@@ -67,6 +67,24 @@
   --elev-card: 0 1px 2px rgb(28 27 25 / 0.04), 0 4px 16px -4px rgb(28 27 25 / 0.06);
   --elev-raised: 0 2px 4px rgb(28 27 25 / 0.05), 0 12px 32px -8px rgb(28 27 25 / 0.07);
   --elev-overlay: 0 8px 24px rgb(28 27 25 / 0.07), 0 24px 64px -16px rgb(28 27 25 / 0.07);
+
+  /* Arc bridge: Arc components (components/arc/) read these names. Each points at a Check-in
+     token, so dark mode follows .dark with no second copy. Arc's --text-sm / --text-lg are left
+     out on purpose: they are Tailwind's type scale, and redefining them would resize text-sm
+     everywhere. Arc's --border and --foreground already match ours. */
+  --surface-raised: var(--popover);
+  --surface-muted: var(--muted);
+  --text-secondary: var(--muted-foreground);
+  --text-muted: var(--subtle-foreground);
+  --shadow-floating: var(--elev-overlay);
+  --radius-surface: 22px;          /* rounded-xl: sheets */
+  --radius-pill: 9999px;
+  --font-body: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tracking-body: normal;
+  --leading-body: 1.5;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --duration-fast: 150ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1); /* = --ease-out (chrome enter) */
 }
 
 /* ---------- Dark ---------- */

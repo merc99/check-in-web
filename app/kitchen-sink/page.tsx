@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, type ReactNode } from 'react'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Avatar } from '@/components/checkin/Avatar'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
@@ -35,6 +36,7 @@ export default function KitchenSink() {
   const toast = useToast()
   const live = useLive()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [arcSheetOpen, setArcSheetOpen] = useState(false)
   const [mode, setMode] = useState<'create' | 'join'>('create')
   const [tab, setTab] = useState<TabKey>('feed')
   const [selected, setSelected] = useState<Set<string>>(() => new Set(['leg day']))
@@ -189,11 +191,12 @@ export default function KitchenSink() {
         </Card>
       </Section>
 
-      <Section title="Overlays" note="sheet · toast · live pill">
+      <Section title="Overlays" note="sheet · arc sheet · toast · live pill">
         <div className="flex flex-wrap gap-3">
           <Button variant="primary" onClick={() => setSheetOpen(true)}>
             Open sheet
           </Button>
+          <Button onClick={() => setArcSheetOpen(true)}>Open Arc sheet</Button>
           <Button onClick={() => toast('Invite code copied')}>Show toast</Button>
           <Button
             variant="dark"
@@ -250,6 +253,40 @@ export default function KitchenSink() {
           </div>
         </div>
       </Sheet>
+
+      {/* Arc bottom-sheet: peek (45%) and full (92%) heights, flick to move or dismiss. */}
+      <BottomSheet
+        open={arcSheetOpen}
+        onOpenChange={setArcSheetOpen}
+        title="Check in"
+        description="Drag up for the full sheet, flick down to close."
+      >
+        <div className="flex flex-col gap-4">
+          <FormField label="Note" optional>
+            <Textarea placeholder="How’d it go?" maxLength={280} value={note} onChange={(e) => setNote(e.target.value)} />
+            <p className="tnum mt-[6px] text-right text-xs text-muted-foreground">{note.length} / 280</p>
+          </FormField>
+          <FormField label="Tags" as="group" optional>
+            <div className="flex flex-wrap gap-2">
+              {TAGS.slice(0, 6).map((t) => (
+                <ToggleChip key={t} label={t} selected={selected.has(t)} onToggle={() => toggle(t)} />
+              ))}
+            </div>
+          </FormField>
+          <div className="pt-3">
+            <Button
+              variant="primary"
+              block
+              onClick={() => {
+                setArcSheetOpen(false)
+                toast('You’re in for today')
+              }}
+            >
+              <CheckIcon size={18} /> Check in
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
     </main>
   )
 }
