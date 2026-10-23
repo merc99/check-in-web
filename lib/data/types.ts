@@ -28,6 +28,8 @@ export interface Group {
   created_by: UUID | null
   max_members: number
   pinned_message: string | null
+  /** Listed in Explore. Crews are private until their creator turns this on. */
+  is_public: boolean
   created_at: Timestamp
   deleted_at: Timestamp | null
 }
@@ -72,6 +74,8 @@ export interface Reaction {
   check_in_id: UUID
   user_id: UUID
   created_at: Timestamp
+  /** Unhearting sets this; hearting again clears it. */
+  deleted_at: Timestamp | null
 }
 
 export interface JoinRequest {
@@ -139,6 +143,7 @@ export interface GroupDetail extends GroupSummary {
   slug: string
   description: string | null
   pinnedMessage: string | null
+  isPublic: boolean
   /** Me first, then by join date. */
   members: MemberRow[]
   tags: Tag[]
@@ -258,4 +263,5 @@ export interface GroupPatch {
   name?: string
   color?: BrandColor
   pinned_message?: string | null
+  is_public?: boolean
 }

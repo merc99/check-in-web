@@ -1,37 +1,5 @@
-// The one door components use for data. Today it's the in-memory mock; in Phase 6
-// this file points at the Supabase implementation instead, with the same exports.
+// The one door components use for data. lib/data/api.ts picks the implementation
+// (in-memory mock or Supabase) from NEXT_PUBLIC_DATA_SOURCE; the exports are the same.
 export * from './types'
-export {
-  acceptJoinRequest,
-  addTag,
-  checkIn,
-  createGroup,
-  declineJoinRequest,
-  deleteAccount,
-  deleteGroup,
-  deleteTags,
-  getAchievements,
-  getExploreDetails,
-  getExploreGroups,
-  getFeed,
-  getGroup,
-  getGroupPreview,
-  getJoinRequests,
-  getMe,
-  getMyGroups,
-  getMyRecentCheckIns,
-  getMyStats,
-  getTags,
-  getUserProfile,
-  joinGroupBySlug,
-  leaveGroup,
-  onCheckIn,
-  onHeart,
-  removeMember,
-  requestToJoin,
-  subscribe,
-  toggleHeart,
-  updateGroup,
-  updateProfile,
-} from '@/lib/mock/api'
+export * from './api'
 export { useQuery } from './useQuery'

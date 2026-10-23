@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { BrandMark } from '@/components/ui/BrandMark'
 import { Button } from '@/components/ui/Button'
@@ -11,6 +11,7 @@ import { TextLink } from '@/components/ui/TextButton'
 import { Ticket } from '@/components/ui/Ticket'
 import { useToast } from '@/components/ui/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
+import { setPendingInvite, useAuth } from '@/lib/auth'
 import { getGroupPreview, joinGroupBySlug, useQuery } from '@/lib/data'
 
 /** Public invite page (works signed out once auth exists). Joining with the link skips the join request. */
@@ -18,9 +19,15 @@ export default function InvitePage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const toast = useToast()
   const { setActiveId } = useActiveCrew()
+  const auth = useAuth()
   const [busy, setBusy] = useState(false)
-  const preview = useQuery(() => getGroupPreview(params.slug), [params.slug], ['groups', 'group_members', 'join_requests'])
+  const preview = useQuery(() => getGroupPreview(params.slug), [params.slug, auth.status], ['groups', 'group_members', 'join_requests'])
   const p = preview.data
+
+  // Back from signing in: this invite has done its job.
+  useEffect(() => {
+    if (auth.status === 'signedIn') setPendingInvite(null)
+  }, [auth.status])
 
   const open = (id: string) => {
     setActiveId(id)
@@ -46,7 +53,15 @@ export default function InvitePage({ params }: { params: { slug: string } }) {
     <main className="flex min-h-dvh flex-col justify-center px-5 py-5">
       <BrandMark className="mb-7 justify-center" />
 
-      {!p ? (
+      {preview.error ? (
+        <div className="text-center">
+          <h1 className="font-display text-[30px] leading-none">Can’t reach Check-in right now.</h1>
+          <p className="mx-auto mt-3 max-w-[32ch] text-ink-soft">The invite is fine. Give it a moment and try again.</p>
+          <Button size="sm" className="mt-5" onClick={preview.refetch}>
+            Try again
+          </Button>
+        </div>
+      ) : !p ? (
         <div className="text-center">
           <h1 className="font-display text-[30px] leading-none">This invite doesn’t match a crew.</h1>
           <p className="mx-auto mt-3 max-w-[32ch] text-ink-soft">The code may have changed, or the crew was deleted. Ask whoever sent it for a fresh one.</p>
@@ -77,7 +92,18 @@ export default function InvitePage({ params }: { params: { slug: string } }) {
             }
           />
           <div className="mt-7">
-            {p.status === 'member' ? (
+            {auth.status !== 'signedIn' ? (
+              <Button
+                variant="primary"
+                block
+                onClick={() => {
+                  setPendingInvite(params.slug)
+                  router.push('/')
+                }}
+              >
+                Sign in to join
+              </Button>
+            ) : p.status === 'member' ? (
               <Button variant="primary" block onClick={() => open(p.id)}>
                 <CheckIcon size={18} /> You’re in. Open the feed
               </Button>

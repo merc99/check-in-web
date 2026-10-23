@@ -117,8 +117,8 @@ function summary(g: Group): GroupSummary {
 }
 
 function toFeedItem(c: CheckIn): FeedItem {
-  const reactions = db()
-    .reactions.filter((r) => r.check_in_id === c.id)
+  const reactions = alive(db().reactions)
+    .filter((r) => r.check_in_id === c.id)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
   return {
     id: c.id,
@@ -209,8 +209,9 @@ export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => vo
 /** Someone else hearted one of your check-ins. */
 export function onHeart(listener: (heart: { checkInId: UUID; groupId: UUID; person: Person }) => void): () => void {
   return onChange((c) => {
-    if (c.table !== 'reactions' || c.type !== 'INSERT') return
-    const row = c.row as { check_in_id: UUID; user_id: UUID }
+    if (c.table !== 'reactions' || c.type === 'DELETE') return
+    const row = c.row as { check_in_id: UUID; user_id: UUID; deleted_at: string | null }
+    if (row.deleted_at) return
     const target = db().check_ins.find((x) => x.id === row.check_in_id)
     if (!target || target.user_id !== ME_ID || row.user_id === ME_ID) return
     listener({ checkInId: target.id, groupId: target.group_id, person: personOf(row.user_id) })
@@ -366,6 +367,7 @@ export async function getGroup(groupId: UUID): Promise<GroupDetail> {
     slug: g.invite_slug,
     description: g.description,
     pinnedMessage: g.pinned_message,
+    isPublic: g.is_public,
     members,
     tags: alive(db().tags)
       .filter((t) => t.group_id === groupId)
@@ -386,6 +388,7 @@ export async function createGroup(input: NewGroupInput): Promise<UUID> {
     created_by: ME_ID,
     max_members: input.maxMembers,
     pinned_message: null,
+    is_public: false,
     created_at: nowIso(),
     deleted_at: null,
   }
@@ -420,6 +423,7 @@ export async function updateGroup(groupId: UUID, patch: GroupPatch): Promise<voi
   }
   if (patch.color !== undefined) g.color = patch.color
   if (patch.pinned_message !== undefined) g.pinned_message = patch.pinned_message?.trim() || null
+  if (patch.is_public !== undefined) g.is_public = patch.is_public
   emit({ table: 'groups', type: 'UPDATE', row: g })
 }
 
@@ -532,23 +536,23 @@ export async function checkIn(input: CheckInInput): Promise<FeedItem> {
 export function setHeart(userId: UUID, checkInId: UUID, on: boolean): boolean {
   const c = alive(db().check_ins).find((x) => x.id === checkInId)
   if (!c || !isMember(userId, c.group_id)) throw new Error('not authorized')
-  const rows = db().reactions
-  const i = rows.findIndex((r) => r.check_in_id === checkInId && r.user_id === userId)
-  if (on && i < 0) {
-    const row = { id: newId(), check_in_id: checkInId, user_id: userId, created_at: nowIso() }
-    rows.push(row)
-    emit({ table: 'reactions', type: 'INSERT', row })
-  } else if (!on && i >= 0) {
-    // The reactions table has no deleted_at; unhearting deletes the row (see Phase 6 notes).
-    const [row] = rows.splice(i, 1)
-    emit({ table: 'reactions', type: 'DELETE', row })
+  // set_heart RPC: one row per person per check-in, soft-deleted when unhearted.
+  const row = db().reactions.find((r) => r.check_in_id === checkInId && r.user_id === userId)
+  if (on && !row) {
+    const fresh = { id: newId(), check_in_id: checkInId, user_id: userId, created_at: nowIso(), deleted_at: null }
+    db().reactions.push(fresh)
+    emit({ table: 'reactions', type: 'INSERT', row: fresh })
+  } else if (row && on === !!row.deleted_at) {
+    row.deleted_at = on ? null : nowIso()
+    if (on) row.created_at = nowIso()
+    emit({ table: 'reactions', type: 'UPDATE', row })
   }
   return on
 }
 
 export async function toggleHeart(checkInId: UUID): Promise<boolean> {
   await settle()
-  const on = !db().reactions.some((r) => r.check_in_id === checkInId && r.user_id === ME_ID)
+  const on = !alive(db().reactions).some((r) => r.check_in_id === checkInId && r.user_id === ME_ID)
   return setHeart(ME_ID, checkInId, on)
 }
 
@@ -589,6 +593,7 @@ export async function declineJoinRequest(requestId: UUID): Promise<void> {
 
 export async function requestToJoin(groupId: UUID): Promise<void> {
   await settle()
+  if (!group(groupId).is_public) throw new Error('Group not found')
   const s = status(groupId)
   if (s === 'member' || s === 'pending') return
   if (s === 'full') throw new Error('Group is full')
@@ -621,11 +626,12 @@ function exploreGroup(g: Group): ExploreGroup {
   }
 }
 
-/** get_explore_groups RPC: every live crew, biggest first. */
+/** get_explore_groups RPC: public crews only, biggest first. */
 export async function getExploreGroups(query = ''): Promise<ExploreGroup[]> {
   await settle()
   const q = query.trim().toLowerCase()
   return alive(db().groups)
+    .filter((g) => g.is_public)
     .filter((g) => !q || `${g.name} ${g.description ?? ''}`.toLowerCase().includes(q))
     .map(exploreGroup)
     .sort((a, b) => b.memberCount - a.memberCount)
@@ -635,6 +641,7 @@ export async function getExploreGroups(query = ''): Promise<ExploreGroup[]> {
 export async function getExploreDetails(groupId: UUID): Promise<ExploreDetail> {
   await settle()
   const g = group(groupId)
+  if (!g.is_public && !isMember(ME_ID, groupId)) throw new Error('Group not found')
   return {
     ...exploreGroup(g),
     members: membersOf(groupId)

@@ -61,12 +61,15 @@ Already scaffolded: `Button`, `TagChip` / `ToggleChip`, `Avatar`, `Card`. Still 
 The prototype skips sign-in on purpose; the real app keeps the email OTP flow from the brief.
 
 ## Data
-- Build every screen against a typed mock data layer first (`lib/mock/`), shaped exactly like the Supabase
-  schema, behind functions like `getFeed(groupId)` / `checkIn(...)`. Swap the internals to Supabase later
-  without touching components.
+- Components import data only from `@/lib/data`. `NEXT_PUBLIC_DATA_SOURCE` picks the implementation:
+  `mock` (default: in-memory demo + live simulation, `lib/mock/`) or `supabase` (`lib/supabase/`).
+  Both export the same functions; `lib/data/api.ts` type-checks that. Add a function to both or neither.
+- Schema changes go in a new migration in `CHECK-IN APP/supabase/migrations/` (shared with the Expo app).
+  Open gaps and the go-live checklist: `docs/supabase-gaps.md`.
 - Supabase client: `flowType: 'implicit'`, `autoRefreshToken: true`, `persistSession: true`.
 - Use the RPCs listed in the brief instead of raw queries where one exists.
-- **Never hard-delete.** Always set `deleted_at`.
+- **Never hard-delete.** Always set `deleted_at`. One exception: `delete_my_account` really deletes the
+  person's data (App Store requirement, decided Oct 2026).
 - Realtime: subscribe to `check_ins` for the active group; new rows drive the same arrival animation the
   prototype fakes with its live simulation.
 - No PII in logs or analytics.

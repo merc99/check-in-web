@@ -130,6 +130,8 @@ export function createSeed(now: Date = new Date()): Tables {
     created_by: g.createdBy,
     max_members: g.max,
     pinned_message: g.pinned ?? null,
+    // Your own 5am Lifters stays private; the rest are listed in Explore.
+    is_public: g.id !== 'g1',
     created_at: daysAgo(230),
     deleted_at: null,
   }))
@@ -186,7 +188,13 @@ export function createSeed(now: Date = new Date()): Tables {
       if (t) check_in_tags.push({ check_in_id: id, tag_id: t })
     }
     hearts.forEach((uid, i) =>
-      reactions.push({ id: `r-${id}-${uid}`, check_in_id: id, user_id: uid, created_at: iso(new Date(at.getTime() + (i + 1) * 7 * MINUTE)) }),
+      reactions.push({
+        id: `r-${id}-${uid}`,
+        check_in_id: id,
+        user_id: uid,
+        created_at: iso(new Date(at.getTime() + (i + 1) * 7 * MINUTE)),
+        deleted_at: null,
+      }),
     )
     return true
   }

@@ -17,11 +17,13 @@ import { List, listRow } from '@/components/ui/List'
 import { SectionTitle } from '@/components/ui/SectionTitle'
 import { TextButton, TextLink } from '@/components/ui/TextButton'
 import { useActiveCrew } from '@/lib/activeCrew'
+import { useAuth } from '@/lib/auth'
 import { getAchievements, getMe, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 
 export default function YouPage() {
   const router = useRouter()
+  const auth = useAuth()
   const { groups } = useActiveCrew()
   const [deleting, setDeleting] = useState(false)
   const me = useQuery(getMe, [], ['profiles'])
@@ -134,8 +136,7 @@ export default function YouPage() {
       )}
 
       <div className="mt-10 flex flex-col items-center gap-4">
-        {/* Signing in and out arrives with Supabase auth in Phase 6; `/` becomes the intro screen then. */}
-        <Button block onClick={() => router.push('/')}>
+        <Button block onClick={() => auth.signOut()}>
           Sign out
         </Button>
         <TextButton danger onClick={() => setDeleting(true)}>

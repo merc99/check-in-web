@@ -1,8 +1,9 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { getMyGroups, useQuery, type GroupSummary } from '@/lib/data'
-import { useLiveSimulation } from '@/lib/mock/simulation'
+import { useAuth } from '@/lib/auth'
+import { DATA_SOURCE, getMyGroups, useQuery, type GroupSummary } from '@/lib/data'
+import { SIMULATE_LIVE, useLiveSimulation } from '@/lib/mock/simulation'
 
 const STORAGE_KEY = 'checkin.activeCrew'
 
@@ -20,7 +21,9 @@ export const useActiveCrew = () => useContext(Ctx)
 
 /** Which crew the feed shows. Remembered per browser; falls back to your first crew. */
 export function ActiveCrewProvider({ children }: { children: ReactNode }) {
-  const groups = useQuery(getMyGroups, [], ['groups', 'group_members', 'check_ins'])
+  const { status, userId } = useAuth()
+  const signedIn = status === 'signedIn' && !!userId
+  const groups = useQuery(() => (signedIn ? getMyGroups() : Promise.resolve([])), [signedIn, userId], ['groups', 'group_members', 'check_ins'])
   const [stored, setStored] = useState<string | null>(null)
 
   useEffect(() => {
@@ -43,8 +46,8 @@ export function ActiveCrewProvider({ children }: { children: ReactNode }) {
   const list = groups.data
   const activeId = list ? (list.find((g) => g.id === stored)?.id ?? list[0]?.id ?? null) : null
 
-  // Fake crew activity (dev, or when NEXT_PUBLIC_SIMULATE_LIVE=true). Mostly lands in the crew on screen.
-  useLiveSimulation(activeId)
+  // Fake crew activity: mock data only (dev, or NEXT_PUBLIC_SIMULATE_LIVE=true). Mostly lands in the crew on screen.
+  useLiveSimulation(activeId, SIMULATE_LIVE && DATA_SOURCE === 'mock' && signedIn)
 
   return (
     <Ctx.Provider value={{ activeId, setActiveId, groups: list, loading: groups.loading && !list }}>{children}</Ctx.Provider>

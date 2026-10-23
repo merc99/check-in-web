@@ -14,6 +14,7 @@ import { CheckIcon, ShareIcon, XIcon } from '@/components/ui/icons'
 import { List, listRow } from '@/components/ui/List'
 import { PageHead, SectionTitle } from '@/components/ui/SectionTitle'
 import { Swatches } from '@/components/ui/Swatches'
+import { Switch } from '@/components/ui/Switch'
 import { BackLink, TextButton } from '@/components/ui/TextButton'
 import { CodeTiles, Ticket } from '@/components/ui/Ticket'
 import { useToast } from '@/components/ui/Toast'
@@ -144,6 +145,23 @@ export default function GroupSettingsPage({ params }: { params: { groupId: strin
         <>
           <SectionTitle title="Theme color" />
           <Swatches colors={GROUP_COLORS} value={g.color} onChange={(color) => updateGroup(g.id, { color }).catch(fail)} />
+
+          <SectionTitle title="Who can find it" />
+          <Card className="flex items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">Show in Explore</p>
+              <p className="mt-1 text-[13px] text-ink-soft">
+                {g.isPublic ? 'Anyone can find this crew and ask to join.' : 'Invite code only. Nobody finds it by browsing.'}
+              </p>
+            </div>
+            <Switch
+              label="Show in Explore"
+              checked={g.isPublic}
+              onChange={(on) =>
+                updateGroup(g.id, { is_public: on }).then(() => toast(on ? 'Listed in Explore' : 'Hidden from Explore'), fail)
+              }
+            />
+          </Card>
 
           <SectionTitle title="Crew name" />
           <form

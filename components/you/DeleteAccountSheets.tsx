@@ -1,15 +1,15 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ConfirmSheet } from '@/components/ui/ConfirmSheet'
 import { Input } from '@/components/ui/FormField'
 import { useToast } from '@/components/ui/Toast'
+import { useAuth } from '@/lib/auth'
 import { deleteAccount } from '@/lib/data'
 
 /** Two steps: what goes away, then type "delete" to confirm. */
 export function DeleteAccountSheets({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const router = useRouter()
+  const auth = useAuth()
   const toast = useToast()
   const [step, setStep] = useState<1 | 2>(1)
   const [typed, setTyped] = useState('')
@@ -28,7 +28,7 @@ export function DeleteAccountSheets({ open, onClose }: { open: boolean; onClose:
     try {
       await deleteAccount()
       onClose()
-      router.push('/')
+      await auth.signOut() // the auth gate takes them to the intro
       toast('Account deleted')
     } catch (e) {
       toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.')

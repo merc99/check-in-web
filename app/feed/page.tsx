@@ -145,6 +145,22 @@ export default function FeedPage() {
       (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
     )
 
+  if (activeId && !g && group.error) {
+    return (
+      <main className="px-5 pb-[150px]">
+        <div className="pb-5 pt-7">
+          <BrandMark />
+        </div>
+        <div className="px-2 py-10 text-center">
+          <h2 className="font-display text-[26px] leading-none">Can’t reach your crew right now.</h2>
+          <p className="mt-2 text-ink-soft">Nothing’s lost. Give it a moment and try again.</p>
+          <Button size="sm" className="mt-5" onClick={group.refetch}>
+            Try again
+          </Button>
+        </div>
+      </main>
+    )
+  }
   if (loading || (activeId && !g)) return <main className="min-h-dvh px-5" />
 
   if (!g) {

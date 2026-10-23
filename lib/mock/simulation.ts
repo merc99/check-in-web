@@ -49,7 +49,7 @@ export function simulateHeart(checkInId: string): boolean {
   const fans = t.group_members
     .filter((m) => m.group_id === c.group_id && !m.deleted_at && m.user_id !== c.user_id)
     .map((m) => m.user_id)
-    .filter((uid) => !t.reactions.some((r) => r.check_in_id === checkInId && r.user_id === uid))
+    .filter((uid) => !t.reactions.some((r) => r.check_in_id === checkInId && r.user_id === uid && !r.deleted_at))
   if (!fans.length) return false
   setHeart(pick(fans), checkInId, true)
   return true
