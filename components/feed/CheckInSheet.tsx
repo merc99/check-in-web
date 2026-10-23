@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Button } from '@/components/checkin/Button'
 import { AddChip, TagChip, ToggleChip } from '@/components/checkin/Chip'
 import { FormField, Textarea } from '@/components/checkin/FormField'
 import { CheckIcon } from '@/components/checkin/icons'
 import { SearchInput } from '@/components/checkin/SearchInput'
-import { Sheet } from '@/components/checkin/Sheet'
 import { cn } from '@/lib/utils'
 import type { Hue } from '@/lib/colors'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -82,8 +82,21 @@ export function CheckInSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title="Check in" aside={<TagChip name={group.name} color={group.color} size="m" />}>
+    // One resting height: the note, tags and button need most of the screen, so a half-height peek would hide the button.
+    <BottomSheet
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose()
+      }}
+      title="Check in"
+      detents={[0.9]}
+    >
       <div className="flex flex-col gap-4">
+        {/* Arc's title is text only, so the crew chip leads the content instead of sitting beside the title. */}
+        <div>
+          <TagChip name={group.name} color={group.color} size="m" />
+        </div>
+
         <FormField label="Note" optional>
           <Textarea
             value={note}
@@ -138,6 +151,6 @@ export function CheckInSheet({
           </Button>
         </div>
       </div>
-    </Sheet>
+    </BottomSheet>
   )
 }
