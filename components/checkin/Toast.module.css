@@ -1,0 +1,29 @@
+/* Pattern: mmo fx kit / toast stack (adapted to Check-in tokens). Frosted, with a mint edge. */
+.stack {
+  position: fixed; z-index: 60; pointer-events: none;
+  /* Phones: above the tab bar and the check-in FAB (98px + 64px + air), so neither is covered. */
+  left: 50%; bottom: calc(176px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  width: min(340px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 8px;
+}
+/* Desktop has no tab bar: bottom right, like most desktop apps. */
+@media (min-width: 1024px) { .stack { left: auto; right: 24px; bottom: 24px; transform: none; } }
+
+.toast {
+  pointer-events: auto; cursor: pointer; padding: 12px 14px 12px 16px; border-radius: 16px;
+  font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--foreground);
+  background: var(--fx-glass); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--border-strong); border-left: 3px solid var(--primary);
+  box-shadow: var(--elev-overlay);
+  animation: tin .3s var(--ease-out);
+}
+@supports not (backdrop-filter: blur(1px)) { .toast { background: var(--popover); } }
+.toast[data-bye] { animation: tout .2s var(--ease-in) forwards; }
+.line + .line { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+@keyframes tin { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+@keyframes tout { to { opacity: 0; transform: translateY(8px); } }
+@media (min-width: 1024px) {
+  @keyframes tin { from { opacity: 0; transform: translateX(24px); } }
+  @keyframes tout { to { opacity: 0; transform: translateX(24px); } }
+}
+@media (prefers-reduced-motion: reduce) { .toast, .toast[data-bye] { animation: none; } }

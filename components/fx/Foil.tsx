@@ -9,9 +9,9 @@ import styles from './Foil.module.css'
 export interface FoilProps {
   /** Sheen color. Defaults to the brand mint. Use `white` on a card that is already filled with a hue. */
   hue?: Hue | 'white'
-  /** Largest tilt in degrees at the card's edge. Small reads expensive, large reads toy. */
+  /** Largest tilt in degrees at the card's edge. Defaults to --fx-tilt. Small reads expensive, large reads toy. */
   tilt?: number
-  /** Sheen opacity under the pointer (0 to 1). */
+  /** Sheen opacity under the pointer (0 to 1). Defaults to --fx-foil-strength. */
   strength?: number
   /** Turns the effect off (locked achievements), leaving just the content. */
   disabled?: boolean
@@ -24,7 +24,7 @@ export interface FoilProps {
  * sheen and a glare move across it; on touch, a tap plays one sweep. It never moves on its own.
  * The pointer only writes --mx / --my; the CSS draws everything.
  */
-export function Foil({ hue, tilt = 10, strength = 0.4, disabled, className, children }: FoilProps) {
+export function Foil({ hue, tilt, strength, disabled, className, children }: FoilProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   if (disabled) return <div className={className}>{children}</div>
@@ -55,8 +55,8 @@ export function Foil({ hue, tilt = 10, strength = 0.4, disabled, className, chil
 
   const vars = {
     '--hue': hue === 'white' ? 'white' : hue ? HUE_CLASS[hue].cssVar : 'var(--primary)',
-    '--tilt': tilt,
-    '--strength': strength,
+    ...(tilt !== undefined && { '--tilt': tilt }),
+    ...(strength !== undefined && { '--strength': strength }),
   } as CSSProperties
 
   return (

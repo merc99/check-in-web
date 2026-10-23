@@ -71,7 +71,6 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
         <>
           <Ticket
             color={p.color}
-            shine={0}
             className="text-center"
             top={
               <div className="px-5 pb-6 pt-8">

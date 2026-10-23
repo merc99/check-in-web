@@ -24,7 +24,11 @@ export interface TabBarProps {
 export function TabBar({ active, onSelect }: TabBarProps) {
   const index = TABS.findIndex((t) => t.key === active)
   return (
-    <nav aria-label="Main" className="relative flex rounded-full border border-border bg-card p-[6px] shadow-card">
+    // Frosted glass (fx, J2): blur where supported, opaque card everywhere else.
+    <nav
+      aria-label="Main"
+      className="relative flex rounded-full border border-border bg-card p-[6px] shadow-raised supports-[backdrop-filter:blur(1px)]:bg-(--fx-glass) supports-[backdrop-filter:blur(1px)]:backdrop-blur-xl"
+    >
       <span
         aria-hidden="true"
         className="absolute inset-y-[6px] left-[6px] w-[calc((100%-12px)/3)] rounded-full bg-foreground transition-transform duration-200 ease-out"
@@ -53,7 +57,8 @@ export function TabBar({ active, onSelect }: TabBarProps) {
             {inner}
           </button>
         ) : (
-          <Link key={key} href={href} aria-current={current ? 'page' : undefined} className={className}>
+          // The You tab is where a check-in's streak +1 lands on phones (fx/fly).
+          <Link key={key} href={href} aria-current={current ? 'page' : undefined} className={className} data-fx-streak={key === 'you' && !onSelect ? '' : undefined}>
             {inner}
           </Link>
         )

@@ -1,0 +1,10 @@
+.count { --roll-h: 1.4em; display: inline-flex; font-variant-numeric: tabular-nums; }
+.tight { --roll-h: 1em; }
+.digits { display: inline-flex; }
+.col { display: inline-block; height: var(--roll-h); overflow: hidden; line-height: var(--roll-h); }
+.strip { display: flex; flex-direction: column; transition: transform var(--roll-ms, 220ms) var(--fx-spring); }
+.strip > span { height: var(--roll-h); }
+
+@media (prefers-reduced-motion: reduce) {
+  .strip { transition: none; }
+}

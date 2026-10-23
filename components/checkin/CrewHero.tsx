@@ -1,9 +1,10 @@
 'use client'
 
+import { AuroraFrame } from '@/components/fx/loops'
+import { RollingCount } from '@/components/fx/RollingCount'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import type { Person } from '@/lib/data'
-import { useCountUp } from '@/lib/motion'
 import { Avatar } from './Avatar'
 import { CheckIcon } from './icons'
 
@@ -31,9 +32,11 @@ function heroLine(n: number, total: number, meIn: boolean) {
 export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroProps) {
   const n = members.filter((m) => m.inToday).length
   const total = members.length
-  const shown = useCountUp(n)
+  const everyone = total > 1 && n === total
 
   return (
+    // The aurora frame is the crew-complete moment: it turns only while everyone's in today.
+    <AuroraFrame on={everyone} className="rounded-lg">
     <section
       aria-label="Who’s in today"
       className={cn('relative overflow-hidden rounded-lg border border-border p-5 shadow-raised transition-colors duration-200', HUE_CLASS[color].soft)}
@@ -41,8 +44,8 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="tnum font-display text-[72px] leading-[.85] max-[380px]:text-[60px]">
-            {shown}
-            <span className="text-[32px] opacity-55">/{total}</span>
+            <RollingCount n={n} tight label={`${n} of ${total}`} />
+            <span aria-hidden="true" className="text-[32px] opacity-55">/{total}</span>
           </div>
           <p className="mt-2 font-bold">in today</p>
         </div>
@@ -98,5 +101,6 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
         ))}
       </div>
     </section>
+    </AuroraFrame>
   )
 }

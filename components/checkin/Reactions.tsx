@@ -27,6 +27,9 @@ import {
   type PointerEvent,
 } from 'react'
 import type { ReactionCount } from '@/lib/data'
+import { flyArc, squash } from '@/components/fx/fly'
+import { RollingCount } from '@/components/fx/RollingCount'
+import { sfx } from '@/components/fx/sound'
 import { prefersReducedMotion } from '@/lib/motion'
 import { REACTIONS } from '@/lib/reactions'
 import { cn } from '@/lib/utils'
@@ -60,7 +63,6 @@ const CELL = 36 // one picker cell, px (matches .emo)
 const PAD = 6 // the pill's padding, px
 const MAGNIFY = 1.17 // the emoji under the pointer: a gentle lift, not a balloon
 const HOLD_MS = 260 // a finger held this long opens the pill
-const DIGITS = '0123456789'.split('')
 
 const kindOf = (e: string) => REACTION_SET.find((s) => s.e === e)?.k ?? 'nod'
 const labelOf = (e: string) => REACTION_SET.find((s) => s.e === e)?.label ?? e
@@ -74,24 +76,6 @@ function play(el: Element | null | undefined) {
   window.setTimeout(() => el.removeAttribute('data-play'), 720)
 }
 
-/** A count whose digits roll. Columns are keyed from the right, so 9 → 10 adds a column on the left. */
-export function RollingCount({ n }: { n: number }) {
-  const s = String(Math.max(0, n))
-  return (
-    <span className={styles.count} aria-hidden="true">
-      {s.split('').map((d, i) => (
-        <span key={s.length - i} className={styles.col}>
-          <span className={styles.strip} style={{ transform: `translateY(${-Number(d) * 1.4}em)` }}>
-            {DIGITS.map((x) => (
-              <span key={x}>{x}</span>
-            ))}
-          </span>
-        </span>
-      ))}
-    </span>
-  )
-}
-
 export function Reactions({ chips, onReact, className }: ReactionsProps) {
   const root = useRef<HTMLDivElement>(null)
   const row = useRef<HTMLDivElement>(null)
@@ -101,8 +85,8 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
   const [on, setOn] = useState(-1)
   /** A pick waiting for its chip to be laid out, with where the flying copy starts. */
   const [landing, setLanding] = useState<{ e: string; from: { x: number; y: number } } | null>(null)
-  /** The emoji in the air: its chip holds the emoji back and shows the old count until it lands. */
-  const [flying, setFlying] = useState<string | null>(null)
+  /** Which pick has been sent flying (so a re-render doesn't send it twice). */
+  const launched = useRef<typeof landing>(null)
   const positions = useRef(new Map<string, { x: number; y: number }>())
   const mounted = useRef(false)
   const hold = useRef({ timer: 0, sliding: false, touch: false })
@@ -110,11 +94,6 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
   /** Counts openings, so a close that lands after a reopen leaves the new pill alone. */
   const opens = useRef(0)
 
-  /** A point on the page, in the block's own pixels. */
-  const local = (r: DOMRect) => {
-    const b = root.current!.getBoundingClientRect()
-    return { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top }
-  }
   const chipEmoji = (e: string) => row.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(e)}"] [data-emoji]`) ?? null
 
   // Layout animation (framer's `layout`, by hand): every chip that moved plays from where it was.
@@ -143,49 +122,28 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
     mounted.current = true
   }, [chips])
 
-  // A pick whose chip is now laid out: send the copy there in an arc, then land it.
+  // A pick whose chip is now laid out: send the copy there in an arc (fx/fly), then land it.
+  // `landing` stays set for the whole flight (the chip holds its emoji back meanwhile); only the
+  // landing clears it, so this effect never sets state itself.
   useLayoutEffect(() => {
-    if (!landing) return
+    if (!landing || launched.current === landing) return
     const c = chips.find((x) => x.emoji === landing.e)
     const target = chipEmoji(landing.e)
-    if (!c?.mine || !target || !root.current) return
-    setLanding(null)
-    setFlying(landing.e)
-    const to = local(target.getBoundingClientRect())
-    const at = landing.from
-    const fly = document.createElement('span')
-    fly.className = styles.fly
-    fly.setAttribute('aria-hidden', 'true')
-    fly.textContent = landing.e
-    root.current.appendChild(fly)
-    const mx = (at.x + to.x) / 2
-    const my = Math.min(at.y, to.y) - 46
-    const anim = fly.animate(
-      [
-        { transform: `translate(${at.x}px, ${at.y}px) scale(1.4) rotate(0deg)` },
-        { transform: `translate(${mx}px, ${my}px) scale(1.25) rotate(-14deg)`, offset: 0.45 },
-        { transform: `translate(${to.x}px, ${to.y}px) scale(1) rotate(0deg)` },
-      ],
-      { duration: 600, easing: 'cubic-bezier(0.35, 0, 0.3, 1)', fill: 'forwards' },
-    )
+    if (!c?.mine || !target) return
+    launched.current = landing
     const e = landing.e
-    // Land once: when the flight ends, or after a beat if it never does (a hidden tab pauses
-    // animations, and the chip must not sit on the old count until someone comes back).
-    let landed = false
-    const land = () => {
-      if (landed) return
-      landed = true
-      fly.remove()
-      setFlying(null)
-      const chip = row.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(e)}"]`)
-      chip?.animate(
-        [{ transform: 'scale(1)' }, { transform: 'scale(1.14, 0.9)', offset: 0.35 }, { transform: 'scale(0.96, 1.05)', offset: 0.7 }, { transform: 'scale(1)' }],
-        { duration: 420, easing: 'ease-out' },
-      )
-      play(chipEmoji(e)?.firstElementChild)
-    }
-    anim.onfinish = land
-    window.setTimeout(land, 900)
+    flyArc({
+      from: landing.from,
+      to: target,
+      text: e,
+      className: styles.fly,
+      squashTarget: false, // the whole chip squashes, not just its emoji
+      onLand: () => {
+        setLanding((l) => (l?.e === e ? null : l))
+        squash(row.current?.querySelector(`[data-key="${CSS.escape(e)}"]`))
+        play(chipEmoji(e)?.firstElementChild)
+      },
+    })
   }, [chips, landing])
 
   // ── the pill ──
@@ -260,10 +218,12 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
 
   // ── picking ──
   const pick = (e: string, from: Element) => {
-    const at = local(from.getBoundingClientRect())
+    const r = from.getBoundingClientRect()
+    const at = { x: r.left + r.width / 2, y: r.top + r.height / 2 }
     hide()
     const had = chips.find((c) => c.emoji === e)
     if (had?.mine) return
+    sfx('tap')
     if (!prefersReducedMotion()) setLanding({ e, from: at })
     onReact(e, true)
   }
@@ -326,6 +286,9 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
     const n = (i + (e.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length
     items[n]?.focus()
   }
+
+  // The emoji in the air: its chip holds the emoji back and shows the old count until it lands.
+  const flying = landing && chips.find((c) => c.emoji === landing.e)?.mine ? landing.e : null
 
   return (
     <div ref={root} className={cn(styles.root, className)}>

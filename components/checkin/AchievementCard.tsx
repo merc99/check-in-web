@@ -1,4 +1,4 @@
-import { Foil, FoilLight } from '@/components/checkin/Foil'
+import { Foil, FoilLight } from '@/components/fx/Foil'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS } from '@/lib/colors'
 import type { Achievement } from '@/lib/data'
@@ -53,7 +53,7 @@ export function AchievementCard({
   )
 
   return foil ? (
-    <Foil hue="white" strength={0.6} className="flex-none snap-start">
+    <Foil hue="white" className="flex-none snap-start">
       {card}
     </Foil>
   ) : (

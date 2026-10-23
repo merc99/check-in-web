@@ -19,7 +19,7 @@
   transition: transform 300ms var(--ease-out);
 }
 .foil[data-active] .surface {
-  transform: rotateX(calc((0.5 - var(--my)) * var(--tilt) * 0.8deg)) rotateY(calc((var(--mx) - 0.5) * var(--tilt) * 1deg));
+  transform: rotateX(calc((0.5 - var(--my)) * var(--tilt, var(--fx-tilt)) * 0.8deg)) rotateY(calc((var(--mx) - 0.5) * var(--tilt, var(--fx-tilt)) * 1deg));
   transition: transform 120ms var(--ease-out);
 }
 
@@ -63,7 +63,7 @@
 :global(.dark) .sheen,
 :global(.dark) .glare { mix-blend-mode: overlay; }
 
-.foil[data-active] .sheen { opacity: var(--strength); }
+.foil[data-active] .sheen { opacity: var(--strength, var(--fx-foil-strength)); }
 .foil[data-active] .glare { opacity: 0.9; }
 
 /* Touch: one sweep across the card per tap, then it settles flat. */
@@ -73,7 +73,7 @@
 
 @keyframes shine {
   0% { opacity: 0; background-position: 0% 0%, 0 0; }
-  25% { opacity: var(--strength); }
+  25% { opacity: var(--strength, var(--fx-foil-strength)); }
   100% { opacity: 0; background-position: 100% 100%, 0 0; }
 }
 @keyframes shineGlare {

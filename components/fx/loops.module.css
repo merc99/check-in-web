@@ -1,0 +1,38 @@
+/* The two looping effects (mmo fx kit, adapted). Both are scoped by the motion budget in CLAUDE.md:
+   SheenLoop only on invite tickets, AuroraFrame only on a crew hero when the whole crew is in.
+   Both stop under reduced motion and pause while the tab is hidden (--fx-play, set in fx/loops.tsx). */
+
+@property --fx-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+/* ── SheenLoop: a holographic sheen gliding across a surface ── */
+.sheen {
+  position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: var(--fx-sheen-strength);
+  background-image: linear-gradient(115deg, transparent 15%, rgb(255 120 220), rgb(120 220 255), rgb(255 240 120), transparent 85%);
+  background-size: 300% 300%;
+  animation: sheen var(--fx-sheen-speed) linear infinite;
+  animation-play-state: var(--fx-play, running);
+}
+/* Screen washes out a light canvas; soft-light keeps the colors visible without fogging the ticket. */
+:global(html:not(.dark)) .sheen { mix-blend-mode: soft-light; opacity: calc(var(--fx-sheen-strength) * 1.6); }
+@keyframes sheen { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+
+/* ── AuroraFrame: a turning multicolor edge with a soft glow ── */
+.aurora { position: relative; isolation: isolate; } /* give it the child's radius via className */
+.aurora::before {
+  content: ""; position: absolute; inset: -2px; z-index: 2; border-radius: inherit; padding: 2.5px; pointer-events: none;
+  background: conic-gradient(from var(--fx-ang), var(--sky), var(--leaf), var(--grape), var(--rose), var(--sky));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  filter: drop-shadow(0 0 var(--fx-aurora-glow) color-mix(in srgb, var(--leaf) 70%, transparent))
+          drop-shadow(0 0 calc(var(--fx-aurora-glow) * 2) color-mix(in srgb, var(--grape) 50%, transparent));
+  animation: turn var(--fx-aurora-speed) linear infinite;
+  animation-play-state: var(--fx-play, running);
+}
+@keyframes turn { to { --fx-ang: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen { animation: none; background-position: 50% 50%; }
+  .aurora::before { animation: none; }
+}

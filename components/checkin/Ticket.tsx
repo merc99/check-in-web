@@ -1,19 +1,19 @@
 import type { ReactNode } from 'react'
-import { LightBand } from '@/components/checkin/LightBand'
+import { SheenLoop } from '@/components/fx/loops'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 
 /**
  * Invite ticket in the crew color: a main section, a perforated divider with
- * half-circle notches cut into both edges, and a stub below. Pass `shine` to add a light band that
- * sweeps when a mouse comes over it and each time the number goes up (the code was copied).
+ * half-circle notches cut into both edges, and a stub below. A holographic sheen glides across it
+ * (fx/SheenLoop); invite tickets are the one place that loop is allowed.
  */
 export function Ticket({
-  color, top, bottom, className, shine,
-}: { color: Hue; top: ReactNode; bottom: ReactNode; className?: string; shine?: number }) {
+  color, top, bottom, className,
+}: { color: Hue; top: ReactNode; bottom: ReactNode; className?: string }) {
   return (
-    <div className={cn('relative rounded-lg border border-border shadow-raised transition-colors duration-200', HUE_CLASS[color].soft, className)}>
-      {shine !== undefined && <LightBand trigger={shine} />}
+    <div className={cn('relative isolate rounded-lg border border-border shadow-raised transition-colors duration-200', HUE_CLASS[color].soft, className)}>
+      <SheenLoop />
       {top}
       <div aria-hidden="true" className="relative mx-[22px] h-0 border-t-2 border-dashed border-border">
         {/* Notches: peach circles clipped to the half that sits inside the ticket. */}

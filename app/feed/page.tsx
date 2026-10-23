@@ -15,7 +15,6 @@ import { Card } from '@/components/checkin/Card'
 import { CrewHero } from '@/components/checkin/CrewHero'
 import { HeatmapGrid, weekDays } from '@/components/checkin/HeatmapGrid'
 import { CheckIcon, PinIcon } from '@/components/checkin/icons'
-import { JoyTakeover } from '@/components/checkin/JoyTakeover'
 import { useLive } from '@/components/checkin/LivePill'
 import { PostCard } from '@/components/checkin/PostCard'
 import { Reactions } from '@/components/checkin/Reactions'
@@ -25,6 +24,7 @@ import {
   acceptJoinRequest,
   checkIn,
   declineJoinRequest,
+  getAchievements,
   getFeed,
   getGroup,
   getJoinRequests,
@@ -34,21 +34,20 @@ import {
   onHeart,
   react,
   useQuery,
+  type Achievement,
   type FeedItem,
 } from '@/lib/data'
 import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
 import { useDesktop } from '@/lib/viewport'
+import { burstFrom } from '@/components/fx/burst'
+import { flyArc } from '@/components/fx/fly'
+import { RevealCard } from '@/components/fx/RevealCard'
+import { RollingCount } from '@/components/fx/RollingCount'
+import { sfx } from '@/components/fx/sound'
 
 const ARRIVAL_MS = 900
-
-interface Joy {
-  origin: { x: number; y: number }
-  count: number
-  sub: string
-  item: FeedItem
-}
 
 export default function FeedPage() {
   const router = useRouter()
@@ -61,8 +60,7 @@ export default function FeedPage() {
   const [profileId, setProfileId] = useState<string | null>(null)
   const [entering, setEntering] = useState<ReadonlySet<string>>(() => new Set())
   const [arrivedId, setArrivedId] = useState<string | null>(null)
-  const [joy, setJoy] = useState<Joy | null>(null)
-  const joyOpen = useRef(false)
+  const [milestone, setMilestone] = useState<Achievement | null>(null)
   const fab = useRef<HTMLButtonElement>(null)
   const railButton = useRef<HTMLButtonElement>(null)
   const desktop = useDesktop()
@@ -71,6 +69,7 @@ export default function FeedPage() {
   const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([])), [activeId], ['check_ins', 'reactions', 'tags', 'profiles'])
   const requests = useQuery(() => (activeId ? getJoinRequests(activeId) : Promise.resolve([])), [activeId], ['join_requests', 'group_members'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
+  const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const me = useQuery(getMe, [], ['profiles'])
 
   const week = useMemo(() => {
@@ -99,7 +98,7 @@ export default function FeedPage() {
     const offArrivals = onCheckIn(null, (item) => {
       if (item.isMine) return
       const name = <b>{item.user.name}</b>
-      if (item.groupId === activeId && !joyOpen.current) {
+      if (item.groupId === activeId) {
         arrive(item)
         live({ user: item.user, message: <>{name} just checked in</>, onTap: scrollTop })
       } else {
@@ -135,20 +134,26 @@ export default function FeedPage() {
   const submit = async (draft: CheckInDraft) => {
     if (!g) return
     const firstToday = !stats.data?.checkedInToday
+    const unlockedBefore = new Set(achievements.data?.filter((a) => a.unlocked).map((a) => a.key))
     try {
       const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags })
-      const after = await getMyStats()
+      const [after, earned] = await Promise.all([getMyStats(), getAchievements()])
       setCheckInOpen(false)
-      // The joy circle grows from whichever check-in button is on screen (FAB on phones, rail button on desktop).
+      // The celebration (fx, D2): a burst from whichever check-in button is on screen
+      // (the FAB on phones, the rail button on desktop), in the crew's hue with mint.
       const trigger = [fab.current, railButton.current].find((el) => el && el.getClientRects().length > 0)
-      const r = trigger?.getBoundingClientRect()
-      joyOpen.current = true
-      setJoy({
-        origin: r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-        count: after.total,
-        sub: firstToday && after.streak === 7 ? 'Week one unlocked. Seven days in a row.' : 'That one’s yours for good.',
-        item,
-      })
+      if (trigger) burstFrom(trigger, [`--${g.color}`, '--primary', `--${g.color}`, '--lemon', 'white'])
+      sfx('success')
+      arrive(item)
+      // The day's first check-in moves the streak (fx, E1): +1 lands on it (rail on desktop, You tab on phones).
+      const streak = Array.from(document.querySelectorAll('[data-fx-streak]')).find((el) => el.getClientRects().length > 0)
+      if (firstToday && trigger && streak) {
+        flyArc({ from: trigger, to: streak, text: '+1', className: 'font-display text-[22px] font-extrabold text-primary-ink' })
+      }
+      // A milestone (fx, F2) gets the reveal card; otherwise one toast says it counted.
+      const fresh = earned.find((a) => a.unlocked && !unlockedBefore.has(a.key))
+      if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
+      else toast(firstToday && after.streak === 7 ? 'Week one. Seven days in a row.' : 'You showed up. That one’s yours for good.')
     } catch (e) {
       setCheckInOpen(false)
       toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.')
@@ -286,8 +291,13 @@ export default function FeedPage() {
               {stats.data && <small className="tnum text-[13px] text-muted-foreground">{stats.data.total} all time</small>}
             </div>
             <HeatmapGrid days={week} />
-            {!!stats.data?.streak && (
-              <p className="tnum mt-3 text-[13px] text-muted-foreground">{stats.data.streak}-day streak, best {stats.data.best}</p>
+            {stats.data && (
+              <p className="mt-3 text-[13px] text-muted-foreground">
+                <span data-fx-streak="" className="inline-block font-bold text-foreground">
+                  <RollingCount n={stats.data.streak} label={`${stats.data.streak}`} />
+                </span>
+                -day streak, best <span className="tnum">{stats.data.best}</span>
+              </p>
             )}
           </Card>
         </aside>
@@ -315,18 +325,7 @@ export default function FeedPage() {
       />
       <ProfileSheet userId={profileId} onClose={() => setProfileId(null)} />
 
-      {joy && (
-        <JoyTakeover
-          origin={joy.origin}
-          count={joy.count}
-          sub={joy.sub}
-          onDismiss={() => {
-            joyOpen.current = false
-            arrive(joy.item)
-          }}
-          onClosed={() => setJoy(null)}
-        />
-      )}
+      {milestone && <RevealCard achievement={milestone} onClose={() => setMilestone(null)} />}
     </main>
   )
 }

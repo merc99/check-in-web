@@ -7,9 +7,8 @@ import { Avatar } from '@/components/checkin/Avatar'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
 import { TagChip } from '@/components/checkin/Chip'
-import { ConfirmSheet } from '@/components/checkin/ConfirmSheet'
 import { Input } from '@/components/checkin/FormField'
-import { IconButton } from '@/components/checkin/IconButton'
+import { HoldButton } from '@/components/fx/HoldButton'
 import { CheckIcon, ShareIcon, XIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
 import { PageHead, SectionTitle } from '@/components/checkin/SectionTitle'
@@ -23,7 +22,6 @@ import { cn } from '@/lib/utils'
 import { CREW_HUES } from '@/lib/colors'
 import { deleteGroup, getGroup, leaveGroup, removeMember, updateGroup, useQuery, type MemberRow } from '@/lib/data'
 
-type Confirm = { kind: 'remove'; member: MemberRow } | { kind: 'delete' } | { kind: 'leave' } | null
 
 export default function GroupSettingsPage(props: { params: Promise<{ groupId: string }> }) {
   const params = use(props.params);
@@ -35,10 +33,8 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
   // Your edit to the name, or null to show the saved name.
   const [nameDraft, setNameDraft] = useState<string | null>(null)
   const [wave, setWave] = useState(0)
-  const [confirm, setConfirm] = useState<Confirm>(null)
   const [profileId, setProfileId] = useState<string | null>(null)
   // Kept after the sheet closes so the title doesn't change while it slides away.
-  const [removing, setRemoving] = useState<MemberRow | null>(null)
   const g = group.data
 
   // Opening a crew's settings makes it the crew on screen, like the prototype.
@@ -88,26 +84,19 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
     }, fail)
   }
 
-  const runConfirm = async () => {
-    if (!confirm) return
-    try {
-      if (confirm.kind === 'remove') {
-        await removeMember(g.id, confirm.member.person.id)
-        setConfirm(null)
-        toast('Member removed')
-      } else if (confirm.kind === 'delete') {
-        await deleteGroup(g.id)
-        router.push('/feed')
-        toast('Crew deleted')
-      } else {
-        await leaveGroup(g.id)
-        router.push('/feed')
-        toast('You left the crew')
-      }
-    } catch (e) {
-      fail(e)
-    }
-  }
+  // Destructive actions are hold-to-confirm (fx/HoldButton): the hold is the confirmation.
+  const remove = (m: MemberRow) =>
+    removeMember(g.id, m.person.id).then(() => toast(`${m.person.name} removed`), fail)
+  const destroy = () =>
+    deleteGroup(g.id).then(() => {
+      router.push('/feed')
+      toast('Crew deleted')
+    }, fail)
+  const leave = () =>
+    leaveGroup(g.id).then(() => {
+      router.push('/feed')
+      toast('You left the crew')
+    }, fail)
 
   return (
     <main className="px-5 pb-12">
@@ -124,7 +113,6 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
 
       <Ticket
         color={g.color}
-        shine={wave}
         className="mt-5"
         top={
           <div className="px-5 pb-[18px] pt-5">
@@ -217,13 +205,14 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
               {m.streak}
             </span>
             {g.isOwner && !m.isMe && (
-              <IconButton size="sm" aria-label={`Remove ${m.person.name}`} onClick={() => {
-                  setRemoving(m)
-                  setConfirm({ kind: 'remove', member: m })
-                }}
+              <HoldButton
+                variant="icon"
+                label={`Hold to remove ${m.person.name}`}
+                hint={`Hold the × to remove ${m.person.name}`}
+                onConfirm={() => remove(m)}
               >
                 <XIcon size={15} />
-              </IconButton>
+              </HoldButton>
             )}
           </div>
         ))}
@@ -239,40 +228,25 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
         </Button>
       </Card>
 
-      <div className="mt-12 text-center">
+      <div className="mx-auto mt-12 max-w-[360px]">
         {g.isOwner ? (
-          <Button variant="danger" onClick={() => setConfirm({ kind: 'delete' })}>
-            Delete crew
-          </Button>
+          <HoldButton
+            label="Hold to delete crew"
+            hint="Hold the button to delete the crew"
+            detail="Everyone loses the feed. Check-in counts stay on each person’s profile."
+            onConfirm={destroy}
+          />
         ) : (
-          <Button onClick={() => setConfirm({ kind: 'leave' })}>Leave crew</Button>
+          <HoldButton
+            variant="secondary"
+            label="Hold to leave crew"
+            hint="Hold the button to leave the crew"
+            detail="You can rejoin later with the invite code."
+            onConfirm={leave}
+          />
         )}
       </div>
 
-      <ConfirmSheet
-        open={confirm?.kind === 'remove'}
-        onClose={() => setConfirm(null)}
-        title={`Remove ${removing?.person.name ?? ''}?`}
-        body={`They’ll leave ${g.name}. Their check-ins stay part of the crew’s history.`}
-        confirmLabel="Remove"
-        onConfirm={runConfirm}
-      />
-      <ConfirmSheet
-        open={confirm?.kind === 'delete'}
-        onClose={() => setConfirm(null)}
-        title="Delete this crew?"
-        body="Everyone loses access to the feed. Check-in counts stay on each person’s profile."
-        confirmLabel="Delete crew"
-        onConfirm={runConfirm}
-      />
-      <ConfirmSheet
-        open={confirm?.kind === 'leave'}
-        onClose={() => setConfirm(null)}
-        title="Leave this crew?"
-        body="You can rejoin later with the invite code."
-        confirmLabel="Leave crew"
-        onConfirm={runConfirm}
-      />
       <ProfileSheet userId={profileId} onClose={() => setProfileId(null)} />
     </main>
   )

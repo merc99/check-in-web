@@ -1,233 +1,220 @@
 'use client'
 
-// /fx-preview: every effect from the three sources (the app, premium-ui-kit/, mmo-fx-kit/) side by
-// side, with a verdict for each overlap. Review page only; real screens change after Ben signs off.
-import { useState, type ReactNode } from 'react'
+// /fx-preview: Check-in's effect system (components/fx), each effect once, with where it's allowed.
+// The reference to check after changing an effect or a --fx-* token. Real components, real demo data.
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { AchievementCard } from '@/components/checkin/AchievementCard'
+import { Button } from '@/components/checkin/Button'
+import { CrewHero } from '@/components/checkin/CrewHero'
+import { XIcon } from '@/components/checkin/icons'
+import { PostCard } from '@/components/checkin/PostCard'
+import { Reactions } from '@/components/checkin/Reactions'
 import { PageHead, SectionTitle } from '@/components/checkin/SectionTitle'
+import { Switch } from '@/components/checkin/Switch'
+import { TabBar } from '@/components/checkin/TabBar'
 import { ThemeToggle } from '@/components/checkin/theme-toggle'
+import { CodeTiles, Ticket } from '@/components/checkin/Ticket'
+import { useToast } from '@/components/checkin/Toast'
+import { burstFrom } from '@/components/fx/burst'
+import { flyArc } from '@/components/fx/fly'
+import { HoldButton } from '@/components/fx/HoldButton'
+import { RevealCard } from '@/components/fx/RevealCard'
+import { RollingCount } from '@/components/fx/RollingCount'
+import { sfx, useSound } from '@/components/fx/sound'
 import { useActiveCrew } from '@/lib/activeCrew'
-import { getAchievements, getGroup, useQuery } from '@/lib/data'
+import { HUE_CLASS, type Hue } from '@/lib/colors'
+import { getAchievements, getFeed, getGroup, useQuery, type FeedItem, type ReactionCount } from '@/lib/data'
 import { cn } from '@/lib/utils'
-import { useSound, MmoToasts } from './_candidates/mmo'
-import {
-  BandCompare,
-  CelebrateCompare,
-  ConfirmCompare,
-  CountCompare,
-  FlyCompare,
-  GlassCompare,
-  RevealCompare,
-  RingCompare,
-  SurfaceCompare,
-  ToastCompare,
-} from './_candidates/sections'
 
-type Row = { type: string; effect: string; app?: string; premium?: string; mmo?: string; overlap?: string }
+/** The motion budget: how loud an effect is allowed to be, and where. */
+const TIER = {
+  calm: 'Everyday: answers a touch, then rests',
+  moment: 'Moments: check-ins, milestones, achievements',
+  scoped: 'Scoped loop: one place only',
+} as const
 
-/** Step 1: the inventory. "overlap" names the comparison section below. */
-const INVENTORY: Row[] = [
-  { type: 'Card surfaces', effect: 'Foil / holo finish on a card', app: 'Foil (white sheen, full hue)', premium: 'Rainbow holo foil + glare', mmo: 'Holo card, cursor-masked rainbow foil, grain', overlap: 'A' },
-  { type: 'Card surfaces', effect: 'Light band / sheen across a surface', app: 'LightBand (one sweep)', premium: 'Masked light band', mmo: 'Looping holo sheen', overlap: 'B' },
-  { type: 'Card surfaces', effect: 'Metallic text, metal buttons, enamel panels', premium: 'Yes', overlap: 'Skipped: luxury-club look' },
-  { type: 'Card surfaces', effect: 'Parallax art layers', mmo: 'Yes', overlap: 'No art to layer' },
-  { type: 'Borders and rings', effect: 'Highlighted border', app: 'Hairline, today ring, “you” ring', premium: 'Gradient (metal) border', mmo: 'Light ring, neon, aurora, rainbow, gold, pulse, prismatic frames', overlap: 'C' },
-  { type: 'Borders and rings', effect: 'Rarity tiles', mmo: 'Common to legendary', overlap: 'No: rarity is a game idea' },
-  { type: 'Hover and tilt', effect: 'Pointer tilt', app: 'Foil tilt, card lift', premium: 'Tilt + press-sink (ring cards)', mmo: 'Tilt with glare', overlap: 'A (tilt is part of the surface)' },
-  { type: 'Rewards and celebrations', effect: 'Check-in celebration', app: 'Joy takeover: flood, words, confetti; check-in stamp', mmo: 'Canvas particle burst', overlap: 'D' },
-  { type: 'Rewards and celebrations', effect: 'Fly-to', app: 'Reaction flight + squash', premium: 'Same (reactions)', mmo: '“+250” to a balance, pulse', overlap: 'E' },
-  { type: 'Rewards and celebrations', effect: 'Milestone reveal', app: 'Joy takeover pattern', mmo: 'Reveal card: shake, beam, flood', overlap: 'F' },
-  { type: 'Rewards and celebrations', effect: 'Heart burst, avatar check-badge pop, heatmap cell-in, ticket wave', app: 'Yes', overlap: 'No overlap: keep' },
-  { type: 'Feedback', effect: 'Toasts', app: 'Inverted pill (+ unused shadcn sonner)', mmo: 'Glass stack, batching', overlap: 'G' },
-  { type: 'Feedback', effect: 'Destructive confirm', app: 'Confirm sheet, tap', mmo: 'Hold to confirm', overlap: 'H' },
-  { type: 'Feedback', effect: 'Counting numbers', app: 'Count-up ticker', premium: 'Rolling digits', overlap: 'I' },
-  { type: 'Feedback', effect: 'Live pill (crew activity)', app: 'Yes', overlap: 'No overlap: keep' },
-  { type: 'Carousels and lists', effect: '3D ring carousel', premium: 'Ring carousel (live on Explore)', overlap: 'No overlap: keep' },
-  { type: 'Carousels and lists', effect: 'Emoji reactions', premium: 'Live on posts', overlap: 'No overlap: keep' },
-  { type: 'Carousels and lists', effect: 'Bottom sheet', app: 'Arc sheet + older Sheet + shadcn sheet', overlap: 'Same job three ways (cleanup in step 3)' },
-  { type: 'Glass and backgrounds', effect: 'Glass dock / panels', app: 'Spec’d frosted tab bar (built opaque)', mmo: 'Liquid glass with refraction', overlap: 'J' },
-  { type: 'Glass and backgrounds', effect: 'Crew glow, hero gradient, film grain', app: 'Crew glow, hero gradient', mmo: 'Grain on cards', overlap: 'Grain judged in A4' },
-  { type: 'Sound', effect: 'Synthesized sounds', mmo: '17 sounds, off by default', overlap: 'No overlap: step 3' },
-]
-
-type Verdict = { winner: string; why: string; combo?: string }
-
-/** Step 2: the recommendation for each overlap. */
-const VERDICTS: Record<string, Verdict> = {
-  A: {
-    winner: 'A4 · Foil + sparkle',
-    why: 'A1’s full-hue card and enamel medal read best at a glance; mmo’s cursor sparkle adds the “earned” glint without the rainbow or the looping ring.',
-    combo: 'Yes: the combo beats both. A2’s ring loops forever and its darker lower half drops the subtitle’s contrast; A3’s rainbow bleeds into the enamel medal and fights the hue.',
-  },
-  B: { winner: 'B1 · One sweep', why: 'Light that answers a hover or a copy feels like a reward; B2 and B3 loop on a screen you’re reading, which breaks the calm rule.' },
-  C: {
-    winner: 'C2 · Slow light ring, hue-tinted',
-    why: 'Only for the day the whole crew is in: one slow arc in the crew’s hue marks a rare moment. C3 glows like a game; C4 is static so it never says “today”.',
-    combo: 'Use C2 only for “everyone’s in”, never as a default border.',
-  },
-  D: {
-    winner: 'D3 · Burst, then the takeover',
-    why: 'The button answers in the same frame, then the takeover lands. D2 alone is too small for the app’s biggest moment.',
-    combo: 'Yes: mmo’s burst in front of the app’s takeover beats both.',
-  },
-  E: { winner: 'E1 · Arc and rolling digits', why: 'Matches the reactions, so the app has one way of landing a number; E2’s straight glide and brightness pulse feel like a coin counter.' },
-  F: {
-    winner: 'F3 · Reveal card, foil inside',
-    why: 'A milestone deserves its own card you can keep looking at; landing on the real foil achievement ties it to the You tab. F1 repeats the check-in takeover; F2’s beam and big burst read as loot.',
-    combo: 'Yes: mmo’s reveal staging with the app’s foil card.',
-  },
-  G: {
-    winner: 'G1 · Pill, plus batching',
-    why: 'The pill is calmer and fits the brand; borrow G2’s batching so three arrivals become one toast instead of overwriting each other.',
-    combo: 'Yes: the pill’s look with the stack’s batching.',
-  },
-  H: {
-    winner: 'H3 · Sheet + hold',
-    why: 'The sheet says what will be lost; holding the final button stops an accidental tap. H2 without the sheet hides the explanation.',
-    combo: 'Yes: hold-to-confirm only for “delete crew” and “delete account”, not for leaving or removing a tag.',
-  },
-  I: { winner: 'I1 for big numbers, I2 in chips', why: 'The count-up feels like progress on the hero numbers; rolling digits suit small counts that change by one (reactions, streak).' },
-  J: {
-    winner: 'J2 · Frosted glass',
-    why: 'It’s already the spec: blur with a border and an opaque fallback. J3’s refraction is Chromium-only and warps the post text under it.',
-  },
-}
-
-function Section({ id, title, note, children }: { id: string; title: string; note: string; children: ReactNode }) {
-  const v = VERDICTS[id]
+function Fx({ name, tier, where, children }: { name: string; tier: keyof typeof TIER; where: string; children: ReactNode }) {
   return (
     <section className="mt-10">
-      <SectionTitle title={`${id}. ${title}`} note={note} />
-      {children}
-      {v && (
-        <div className="mt-4 rounded-md border border-primary/40 bg-primary-soft p-4 text-[14px]">
-          <p>
-            <b>Pick: {v.winner}.</b> {v.why}
-          </p>
-          {v.combo && <p className="mt-1 text-muted-foreground">Combining: {v.combo}</p>}
-        </div>
-      )}
+      <SectionTitle title={name} note={TIER[tier]} />
+      <p className="-mt-1 mb-4 text-[13.5px] text-muted-foreground">{where}</p>
+      <div className="rounded-lg border bg-card p-5 shadow-card">{children}</div>
     </section>
   )
 }
 
 export default function FxPreview() {
+  const toast = useToast()
   const { activeId } = useActiveCrew()
+  const { soundOn, setSoundOn } = useSound()
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const group = useQuery(() => (activeId ? getGroup(activeId) : Promise.resolve(null)), [activeId], ['groups', 'group_members'])
-  const sound = useSound()
-  const [phone, setPhone] = useState(false)
+  const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([] as FeedItem[])), [activeId], ['check_ins', 'reactions'])
+  const [streak, setStreak] = useState(6)
+  const [total, setTotal] = useState(41)
+  const [reveal, setReveal] = useState(false)
+  const [chips, setChips] = useState<ReactionCount[] | null>(null)
+  const [tab, setTab] = useState<'explore' | 'feed' | 'you'>('feed')
+  const streakRef = useRef<HTMLDivElement>(null)
+
   const g = group.data
   const list = achievements.data ?? []
-  const milestone = list.find((a) => !a.unlocked) ?? list[list.length - 1]
+  const milestone = list.find((a) => !a.unlocked) ?? list[0]
+  const post = feed.data?.find((f) => !f.isMine && f.note)
+  const shownChips = chips ?? post?.reactions ?? []
+  const react = (emoji: string, on: boolean) =>
+    setChips(() => {
+      const had = shownChips.find((c) => c.emoji === emoji)
+      if (on) return had ? shownChips.map((c) => (c.emoji === emoji ? { ...c, count: c.count + 1, mine: true } : c)) : [...shownChips, { emoji, count: 1, mine: true }]
+      return shownChips.map((c) => (c.emoji === emoji ? { ...c, count: c.count - 1, mine: false } : c)).filter((c) => c.count > 0)
+    })
+  const hue: Hue = g?.color ?? 'sky'
 
   return (
     <main data-layout="wide" className="px-5 pb-[150px] lg:px-8 lg:pb-16">
-      {/* The liquid glass refraction filter (J3). Chromium only. */}
-      <svg width="0" height="0" className="absolute" aria-hidden="true">
-        <filter id="liquid" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.011 0.03" numOctaves={2} seed={4} result="n" />
-          <feGaussianBlur in="n" stdDeviation="1.5" result="nb" />
-          <feDisplacementMap in="SourceGraphic" in2="nb" scale={34} xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-      </svg>
+      <PageHead title="Effects" lead="Check-in’s effect system (components/fx), each effect once, with where it’s allowed. Knobs are the --fx-* tokens in globals.css." />
 
-      <PageHead
-        title="Effects, side by side"
-        lead="Every overlap between the app, the premium kit and the mmo kit, in Check-in’s colors. Switch the theme and the phone frame to check each one."
-      />
-
-      <div className="sticky top-0 z-30 -mx-5 mt-5 flex flex-wrap items-center gap-3 border-b bg-background/90 px-5 py-3 backdrop-blur-xl lg:-mx-8 lg:px-8">
+      <div className="sticky top-0 z-30 -mx-5 mt-5 flex flex-wrap items-center gap-4 border-b bg-background/90 px-5 py-3 backdrop-blur-xl lg:-mx-8 lg:px-8">
         <div className="w-[220px]">
           <ThemeToggle />
         </div>
-        <button
-          type="button"
-          aria-pressed={phone}
-          onClick={() => setPhone((p) => !p)}
-          className={cn('rounded-full border px-4 py-2 text-[13px] font-bold', phone ? 'bg-foreground text-background' : 'bg-card')}
-        >
-          Phone width
-        </button>
-        <button
-          type="button"
-          aria-pressed={sound.on}
-          onClick={sound.toggle}
-          className={cn('rounded-full border px-4 py-2 text-[13px] font-bold', sound.on ? 'bg-foreground text-background' : 'bg-card')}
-        >
-          Sound {sound.on ? 'on' : 'off'}
-        </button>
-        <span className="text-[13px] text-muted-foreground">Sound plays on the D, E, F, H buttons (mmo kit).</span>
+        <label className="flex items-center gap-3 text-[13px] font-bold">
+          <Switch checked={soundOn} onChange={setSoundOn} label="Sounds" /> Sounds
+        </label>
       </div>
 
-      <div className={cn(phone && 'phone mx-auto max-w-[390px]')}>
-        <SectionTitle title="Inventory" note={`${INVENTORY.length} effects, 3 sources`} />
-        <div className="overflow-x-auto rounded-lg border bg-card shadow-card">
-          <table className="w-full min-w-[760px] text-left text-[13px]">
-            <thead className="border-b text-muted-foreground">
-              <tr>
-                {['Type', 'Effect', 'App', 'Premium kit', 'mmo kit', 'Overlap'].map((h) => (
-                  <th key={h} className="px-3 py-2 font-semibold">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {INVENTORY.map((r) => (
-                <tr key={r.effect} className="border-b last:border-0">
-                  <td className="px-3 py-2 text-muted-foreground">{r.type}</td>
-                  <td className="px-3 py-2 font-semibold">{r.effect}</td>
-                  <td className="px-3 py-2">{r.app ?? '–'}</td>
-                  <td className="px-3 py-2">{r.premium ?? '–'}</td>
-                  <td className="px-3 py-2">{r.mmo ?? '–'}</td>
-                  <td className="px-3 py-2">{r.overlap && /^[A-J]/.test(r.overlap) ? <b>{r.overlap}</b> : r.overlap}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="mx-auto max-w-[880px]">
+        <Fx name="Foil achievements" tier="calm" where="You → Achievements, and inside the milestone reveal. Tilts under a mouse; one sweep on a tap.">
+          <div className="flex flex-wrap justify-center gap-3">
+            {list.filter((a) => a.unlocked).slice(0, 4).map((a, i) => (
+              <AchievementCard key={a.key} achievement={a} tilt={i % 2 ? 'right' : 'left'} />
+            ))}
+          </div>
+        </Fx>
 
-        {list.length > 0 && (
-          <Section id="A" title="Card surfaces" note="Achievements on You. Hover with a mouse; tap on a phone.">
-            <SurfaceCompare achievements={list} />
-          </Section>
-        )}
         {g && (
-          <Section id="B" title="Light bands" note="The invite ticket. Hover, or tap the code.">
-            <BandCompare g={g} />
-          </Section>
+          <Fx name="Holo sheen" tier="scoped" where="Invite tickets only (crew settings, the invite page).">
+            <Ticket
+              color={g.color}
+              top={
+                <div className="px-5 pb-[18px] pt-5">
+                  <p className="text-sm font-bold">Invite code</p>
+                  <div className="mt-3">
+                    <CodeTiles code={g.slug} wave={0} />
+                  </div>
+                </div>
+              }
+              bottom={<div className="px-5 py-[14px] text-sm text-muted-foreground">{g.name}</div>}
+            />
+          </Fx>
         )}
+
         {g && (
-          <Section id="C" title="Borders and rings" note="The crew hero on a day everyone’s in.">
-            <RingCompare g={g} />
-          </Section>
+          <Fx name="Aurora frame" tier="scoped" where="The crew hero, only while the whole crew is in today.">
+            <CrewHero color={g.color} members={g.members.map((m) => ({ ...m, inToday: true }))} arrivedId={null} />
+          </Fx>
         )}
-        <Section id="D" title="Check-in celebration" note="Tap each Check in.">
-          <CelebrateCompare hue={g?.color ?? 'sky'} />
-        </Section>
-        <Section id="E" title="Fly-to" note="+1 into your streak.">
-          <FlyCompare />
-        </Section>
+
+        <Fx name="Check-in burst" tier="moment" where="After a check-in, from the button you used (the FAB or the rail button).">
+          <div className="flex justify-center">
+            <Button
+              variant="primary"
+              onClick={(e) => {
+                burstFrom(e.currentTarget, [`--${hue}`, '--primary', `--${hue}`, '--lemon', 'white'])
+                sfx('success')
+              }}
+            >
+              Check in
+            </Button>
+          </div>
+        </Fx>
+
+        <Fx name="Fly-to" tier="moment" where="A day’s first check-in: +1 lands on the streak. Reactions land on their chip the same way.">
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <div ref={streakRef} className="rounded-lg border bg-background p-4">
+              <div className="font-display text-[44px] leading-none tracking-tightest">
+                <RollingCount n={streak} tight label={`${streak}`} />
+              </div>
+              <div className="mt-1 text-[13px] text-muted-foreground">day streak</div>
+            </div>
+            <Button
+              size="sm"
+              onClick={(e) => streakRef.current && flyArc({ from: e.currentTarget, to: streakRef.current, text: '+1', className: 'font-display text-[22px] font-extrabold text-primary-ink', onLand: () => setStreak((n) => n + 1) })}
+            >
+              Check in today
+            </Button>
+          </div>
+        </Fx>
+
         {milestone && (
-          <Section id="F" title="Milestone reveal" note={`Your next one: ${milestone.title}.`}>
-            <RevealCompare milestone={milestone} />
-          </Section>
+          <Fx name="Milestone reveal" tier="moment" where="When a check-in unlocks an achievement. Nowhere else.">
+            <div className="flex justify-center">
+              <Button onClick={() => setReveal(true)}>Unlock “{milestone.title}”</Button>
+            </div>
+            {reveal && <RevealCard achievement={{ ...milestone, unlocked: true }} onClose={() => setReveal(false)} />}
+          </Fx>
         )}
-        <Section id="G" title="Toasts" note="Try “Three at once”.">
-          <ToastCompare />
-        </Section>
-        <Section id="H" title="Destructive confirm" note="Deleting a crew (nothing is deleted here).">
-          <ConfirmCompare />
-        </Section>
-        <Section id="I" title="Counting numbers" note="All-time check-ins.">
-          <CountCompare />
-        </Section>
-        <Section id="J" title="Glass" note="The tab dock over a busy feed.">
-          <GlassCompare />
-        </Section>
-      </div>
 
-      <MmoToasts />
+        {post && (
+          <Fx name="Reactions" tier="calm" where="Every post. The heart is the first emoji; double-tap hearts.">
+            <PostCard item={{ ...post, reactions: shownChips }} onHeart={(on) => react('❤️', on)} reactions={<Reactions chips={shownChips} onReact={react} />} />
+          </Fx>
+        )}
+
+        <Fx name="Toasts" tier="calm" where="Confirmations and live news. Arrivals within a moment batch into one card.">
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button size="sm" onClick={() => toast('Invite code copied')}>One</Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                toast('Maya joined the crew')
+                toast('Dre just checked in')
+                toast('Priya reacted 💪')
+              }}
+            >
+              Three at once
+            </Button>
+          </div>
+        </Fx>
+
+        <Fx name="Hold to confirm" tier="calm" where="Destructive actions only: delete a crew or your account, leave a crew, remove a member.">
+          <div className="mx-auto flex max-w-[360px] flex-col items-center gap-5">
+            <HoldButton label="Hold to delete crew" hint="Hold the button to delete the crew" detail="Nothing is deleted here." onConfirm={() => toast('Held: crew deleted (preview)')} />
+            <HoldButton variant="secondary" label="Hold to leave crew" hint="Hold the button to leave the crew" onConfirm={() => toast('Held: left (preview)')} />
+            <div className="flex items-center gap-3 text-[13px] text-muted-foreground">
+              <HoldButton variant="icon" label="Hold to remove Maya" hint="Hold the × to remove Maya" onConfirm={() => toast('Held: Maya removed (preview)')}>
+                <XIcon size={15} />
+              </HoldButton>
+              Remove a member
+            </div>
+          </div>
+        </Fx>
+
+        <Fx name="Rolling digits" tier="calm" where="Every number that changes: stats, the crew hero, streaks, reaction counts.">
+          <div className="flex items-center justify-center gap-6">
+            <div className="font-display text-[64px] leading-none tracking-tightest">
+              <RollingCount n={total} tight label={`${total}`} />
+            </div>
+            <Button size="sm" onClick={() => setTotal((n) => n + 1)}>+1</Button>
+          </div>
+        </Fx>
+
+        <Fx name="Frosted glass" tier="calm" where="The tab dock and toasts. Opaque where blur isn’t supported.">
+          <div className="crew-glow relative h-48 overflow-hidden rounded-lg border bg-background" style={{ '--crew': HUE_CLASS[hue].cssVar } as CSSProperties}>
+            <div className="flex flex-col gap-2 p-3" aria-hidden="true">
+              {(['coral', 'grape', 'lemon'] as Hue[]).map((h, i) => (
+                <div key={h} className="flex items-center gap-2 rounded-md border bg-card p-2 text-[13px]">
+                  <span className={cn('size-7 rounded-full', HUE_CLASS[h].solid)} />
+                  {['5x5 squats, finally smooth.', 'Inked the cat.', 'Morning pages done.'][i]}
+                </div>
+              ))}
+            </div>
+            <div className="absolute inset-x-3 bottom-3">
+              <TabBar active={tab} onSelect={setTab} />
+            </div>
+          </div>
+        </Fx>
+      </div>
     </main>
   )
 }

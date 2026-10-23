@@ -1,0 +1,21 @@
+/* Pattern: mmo fx kit / hold to confirm (adapted). The fill is functional progress, so it stays
+   under reduced motion; it's just progress, not decoration. */
+.hold { position: relative; isolation: isolate; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
+
+/* Pill: fills left to right. */
+.pill::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; transform-origin: left;
+  transform: scaleX(var(--hold, 0));
+  background: var(--hold-fill);
+}
+.danger { --hold-fill: color-mix(in srgb, var(--destructive) 32%, transparent); }
+.secondary { --hold-fill: var(--muted); }
+
+/* Icon: a ring fills around the button. */
+.icon { overflow: visible; }
+.icon::before {
+  content: ""; position: absolute; inset: -3px; border-radius: 9999px; pointer-events: none;
+  background: conic-gradient(var(--destructive) calc(var(--hold, 0) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+}

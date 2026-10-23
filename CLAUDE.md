@@ -85,27 +85,50 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **input / textarea:** `h-12 rounded-md border-border-strong bg-card`, focus = 3px `ring-primary/25` + `border-primary`.
 - **sheet:** bottom side, `rounded-t-xl shadow-overlay`, drag handle, scrim `bg-black/40`. Prefer Arc `bottom-sheet`
   if it gives drag-to-dismiss with velocity.
-- **sonner (toasts):** inverted pill (`bg-foreground text-background`), above the tab bar.
+- **toasts:** `components/checkin/Toast.tsx` (not sonner): a frosted stack with a mint edge, batching arrivals.
 
 ## Motion
 - **Chrome** (buttons, sheets, tabs, toasts, lists, page transitions): 150–200ms, `ease-out` on enter, `ease-in` on
   exit, transform and opacity only. Entrances `animate-rise`. Press `active:scale-[.97]`.
-- **Delight moments** (springs allowed, `ease-spring`): check-in stamp, joy takeover, avatar check-badge pop, heart
-  burst, chip selection, number tickers, and emoji reactions (picker rise, the flying landing and squash, the rolling
-  count, each emoji's own arrival). The list is closed.
-- **Pointer effects** (premium kit, `premium-ui-kit/`): the foil achievement tilt (`Foil`), the invite ticket's light
-  band (`LightBand`) and the featured crews ring (`RingCarousel`) move only under a pointer, a tap, a drag or a copy.
-  Nothing idles or loops. Check `/kitchen-sink/effects` after changing them.
-- Motion answers what people do. The only motion nobody triggered is live crew activity (arrivals, hearts).
+- **Delight moments** (springs allowed, `ease-spring` / `--fx-spring`): check-in stamp, avatar check-badge pop, heart
+  burst, chip selection, rolling digits, and emoji reactions (picker rise, the flying landing and squash, each emoji's
+  own arrival). The list is closed.
+- **Effects** are the `components/fx` system (below). Use one of them before writing a new effect.
 - transitions.dev recipes are the default source for chrome motion; keep our durations and easing when adopting them.
-- Always respect `prefers-reduced-motion` (globals.css zeroes animations; Arc components ship reduced-motion behavior).
+- Always respect `prefers-reduced-motion` (globals.css zeroes animations; every fx piece has a reduced-motion branch).
+
+## Effects (`components/fx`) and the motion budget
+One system, picked by Ben on `/fx-preview` (Oct 2026) from the app, `premium-ui-kit/` and `mmo-fx-kit/`. CSS knobs
+are the `--fx-*` tokens in `app/globals.css`; JS timings are `components/fx/config.ts`. Check `/fx-preview` after
+changing any of them, in light and dark, on a phone and desktop.
+
+**Budget.** Everyday screens stay calm: an effect answers a touch, then rests. Bold effects are for real moments only.
+Loops are scoped to exactly one place each. Nothing else idles. Never add a second effect to a surface that has one.
+
+| Effect | Tier | Allowed only on |
+|---|---|---|
+| `Foil` + `FoilLight` (tilt, white sheen; one sweep on tap) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
+| `SheenLoop` (holo sheen, loops) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
+| `AuroraFrame` (turning multicolor edge, soft glow) | scoped loop | `CrewHero`, only while the whole crew is in today |
+| `burstFrom` (canvas particles, crew hue + mint) | moment | After a check-in, from the button used (FAB or rail button) |
+| `flyArc` + `squash` (arc, tilt, land) | moment / calm | The day's first check-in (+1 to the streak: rail on desktop, You tab on phones); reactions landing on their chip |
+| `RevealCard` (shake, beam, hue flood, burst) | moment | When a check-in unlocks an achievement. Nowhere else |
+| `RollingCount` (odometer digits) | calm | Every number that changes: stats, the crew hero, streaks, reaction counts |
+| `HoldButton` (hold to confirm, no sheet) | calm | Destructive actions only: delete a crew or your account, leave a crew, remove a member |
+| Toast stack (frosted, batched) | calm | Confirmations and live news; up to three, 4.2s, tap to dismiss |
+| Frosted glass (`--fx-glass` + blur, opaque fallback) | calm | The tab dock and toasts |
+
+**Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
+picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
+**Not used** (judged on `/fx-preview`): metallic text and metal buttons, rarity tiles, parallax art, liquid glass
+refraction, light rings as default borders, the full-screen joy takeover.
 
 ## Product components (`components/checkin/`)
 Build these with the primitives and the sources in `ui-references/check-in-map.md`:
 - **GlassTabBar:** `bg-card/75 backdrop-blur-xl border shadow-raised rounded-full`, opaque fallback via
   `@supports not (backdrop-filter: blur(1px))`; active tab = `bg-foreground text-background` pill sliding (200ms).
 - **CrewHero** (signature): `rounded-xl` card, single-hue gradient (`{hue}-soft` → transparent) over `bg-card`,
-  big `font-display` "n/total" number ticker, "in today", brand-voice line, avatar row (faded + dashed ring until checked
+  big `font-display` "n/total" in `RollingCount`, an `AuroraFrame` while the whole crew is in, "in today", brand-voice line, avatar row (faded + dashed ring until checked
   in, then a mint check badge pops on), segmented progress bar in the crew hue.
 - **PostCard:** L1 card; avatar, name + relative time (plain text), note, interactive `TagChip`s, `Reactions` (emoji
   chips from `lib/reactions.ts`, ❤️ first; yours are mint; the smiley opens the picker); own card gets a mint
@@ -114,12 +137,13 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   white sheen that tilts toward the pointer. Locked ones stay dashed.
 - **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
   `animate-cellin` staggered when the You tab opens.
-- **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy), **JoyTakeover** (primary
-  circle expands from the FAB via clip-path, "You showed up." words `animate-word`, count ticks up, confetti in crew hues).
+- **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
+- **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
+  first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).
 - **Behavior to keep** from the current build when these are rebuilt: sheets close on Escape, on a drag past ~110px or a
-  fast flick, and trap focus; toasts auto-hide after ~2.2s; tapping the LivePill scrolls the feed to the top (or switches
-  crew for an arrival elsewhere); JoyTakeover dismisses on tap or after ~2.9s and is the only confetti moment in the app.
+  fast flick, and trap focus; toasts batch, stack up to three and hide after ~4.2s (hover pauses); tapping the LivePill
+  scrolls the feed to the top (or switches crew for an arrival elsewhere); a tap on a `HoldButton` explains the hold.
 
 ## Screens (routes)
 `/` intro · `/feed` · `/explore` · `/you` · `/group-settings/[groupId]` · `/new-group` · `/profile/edit` ·

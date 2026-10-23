@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
-import { DeleteAccountSheets } from '@/components/you/DeleteAccountSheets'
+import { useMemo } from 'react'
 import { StatsGrid } from '@/components/you/StatsGrid'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
 import { Avatar } from '@/components/checkin/Avatar'
@@ -15,17 +14,23 @@ import { IconLink } from '@/components/checkin/IconButton'
 import { GearIcon, PlusIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
 import { SectionTitle } from '@/components/checkin/SectionTitle'
-import { TextButton, TextLink } from '@/components/checkin/TextButton'
+import { TextLink } from '@/components/checkin/TextButton'
+import { Switch } from '@/components/checkin/Switch'
+import { ThemeToggle } from '@/components/checkin/theme-toggle'
+import { useToast } from '@/components/checkin/Toast'
+import { HoldButton } from '@/components/fx/HoldButton'
+import { useSound } from '@/components/fx/sound'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
-import { getAchievements, getMe, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
+import { deleteAccount, getAchievements, getMe, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 
 export default function YouPage() {
   const router = useRouter()
   const auth = useAuth()
   const { groups } = useActiveCrew()
-  const [deleting, setDeleting] = useState(false)
+  const toast = useToast()
+  const { soundOn, setSoundOn } = useSound()
   const me = useQuery(getMe, [], ['profiles'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
@@ -35,6 +40,15 @@ export default function YouPage() {
     const days = new Set(stats.data?.days)
     return weekDays((d) => days.has(localDate(d)))
   }, [stats.data])
+
+  const deleteMe = () =>
+    deleteAccount().then(
+      async () => {
+        await auth.signOut() // the auth gate takes them to the intro
+        toast('Account deleted')
+      },
+      (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
+    )
 
   if (!me.data || !stats.data) return <main className="min-h-dvh px-5" />
   const { profile, person } = me.data
@@ -135,16 +149,35 @@ export default function YouPage() {
         </>
       )}
 
-      <div className="mt-10 flex flex-col items-center gap-4">
+      <SectionTitle title="Settings" />
+      <Card className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <p className="font-bold">Theme</p>
+          <div className="w-[220px]">
+            <ThemeToggle />
+          </div>
+        </div>
+        <div className="flex items-center gap-4 border-t pt-4">
+          <div className="min-w-0 flex-1">
+            <p className="font-bold">Sounds</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">Small sounds for check-ins, reactions and milestones.</p>
+          </div>
+          <Switch checked={soundOn} onChange={setSoundOn} label="Sounds" />
+        </div>
+      </Card>
+
+      <div className="mx-auto mt-10 flex max-w-[360px] flex-col items-center gap-6">
         <Button block onClick={() => auth.signOut()}>
           Sign out
         </Button>
-        <TextButton danger onClick={() => setDeleting(true)}>
-          Delete account
-        </TextButton>
+        {/* Hold to confirm (fx/HoldButton): the hold is the confirmation, the line says what goes. */}
+        <HoldButton
+          label="Hold to delete account"
+          hint="Hold the button to delete your account"
+          detail="Your check-ins, crews and profile go away. Your crews keep going without you."
+          onConfirm={deleteMe}
+        />
       </div>
-
-      <DeleteAccountSheets open={deleting} onClose={() => setDeleting(false)} />
     </main>
   )
 }

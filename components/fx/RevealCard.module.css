@@ -1,0 +1,42 @@
+/* Pattern: mmo fx kit / reveal card (adapted to Check-in tokens: crew hues, our surfaces, on-color text). */
+.reveal { position: fixed; inset: 0; z-index: 75; display: grid; place-items: center; padding: 20px; }
+.scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .45); animation: fade .2s var(--ease-out); }
+@keyframes fade { from { opacity: 0; } }
+
+.card {
+  position: relative; width: min(340px, 100%); display: grid; justify-items: center; gap: 8px; padding: 30px 22px 22px;
+  border-radius: 22px; text-align: center; color: var(--foreground);
+  background: var(--popover); border: 1px solid var(--border); box-shadow: var(--elev-overlay);
+  transition: background .5s var(--ease-out), box-shadow .5s var(--ease-out), color .5s var(--ease-out);
+  animation: pop .35s var(--fx-spring);
+}
+@keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.94); } }
+
+/* Opened: the card floods with the achievement's hue. */
+.card[data-open] {
+  color: var(--on-color);
+  border-color: transparent;
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--hue) 65%, white), var(--hue) 60%, color-mix(in srgb, var(--hue) 80%, black));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hue) 60%, white), 0 30px 70px -18px var(--hue);
+}
+
+.medal {
+  position: relative; display: grid; place-items: center; width: 104px; height: 104px; margin-bottom: 8px; border-radius: 9999px;
+  border: 1px dashed var(--border-strong); background: var(--muted); color: var(--muted-foreground);
+  font-family: var(--font-bricolage), sans-serif; font-weight: 800; font-size: 36px;
+}
+.card[data-open] .medal { border: 0; background: var(--on-color); color: var(--hue); }
+.medal[data-shake] { animation: shake var(--fx-reveal-shake, .8s) ease-in-out; }
+@keyframes shake { 10%, 30%, 50%, 70% { transform: rotate(-6deg) scale(1.04); } 20%, 40%, 60%, 80% { transform: rotate(6deg) scale(1.06); } 100% { transform: none; } }
+
+/* The light beam rising out of the medal as it opens. */
+.beam { position: absolute; left: 50%; bottom: 40%; width: 70%; height: 0; transform: translateX(-50%); opacity: 0; border-radius: 50% 50% 0 0;
+  background: linear-gradient(0deg, white, transparent); filter: blur(6px); pointer-events: none; }
+.card[data-open] .beam { animation: beam 1s ease-out forwards; }
+@keyframes beam { 0% { height: 0; opacity: 0; } 30% { opacity: 1; } 100% { height: 170%; opacity: .45; } }
+.glyph { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .scrim, .medal[data-shake], .card[data-open] .beam { animation: none; }
+  .card { transition: none; }
+}
