@@ -7,8 +7,8 @@ import { HUE_CLASS, type Hue } from '@/lib/colors'
 import styles from './Foil.module.css'
 
 export interface FoilProps {
-  /** Sheen color. Defaults to the brand mint. */
-  hue?: Hue
+  /** Sheen color. Defaults to the brand mint. Use `white` on a card that is already filled with a hue. */
+  hue?: Hue | 'white'
   /** Largest tilt in degrees at the card's edge. Small reads expensive, large reads toy. */
   tilt?: number
   /** Sheen opacity under the pointer (0 to 1). */
@@ -54,7 +54,7 @@ export function Foil({ hue, tilt = 10, strength = 0.4, disabled, className, chil
   }
 
   const vars = {
-    '--hue': hue ? HUE_CLASS[hue].cssVar : 'var(--primary)',
+    '--hue': hue === 'white' ? 'white' : hue ? HUE_CLASS[hue].cssVar : 'var(--primary)',
     '--tilt': tilt,
     '--strength': strength,
   } as CSSProperties

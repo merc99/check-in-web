@@ -77,7 +77,7 @@ export default function EffectsPreview() {
       <Section
         title="Foil achievements"
         note="You tab"
-        how="With a mouse, the card tilts toward the pointer and a sheen in the achievement’s color follows it. On a phone, a tap plays one sweep. It never moves on its own."
+        how="Filled with the achievement’s color, with an enamel badge. With a mouse, the card tilts toward the pointer and a foil sheen follows it. On a phone, a tap plays one sweep. It never moves on its own."
       >
         <Label>Now</Label>
         <div className="flex gap-3 pb-2">
