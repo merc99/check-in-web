@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type PointerEvent } from 'react'
+import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import type { FeedItem } from '@/lib/data'
 import { HOUR, timeAgo } from '@/lib/dates'
@@ -19,10 +19,12 @@ export interface PostCardProps {
   entering?: boolean
   onHeart: (on: boolean) => void
   onPersonTap?: (id: string) => void
+  /** Emoji reactions (preview), shown after the heart. */
+  reactions?: ReactNode
 }
 
 /** One check-in. Heart pill, who hearted, and double-tap anywhere on the card to heart it. */
-export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps) {
+export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: PostCardProps) {
   const [burst, setBurst] = useState(0)
   const [pop, setPop] = useState(false)
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
@@ -43,7 +45,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
 
   // Double-tap detection that works for touch and mouse alike. Taps on buttons don't count.
   const onPointerUp = (e: PointerEvent<HTMLElement>) => {
-    if ((e.target as HTMLElement).closest('button,a')) return
+    if ((e.target as HTMLElement).closest('button,a,[role=menu]')) return
     const now = performance.now()
     const prev = lastTap.current
     if (prev && now - prev.t < DOUBLE_TAP_MS && Math.hypot(e.clientX - prev.x, e.clientY - prev.y) < DOUBLE_TAP_PX) {
@@ -130,6 +132,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
             </svg>
             {item.hearts.count > 0 && item.hearts.count}
           </button>
+          {reactions}
           {item.hearts.people.length > 0 && (
             <span className="flex" aria-label={`Hearted by ${item.hearts.people.map((p) => p.name).join(', ')}`}>
               {item.hearts.people.map((p, i) => (

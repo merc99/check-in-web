@@ -1,18 +1,25 @@
+import { Foil, FoilLight } from '@/components/checkin/Foil'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS } from '@/lib/colors'
 import type { Achievement } from '@/lib/data'
 
 /**
  * Medal card for the achievements shelf. Unlocked ones get a light sweep on hover;
- * locked ones are dashed and hide their glyph.
+ * locked ones are dashed and hide their glyph. `finish="foil"` (preview) swaps the sweep for a
+ * foil finish in the achievement's hue that tilts toward the pointer.
  */
-export function AchievementCard({ achievement: a, tilt }: { achievement: Achievement; tilt: 'left' | 'right' }) {
-  return (
+export function AchievementCard({
+  achievement: a, tilt, finish = 'sweep',
+}: { achievement: Achievement; tilt: 'left' | 'right'; finish?: 'sweep' | 'foil' }) {
+  const foil = finish === 'foil' && a.unlocked
+  const card = (
     <div
       className={cn(
         'relative w-[118px] flex-none snap-start overflow-hidden rounded-lg border border-border px-[10px] py-4 text-center',
         tilt === 'left' ? 'rotate-[-1.5deg]' : 'rotate-[1.2deg]',
-        a.unlocked
+        foil
+          ? 'bg-card shadow-card'
+          : a.unlocked
           ? [
               'bg-card shadow-card',
               'after:pointer-events-none after:absolute after:inset-0 after:translate-x-[-120%] after:bg-linear-to-r',
@@ -34,6 +41,15 @@ export function AchievementCard({ achievement: a, tilt }: { achievement: Achieve
       <div className="text-[13px] font-bold leading-[1.2]">{a.title}</div>
       <div className="mt-1 text-[11.5px] text-muted-foreground">{a.subtitle}</div>
       <span className="sr-only">{a.unlocked ? 'Unlocked' : 'Locked'}</span>
+      {foil && <FoilLight />}
     </div>
+  )
+
+  return foil ? (
+    <Foil hue={a.color} className="flex-none snap-start">
+      {card}
+    </Foil>
+  ) : (
+    card
   )
 }

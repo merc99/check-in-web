@@ -1,0 +1,57 @@
+/* Pattern: Bencho / Carousel, via the 100K Club Premium UI Kit (MIT, bencho.dev/licence).
+   Adapted to Check-in tokens and ported to React (RingCarousel.tsx). Check-in change: no idle
+   drift (motion answers what people do), so the floater element and its keyframes are gone;
+   the ring moves only when it is dragged, flicked, tapped or arrowed. */
+
+.wrap { position: relative; width: 100%; }
+
+.car {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform-origin: top center;
+}
+
+/* The frame is only a frame: no background, no clip, no mask. */
+.track {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.track[data-held="true"] { cursor: grabbing; }
+.track:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
+
+/* WHERE on the ring and the resting ANGLE, written per frame by the script: no transition here. */
+.slot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  perspective: 760px;
+}
+
+/* A Check-in card. One shadow, and it does not move: the dent and the rim say the card went back.
+   No transition: the tilt is sprung in the script. */
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--elev-raised);
+}
+
+.sheen {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  pointer-events: none;
+}

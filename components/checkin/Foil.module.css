@@ -1,0 +1,88 @@
+/* Pattern: 100K Club Premium UI Kit / holographic foil card (adapted to Check-in tokens).
+   Changes from the kit, per CLAUDE.md and .ux-profile.md:
+   - No idle drift: motion answers what people do. A mouse tilts it; a tap plays one sweep.
+   - Single-hue sheen (the card's hue) instead of rainbow foil: rainbow is the joy confetti's alone.
+   - soft-light in light mode, overlay in dark: the kit's color-dodge washes out on a light canvas.
+   The white in the glare and etching is light, not a palette color. */
+
+.foil {
+  --mx: 0.5;
+  --my: 0.5;
+  position: relative;
+  perspective: 900px;
+}
+
+/* One transform, owned by the pointer (the card inside keeps its own rotate). */
+.surface {
+  position: relative;
+  transform: none;
+  transition: transform 300ms var(--ease-out);
+}
+.foil[data-active] .surface {
+  transform: rotateX(calc((0.5 - var(--my)) * var(--tilt) * 0.8deg)) rotateY(calc((var(--mx) - 0.5) * var(--tilt) * 1deg));
+  transition: transform 120ms var(--ease-out);
+}
+
+/* Both light layers sit over the content, inside the card (FoilLight), so the card clips them. */
+.sheen,
+.glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+
+/* The card's hue in diagonal bands, over fine etching lines. */
+.sheen {
+  mix-blend-mode: soft-light;
+  background:
+    repeating-linear-gradient(115deg,
+      transparent 0%,
+      color-mix(in srgb, var(--hue) 85%, white) 6%,
+      transparent 12%,
+      color-mix(in srgb, white 70%, transparent) 17%,
+      transparent 22%),
+    repeating-linear-gradient(45deg, color-mix(in srgb, white 14%, transparent) 0 1px, transparent 1px 5px);
+  background-size: 300% 300%, auto;
+  background-position: calc(var(--mx) * 100%) calc(var(--my) * 100%), 0 0;
+}
+
+/* A soft highlight that moves opposite the pointer, like light catching the far side. */
+.glare {
+  mix-blend-mode: soft-light;
+  background: radial-gradient(circle,
+    color-mix(in srgb, white 80%, transparent) 0%,
+    color-mix(in srgb, white 15%, transparent) 22%,
+    transparent 42%);
+  background-size: 200% 200%;
+  background-position: calc(100% - var(--mx) * 100%) calc(100% - var(--my) * 100%);
+}
+
+:global(.dark) .sheen,
+:global(.dark) .glare { mix-blend-mode: overlay; }
+
+.foil[data-active] .sheen { opacity: var(--strength); }
+.foil[data-active] .glare { opacity: 0.9; }
+
+/* Touch: one sweep across the card per tap, then it settles flat. */
+.foil[data-shine] .sheen,
+.foil[data-shine] .glare { animation: shine 900ms var(--ease-out) both; }
+.foil[data-shine] .glare { animation-name: shineGlare; }
+
+@keyframes shine {
+  0% { opacity: 0; background-position: 0% 0%, 0 0; }
+  25% { opacity: var(--strength); }
+  100% { opacity: 0; background-position: 100% 100%, 0 0; }
+}
+@keyframes shineGlare {
+  0% { opacity: 0; background-position: 100% 100%; }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; background-position: 0% 0%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foil[data-active] .surface { transform: none; }
+  .surface { transition: none; }
+}

@@ -1,16 +1,19 @@
 import type { ReactNode } from 'react'
+import { LightBand } from '@/components/checkin/LightBand'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 
 /**
  * Invite ticket in the crew color: a main section, a perforated divider with
- * half-circle notches cut into both edges, and a stub below.
+ * half-circle notches cut into both edges, and a stub below. Pass `shine` (preview) to add a
+ * light band that sweeps on hover and each time the number goes up (the code was copied).
  */
 export function Ticket({
-  color, top, bottom, className,
-}: { color: Hue; top: ReactNode; bottom: ReactNode; className?: string }) {
+  color, top, bottom, className, shine,
+}: { color: Hue; top: ReactNode; bottom: ReactNode; className?: string; shine?: number }) {
   return (
     <div className={cn('relative rounded-lg border border-border shadow-raised transition-colors duration-200', HUE_CLASS[color].soft, className)}>
+      {shine !== undefined && <LightBand trigger={shine} />}
       {top}
       <div aria-hidden="true" className="relative mx-[22px] h-0 border-t-2 border-dashed border-border">
         {/* Notches: peach circles clipped to the half that sits inside the ticket. */}
