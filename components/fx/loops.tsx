@@ -37,3 +37,12 @@ export function AuroraFrame({ on, className, children }: { on: boolean; classNam
 export function SheenOnce() {
   return <span aria-hidden="true" className={styles.once} />
 }
+
+/**
+ * A soft band of light that glides across its parent every few seconds (a `relative` element with
+ * rounded corners). Motion budget: the feed's crew banner only.
+ */
+export function LightSweep() {
+  usePauseWhenHidden()
+  return <span aria-hidden="true" className={styles.sweep} />
+}

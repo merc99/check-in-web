@@ -94,6 +94,7 @@
   --fx-sheen-strength: 0.35;        /* SheenLoop: how strong the rainbow is */
   --fx-aurora-speed: 5s;            /* AuroraFrame: one turn of the crew-complete frame */
   --fx-aurora-glow: 6px;            /* AuroraFrame: glow radius (the one glow allowed) */
+  --fx-banner-sweep: 7s;            /* LightSweep: one glint across the crew banner, then rest */
   --fx-spring: cubic-bezier(0.24, 1.34, 0.38, 1); /* overshoot for landings and pops */
   --fx-glass: color-mix(in srgb, var(--card) 75%, transparent); /* frosted surfaces: tab dock, toasts */
 }

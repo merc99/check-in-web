@@ -75,7 +75,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
   crews in two columns) and You (glossy stat cards, then two columns: week, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
-- **Modes:** both first-class; default follows the system; `ThemeToggle` on the You tab. Check every screen in both.
+- **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
 ### shadcn primitive specs (apply after `shadcn add`)
 - **button:** `rounded-full font-semibold`, sizes `sm` h-9 px-4 text-[13px], `default` h-12 px-6, `lg` h-14 px-8,
@@ -107,13 +107,14 @@ are the `--fx-*` tokens in `app/globals.css`; JS timings are `components/fx/conf
 changing any of them, in light and dark, on a phone and desktop.
 
 **Budget.** Everyday screens stay calm: an effect answers a touch, then rests. Bold effects are for real moments only.
-Loops are scoped to exactly one place each. Nothing else idles. Never add a second effect to a surface that has one.
+Loops are scoped to exactly one place each (three: the ticket sheen, the aurora frame, the banner glint). Nothing else idles. Never add a second effect to a surface that has one.
 
 | Effect | Tier | Allowed only on |
 |---|---|---|
 | `Foil` + `FoilLight` (tilt, white sheen; one sweep on tap) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
 | `SheenLoop` (holo sheen, loops) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
 | `AuroraFrame` (turning multicolor edge, soft glow) | scoped loop | `CrewHero`, only while the whole crew is in today |
+| `LightSweep` (a soft glint every ~7s) | scoped loop | The feed's crew banner only |
 | `burstFrom` (canvas particles, crew hue + mint) | moment | After a check-in, from the button used (FAB or rail button) |
 | `flyArc` + `squash` (arc, tilt, land) | moment / calm | The day's first check-in (+1 to the streak: rail on desktop, You tab on phones); reactions landing on their chip |
 | `RevealCard` (shake, beam, hue flood, burst) | moment | When a check-in unlocks an achievement. Nowhere else |

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
@@ -27,6 +27,7 @@ import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
 import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
+import { useDragScroll } from '@/lib/useDragScroll'
 
 export default function YouPage() {
   const router = useRouter()
@@ -40,6 +41,8 @@ export default function YouPage() {
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
   const [profileId, setProfileId] = useState<string | null>(null)
+  const shelf = useRef<HTMLDivElement>(null)
+  useDragScroll(shelf, achievements.data)
 
   const week = useMemo(() => {
     const days = new Set(stats.data?.days)
@@ -97,7 +100,11 @@ export default function YouPage() {
               </>
             }
           />
-          <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-3 pt-[6px]">
+          {/* Swipe on touch; press and drag with a mouse (useDragScroll). */}
+          <div
+            ref={shelf}
+            className="no-scrollbar -mx-5 flex cursor-grab snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-3 pt-[6px] select-none"
+          >
             {achievements.data.map((a, i) => (
               <AchievementCard key={a.key} achievement={a} tilt={i % 2 ? 'right' : 'left'} />
             ))}

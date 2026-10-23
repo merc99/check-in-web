@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
+import { LightSweep } from '@/components/fx/loops'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { useScrolledPast } from '@/lib/motion'
@@ -65,8 +66,10 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
       </header>
 
       {/* The banner is the crew's own color, flat: dark ink on the hue, light pills, no glow. */}
-      <div className={cn('mb-5 mt-5 overflow-hidden rounded-xl p-5 text-on-color shadow-card', hue.solid)}>
-        <div className="flex items-start gap-4">
+      <div className={cn('relative isolate mb-5 mt-5 overflow-hidden rounded-xl p-5 text-on-color shadow-card', hue.solid)}>
+        {/* A glint of light crosses the banner every few seconds (fx/LightSweep, the banner's one loop). */}
+        <LightSweep />
+        <div className="relative flex items-start gap-4">
           <CrewBlock name={group.name} color={group.color} size="lg" white className="border-white/50 bg-white/80 text-on-color max-sm:hidden" />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-semibold opacity-75">{date}</p>
@@ -94,7 +97,7 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
             <GearIcon size={19} />
           </Link>
         </div>
-        <ul className="mt-4 flex flex-wrap gap-2 text-[12.5px] font-bold">
+        <ul className="relative mt-4 flex flex-wrap gap-2 text-[12.5px] font-bold">
           <li className="inline-flex items-center gap-[6px] rounded-full bg-white/45 px-3 py-[6px]">
             <Users size={14} strokeWidth={2} aria-hidden="true" />
             <span className="tnum">{group.memberCount}</span> members

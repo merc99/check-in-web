@@ -42,7 +42,21 @@
 :global(html:not(.dark)) .once { mix-blend-mode: soft-light; }
 @keyframes once { 0% { opacity: 1; background-position: 100% 0; } 85% { opacity: 1; } 100% { opacity: 0; background-position: 0% 0; } }
 
+/* ── LightSweep: a soft band of light crossing a colored surface every few seconds ── */
+.sweep { position: absolute; inset: 0; z-index: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.sweep::before {
+  content: ""; position: absolute; inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 38%, color-mix(in srgb, white 34%, transparent) 47%, color-mix(in srgb, white 10%, transparent) 53%, transparent 62%);
+  mix-blend-mode: soft-light;
+  transform: translateX(-70%);
+  animation: sweep var(--fx-banner-sweep, 7s) var(--ease-out) 1.2s infinite;
+  animation-play-state: var(--fx-play, running);
+}
+/* One pass takes the first ~30% of the loop; the rest is rest, so it reads as a glint, not a strobe. */
+@keyframes sweep { 0% { transform: translateX(-70%); } 30%, 100% { transform: translateX(70%); } }
+
 @media (prefers-reduced-motion: reduce) {
+  .sweep::before { animation: none; display: none; }
   .once { display: none; }
   .sheen { animation: none; background-position: 50% 50%; }
   .aurora::before { animation: none; }

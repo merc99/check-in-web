@@ -26,8 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
       <body>
-        {/* .dark goes on <html>. Default follows the system; the You tab has a toggle. */}
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        {/* .dark goes on <html>. Dark by default; You → Settings can switch to light or follow the system. */}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {/* Project: toasts, live pill, demo sign-in, active crew + simulation, then the tab dock. */}
           <Providers>
             {/* Phones: one centered column (max-w-app) with the bottom tab bar.
