@@ -32,6 +32,7 @@ import styles from './Reactions.module.css'
 
 /** The crew set. `k` names the emoji's arrival animation in Reactions.module.css. */
 export const REACTION_SET = [
+  { e: '❤️', label: 'Heart', k: 'heart' },
   { e: '💪', label: 'Strong', k: 'flex' },
   { e: '🔥', label: 'On fire', k: 'flicker' },
   { e: '👏', label: 'Clap', k: 'beat' },

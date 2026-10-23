@@ -29,10 +29,7 @@ function Label({ children }: { children: ReactNode }) {
   return <p className="mb-2 text-[12.5px] font-semibold text-muted-foreground">{children}</p>
 }
 
-const START: ReactionChip[] = [
-  { emoji: '💪', count: 3, mine: false },
-  { emoji: '🔥', count: 1, mine: true },
-]
+const OTHERS: ReactionChip[] = [{ emoji: '💪', count: 3, mine: false }]
 
 export default function EffectsPreview() {
   const toast = useToast()
@@ -42,12 +39,24 @@ export default function EffectsPreview() {
   const group = useQuery(() => (activeId ? getGroup(activeId) : Promise.resolve(null)), [activeId], ['groups'])
   const crews = useQuery(() => getExploreGroups(''), [], ['groups', 'group_members'])
 
-  const [chips, setChips] = useState(START)
-  const [hearted, setHearted] = useState(false)
+  const [edited, setChips] = useState<ReactionChip[] | null>(null)
   const [copies, setCopies] = useState(0)
 
+  // Keep the first sample post: live crew activity adds newer ones while you're trying it.
+  const [sampleId, setSampleId] = useState<string | null>(null)
+  const first = feed.data?.find((f) => !f.isMine && f.note)
+  if (!sampleId && first) setSampleId(first.id)
+  const sample = feed.data?.find((f) => f.id === sampleId) ?? first
+  // The heart is the first reaction: its chip starts from the post's real heart count.
+  const chips =
+    edited ??
+    (sample && sample.hearts.count > 0
+      ? [{ emoji: '❤️', count: sample.hearts.count, mine: sample.hearts.byMe }, ...OTHERS]
+      : OTHERS)
+
   const react = (emoji: string, on: boolean) =>
-    setChips((list) => {
+    setChips(() => {
+      const list = chips
       const had = list.find((c) => c.emoji === emoji)
       if (on) {
         if (had) return list.map((c) => (c.emoji === emoji ? { ...c, count: c.count + 1, mine: true } : c))
@@ -58,11 +67,9 @@ export default function EffectsPreview() {
         .filter((c) => c.count > 0)
     })
 
-  const sample = feed.data?.find((f) => !f.isMine && f.note)
-  const post = sample && {
-    ...sample,
-    hearts: { ...sample.hearts, byMe: hearted, count: sample.hearts.count - (sample.hearts.byMe ? 1 : 0) + (hearted ? 1 : 0) },
-  }
+  // Double-tap on the card checks byMe before hearting, so it reads the heart chip.
+  const heartChip = chips.find((c) => c.emoji === '❤️')
+  const post = sample && { ...sample, hearts: { ...sample.hearts, byMe: !!heartChip?.mine } }
   const unlocked = achievements.data?.filter((a) => a.unlocked).slice(0, 3) ?? []
   const g = group.data
 
@@ -97,10 +104,10 @@ export default function EffectsPreview() {
       <Section
         title="Emoji reactions"
         note="Feed posts"
-        how="The heart stays the one-tap reaction. The smiley opens the crew set: pick one and it flies to its chip and the count rolls. Tap a chip to join it or take yours back. On a phone, hold the smiley and slide."
+        how="The heart is one of the reactions now. The smiley opens the set: pick one and it flies to its chip and the count rolls. Tap a chip to join it or take yours back. Double-tap the post to heart it. On a phone, hold the smiley and slide."
       >
         {post ? (
-          <PostCard item={post} onHeart={setHearted} reactions={<Reactions chips={chips} onReact={react} />} />
+          <PostCard item={post} onHeart={(on) => react('❤️', on)} reactions={<Reactions chips={chips} onReact={react} />} />
         ) : (
           <div className="h-40 rounded-lg border bg-card" />
         )}
