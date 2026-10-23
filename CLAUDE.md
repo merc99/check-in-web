@@ -10,7 +10,8 @@ file and the prototype disagree, this file wins.
 ## Stack (fixed)
 - Next.js 14, App Router, TypeScript
 - Tailwind CSS v3 (`tailwind.config.ts` in this repo holds every brand token)
-- Supabase: auth (email OTP), Postgres, storage, RPCs. Already live; the frontend is the job.
+- Data: an in-memory demo (`lib/mock/`), shaped like the Supabase schema. This is a portfolio build;
+  there's no backend on `master`. Deployed on Vercel.
 - Path alias `@/*` → project root.
 
 ## Design system rules (non-negotiable)
@@ -28,8 +29,8 @@ file and the prototype disagree, this file wins.
 - **Light only.** The palette is fixed; don't add dark-mode variants.
 - Always respect `prefers-reduced-motion` (globals.css already zeroes animations).
 
-## Components (build these first, in `components/ui/`, then reuse; never rebuild one inline)
-Already scaffolded: `Button`, `TagChip` / `ToggleChip`, `Avatar`, `Card`. Still to build, matching the prototype:
+## Components (in `components/ui/`; reuse them, never rebuild one inline)
+All built. `/kitchen-sink` shows every one in all its variants; add new pieces there too. The signature ones:
 - **Sheet** (bottom sheet): drag handle, spring open (`ease-spring`), drag-to-dismiss past ~110px or a fast flick,
   backdrop `bg-ink/40`, Escape closes, focus trapped inside. Radius `rounded-t-lg`.
 - **FormField**: tiny uppercase label + optional "optional" marker, input with `shadow-sh2`, `focus:shadow-focus`, hint below.
@@ -56,23 +57,21 @@ Already scaffolded: `Button`, `TagChip` / `ToggleChip`, `Avatar`, `Card`. Still 
   Optional; skip if it fights the App Router.
 
 ## Screens (routes)
-`/` intro + sign-in · `/profile-setup` · `/feed` · `/explore` · `/you` · `/group-settings/[groupId]` ·
-`/new-group` · `/profile/edit` · `/manage-tags/[groupId]` · `/invite/[slug]` (public, works signed out).
-The prototype skips sign-in on purpose; the real app keeps the email OTP flow from the brief.
+`/` intro · `/feed` · `/explore` · `/you` · `/group-settings/[groupId]` · `/new-group` · `/profile/edit` ·
+`/manage-tags/[groupId]` · `/invite/[slug]` · `/kitchen-sink` (component reference).
+There are no accounts: "Get started" signs in as Ben (`lib/auth.tsx`), Sign out returns to the intro.
 
 ## Data
-- Components import data only from `@/lib/data`. `NEXT_PUBLIC_DATA_SOURCE` picks the implementation:
-  `mock` (default: in-memory demo + live simulation, `lib/mock/`) or `supabase` (`lib/supabase/`).
-  Both export the same functions; `lib/data/api.ts` type-checks that. Add a function to both or neither.
-- Schema changes go in a new migration in `CHECK-IN APP/supabase/migrations/` (shared with the Expo app).
-  Open gaps and the go-live checklist: `docs/supabase-gaps.md`.
-- Supabase client: `flowType: 'implicit'`, `autoRefreshToken: true`, `persistSession: true`.
-- Use the RPCs listed in the brief instead of raw queries where one exists.
-- **Never hard-delete.** Always set `deleted_at`. One exception: `delete_my_account` really deletes the
-  person's data (App Store requirement, decided Oct 2026).
-- Realtime: subscribe to `check_ins` for the active group; new rows drive the same arrival animation the
-  prototype fakes with its live simulation.
+- Components import data only from `@/lib/data`, which re-exports the async functions in `lib/mock/api.ts`.
+  New features add their functions there. Keep them async and returning view models, so a backend can
+  replace the bodies later without touching components.
+- The demo re-seeds on every page load (`lib/mock/seed.ts`); nothing persists. The live simulation
+  (`lib/mock/simulation.ts`) fakes crew arrivals and hearts; `NEXT_PUBLIC_SIMULATE_LIVE=false` turns it off.
+- **Never hard-delete** in the data model: set `deleted_at` (hearts included). Account deletion is the one
+  planned exception (App Store requirement).
 - No PII in logs or analytics.
+- **Backend reference:** branch `supabase` has a full Supabase data layer, email OTP sign-in, migration 018
+  and the schema decisions (`docs/supabase-gaps.md` there). It's a reference for later: don't merge it back.
 
 ## Brand voice
 - "Your crew", never followers or friends.

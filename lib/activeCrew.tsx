@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useAuth } from '@/lib/auth'
-import { DATA_SOURCE, getMyGroups, useQuery, type GroupSummary } from '@/lib/data'
+import { getMyGroups, useQuery, type GroupSummary } from '@/lib/data'
 import { SIMULATE_LIVE, useLiveSimulation } from '@/lib/mock/simulation'
 
 const STORAGE_KEY = 'checkin.activeCrew'
@@ -46,8 +46,8 @@ export function ActiveCrewProvider({ children }: { children: ReactNode }) {
   const list = groups.data
   const activeId = list ? (list.find((g) => g.id === stored)?.id ?? list[0]?.id ?? null) : null
 
-  // Fake crew activity: mock data only (dev, or NEXT_PUBLIC_SIMULATE_LIVE=true). Mostly lands in the crew on screen.
-  useLiveSimulation(activeId, SIMULATE_LIVE && DATA_SOURCE === 'mock' && signedIn)
+  // Fake crew activity while you're in the app. Mostly lands in the crew on screen.
+  useLiveSimulation(activeId, SIMULATE_LIVE && signedIn)
 
   return (
     <Ctx.Provider value={{ activeId, setActiveId, groups: list, loading: groups.loading && !list }}>{children}</Ctx.Provider>

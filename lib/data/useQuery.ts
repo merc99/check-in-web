@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, type DependencyList } from 'react'
-import { subscribe } from './api'
+import { subscribe } from '@/lib/mock/api'
 import type { TableName } from './types'
 
 export interface QueryState<T> {

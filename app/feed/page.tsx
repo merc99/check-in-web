@@ -80,7 +80,7 @@ export default function FeedPage() {
     }, ARRIVAL_MS)
   }, [])
 
-  // Live arrivals and hearts. Supabase realtime will drive these in Phase 6.
+  // Live arrivals and hearts (from the live simulation; realtime events with a real backend).
   useEffect(() => {
     if (!activeId) return
     const scrollTop = () => window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })

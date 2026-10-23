@@ -11,11 +11,8 @@ import { ME_ID, NOTES } from './seed'
 // hasn't checked in today does, and someone hearts your check-in shortly after you post.
 // It only writes rows; screens react through the same realtime events Supabase will send.
 
-/** On by default in development. Set NEXT_PUBLIC_SIMULATE_LIVE=true to keep it in a production build. */
-export const SIMULATE_LIVE =
-  process.env.NEXT_PUBLIC_SIMULATE_LIVE !== undefined
-    ? process.env.NEXT_PUBLIC_SIMULATE_LIVE === 'true'
-    : process.env.NODE_ENV !== 'production'
+/** On by default (the demo should feel alive). Set NEXT_PUBLIC_SIMULATE_LIVE=false to turn it off. */
+export const SIMULATE_LIVE = process.env.NEXT_PUBLIC_SIMULATE_LIVE !== 'false'
 
 const pick = <T,>(a: readonly T[]) => a[Math.floor(Math.random() * a.length)]
 const today = () => localDate(new Date())

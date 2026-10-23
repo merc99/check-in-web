@@ -31,7 +31,7 @@ import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
 
 // Mock implementation of the data API. Every function is async and returns view
-// models, so Phase 6 can swap these bodies for Supabase queries/RPCs without
+// models, so a real backend can replace these bodies (see the `supabase` branch) without
 // touching a component. Errors mirror the RPCs' `raise exception` messages.
 
 const LATENCY_MS = 0

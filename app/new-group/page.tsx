@@ -130,7 +130,7 @@ export default function NewGroupPage() {
         ) : (
           <>
             <div className="h-3" />
-            {/* "Any code works" is the mock's demo fallback; drop that sentence with the Supabase swap. */}
+            {/* "Any code works" is the demo's fallback (joinGroupBySlug); drop that sentence with a real backend. */}
             <FormField label="Invite code" hint="Six characters, from whoever invited you. Any code works in this prototype.">
               <Input
                 value={code}

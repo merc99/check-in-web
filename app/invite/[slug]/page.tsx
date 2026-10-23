@@ -101,7 +101,7 @@ export default function InvitePage({ params }: { params: { slug: string } }) {
                   router.push('/')
                 }}
               >
-                Sign in to join
+                Get started to join
               </Button>
             ) : p.status === 'member' ? (
               <Button variant="primary" block onClick={() => open(p.id)}>
