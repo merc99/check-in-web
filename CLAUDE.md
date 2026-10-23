@@ -91,7 +91,11 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Chrome** (buttons, sheets, tabs, toasts, lists, page transitions): 150–200ms, `ease-out` on enter, `ease-in` on
   exit, transform and opacity only. Entrances `animate-rise`. Press `active:scale-[.97]`.
 - **Delight moments** (springs allowed, `ease-spring`): check-in stamp, joy takeover, avatar check-badge pop, heart
-  burst, chip selection, number tickers. The list is closed.
+  burst, chip selection, number tickers, and emoji reactions (picker rise, the flying landing and squash, the rolling
+  count, each emoji's own arrival). The list is closed.
+- **Pointer effects** (premium kit, `premium-ui-kit/`): the foil achievement tilt (`Foil`), the invite ticket's light
+  band (`LightBand`) and the featured crews ring (`RingCarousel`) move only under a pointer, a tap, a drag or a copy.
+  Nothing idles or loops. Check `/kitchen-sink/effects` after changing them.
 - Motion answers what people do. The only motion nobody triggered is live crew activity (arrivals, hearts).
 - transitions.dev recipes are the default source for chrome motion; keep our durations and easing when adopting them.
 - Always respect `prefers-reduced-motion` (globals.css zeroes animations; Arc components ship reduced-motion behavior).
@@ -103,8 +107,11 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **CrewHero** (signature): `rounded-xl` card, single-hue gradient (`{hue}-soft` → transparent) over `bg-card`,
   big `font-display` "n/total" number ticker, "in today", brand-voice line, avatar row (faded + dashed ring until checked
   in, then a mint check badge pops on), segmented progress bar in the crew hue.
-- **PostCard:** L1 card; avatar, name + relative time (plain text), note, interactive `TagChip`s, heart (ghost, fills
-  rose when active) + mini stack of who hearted; own card gets a mint "Just in" badge for an hour; double-tap = heart burst.
+- **PostCard:** L1 card; avatar, name + relative time (plain text), note, interactive `TagChip`s, `Reactions` (emoji
+  chips from `lib/reactions.ts`, ❤️ first; yours are mint; the smiley opens the picker); own card gets a mint
+  "Just in" badge for an hour; double-tap = heart burst and adds your ❤️.
+- **AchievementCard:** unlocked ones are foil: filled with the achievement's hue, `text-on-color`, a dark enamel medal,
+  white sheen that tilts toward the pointer. Locked ones stay dashed.
 - **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
   `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy), **JoyTakeover** (primary

@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { CrewCard } from '@/components/explore/CrewCard'
 import { CrewDetailSheet } from '@/components/explore/CrewDetailSheet'
+import { FeaturedCrews } from '@/components/explore/FeaturedCrews'
 import { Button } from '@/components/checkin/Button'
-import { PageHead } from '@/components/checkin/SectionTitle'
+import { PageHead, SectionTitle } from '@/components/checkin/SectionTitle'
 import { SearchInput } from '@/components/checkin/SearchInput'
 import { useToast } from '@/components/checkin/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
@@ -36,6 +37,15 @@ export default function ExplorePage() {
         placeholder="Search crews"
         aria-label="Search crews"
       />
+
+      {/* Under the search, so typing removes it without moving the field. While you search, the list is the answer. */}
+      {!q && crews.data && (
+        <>
+          <SectionTitle title="Going strong" />
+          <FeaturedCrews crews={crews.data} onOpen={setOpenId} />
+          <SectionTitle title="All crews" />
+        </>
+      )}
 
       <div className="mt-5 flex flex-col gap-[14px]">
         {crews.data?.map((c) => <CrewCard key={c.id} crew={c} onOpen={() => setOpenId(c.id)} />)}

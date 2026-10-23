@@ -4,13 +4,13 @@ import { HUE_CLASS } from '@/lib/colors'
 import type { Achievement } from '@/lib/data'
 
 /**
- * Medal card for the achievements shelf. Unlocked ones get a light sweep on hover;
- * locked ones are dashed and hide their glyph. `finish="foil"` (preview) fills the card with the
- * achievement's color, flips the medal to a dark enamel disc, and adds a white foil sheen that
- * tilts toward the pointer.
+ * Medal card for the achievements shelf. Unlocked ones are foil: filled with the achievement's
+ * color, a dark enamel medal, and a white sheen that tilts toward the pointer (a tap sweeps it on
+ * touch). Locked ones are dashed and hide their glyph. `finish="sweep"` is the older plain card
+ * with a light sweep on hover, kept for the effects preview.
  */
 export function AchievementCard({
-  achievement: a, tilt, finish = 'sweep',
+  achievement: a, tilt, finish = 'foil',
 }: { achievement: Achievement; tilt: 'left' | 'right'; finish?: 'sweep' | 'foil' }) {
   const foil = finish === 'foil' && a.unlocked
   const card = (

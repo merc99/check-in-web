@@ -18,6 +18,7 @@ import { CheckIcon, PinIcon } from '@/components/checkin/icons'
 import { JoyTakeover } from '@/components/checkin/JoyTakeover'
 import { useLive } from '@/components/checkin/LivePill'
 import { PostCard } from '@/components/checkin/PostCard'
+import { Reactions } from '@/components/checkin/Reactions'
 import { useToast } from '@/components/checkin/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
 import {
@@ -31,12 +32,13 @@ import {
   getMyStats,
   onCheckIn,
   onHeart,
-  toggleHeart,
+  react,
   useQuery,
   type FeedItem,
 } from '@/lib/data'
 import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
+import { HEART } from '@/lib/reactions'
 import { useDesktop } from '@/lib/viewport'
 
 const ARRIVAL_MS = 900
@@ -112,7 +114,9 @@ export default function FeedPage() {
         })
       }
     })
-    const offHearts = onHeart(({ person }) => live({ user: person, message: <><b>{person.name}</b> sent you a heart</> }))
+    const offHearts = onHeart(({ person, emoji }) =>
+      live({ user: person, message: emoji === HEART ? <><b>{person.name}</b> sent you a heart</> : <><b>{person.name}</b> reacted {emoji}</> }),
+    )
     return () => {
       offArrivals()
       offHearts()
@@ -259,7 +263,8 @@ export default function FeedPage() {
                 <PostCard
                   item={item}
                   entering={entering.has(item.id)}
-                  onHeart={() => toggleHeart(item.id)}
+                  onHeart={(on) => react(item.id, HEART, on)}
+                  reactions={<Reactions chips={item.reactions} onReact={(emoji, on) => react(item.id, emoji, on)} />}
                   onPersonTap={setProfileId}
                 />
               </div>

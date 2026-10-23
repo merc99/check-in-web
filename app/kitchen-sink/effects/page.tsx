@@ -1,17 +1,15 @@
 'use client'
 
-// Preview of the premium UI kit effects (premium-ui-kit/), adapted to Check-in. Nothing here is
-// used by a real screen yet: each one goes in only after Ben approves its preview.
+// The premium UI kit effects (premium-ui-kit/), adapted to Check-in, side by side. All four are live
+// (You, feed, invite tickets, Explore); this page is the reference to check after changing them.
 import { useState, type ReactNode } from 'react'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
-import { Avatar } from '@/components/checkin/Avatar'
-import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { PostCard } from '@/components/checkin/PostCard'
 import { Reactions, type ReactionChip } from '@/components/checkin/Reactions'
-import { RingCarousel } from '@/components/checkin/RingCarousel'
 import { PageHead, SectionTitle } from '@/components/checkin/SectionTitle'
 import { CodeTiles, Ticket } from '@/components/checkin/Ticket'
 import { useToast } from '@/components/checkin/Toast'
+import { FeaturedCrews } from '@/components/explore/FeaturedCrews'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { getAchievements, getExploreGroups, getFeed, getGroup, useQuery, type FeedItem } from '@/lib/data'
 
@@ -77,7 +75,7 @@ export default function EffectsPreview() {
     <main className="px-5 pb-[150px]">
       <PageHead
         title="Effects preview"
-        lead="Four effects from the premium UI kit, rebuilt in Check-in’s style. Nothing here is on a real screen yet."
+        lead="Four effects from the premium UI kit, rebuilt in Check-in’s style. All four are live: You, the feed, invite tickets and Explore."
       />
 
       {/* 1. Foil */}
@@ -86,10 +84,10 @@ export default function EffectsPreview() {
         note="You tab"
         how="Filled with the achievement’s color, with an enamel badge. With a mouse, the card tilts toward the pointer and a foil sheen follows it. On a phone, a tap plays one sweep. It never moves on its own."
       >
-        <Label>Now</Label>
+        <Label>Before</Label>
         <div className="flex gap-3 pb-2">
           {unlocked.map((a, i) => (
-            <AchievementCard key={a.key} achievement={a} tilt={i % 2 ? 'right' : 'left'} />
+            <AchievementCard key={a.key} achievement={a} tilt={i % 2 ? 'right' : 'left'} finish="sweep" />
           ))}
         </div>
         <Label>Foil</Label>
@@ -151,31 +149,7 @@ export default function EffectsPreview() {
         note="Explore, top"
         how="Drag or flick it round, use the arrow keys, or tap a side card to bring it forward. A card gives a little under the pointer. Tap the front one to open the crew."
       >
-        {crews.data && crews.data.length > 2 && (
-          <RingCarousel
-            label="Featured crews"
-            items={crews.data.slice(0, 6).map((c) => ({
-              key: c.id,
-              label: c.name,
-              content: (
-                <div className="flex h-full flex-col p-5">
-                  <CrewBlock name={c.name} color={c.color} size="lg" />
-                  <p className="mt-4 font-display text-[22px] leading-[1.05] tracking-tighter">{c.name}</p>
-                  {c.description && <p className="mt-2 line-clamp-3 text-[13.5px] text-muted-foreground">{c.description}</p>}
-                  <div className="mt-auto flex items-center justify-between gap-2">
-                    <span className="flex">
-                      {c.preview.slice(0, 4).map((p, i) => (
-                        <Avatar key={p.id} name={p.name} color={p.color} photoUrl={p.photoUrl} size="xs" className={i ? 'ml-[-6px]' : undefined} />
-                      ))}
-                    </span>
-                    <span className="tnum text-[12.5px] font-bold">{c.streak}-day streak</span>
-                  </div>
-                </div>
-              ),
-            }))}
-            onTap={(i) => toast(`Would open ${crews.data?.[i]?.name}`)}
-          />
-        )}
+        {crews.data && <FeaturedCrews crews={crews.data} onOpen={(id) => toast(`Would open ${crews.data?.find((c) => c.id === id)?.name}`)} />}
       </Section>
     </main>
   )

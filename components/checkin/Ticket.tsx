@@ -5,8 +5,8 @@ import { HUE_CLASS, type Hue } from '@/lib/colors'
 
 /**
  * Invite ticket in the crew color: a main section, a perforated divider with
- * half-circle notches cut into both edges, and a stub below. Pass `shine` (preview) to add a
- * light band that sweeps on hover and each time the number goes up (the code was copied).
+ * half-circle notches cut into both edges, and a stub below. Pass `shine` to add a light band that
+ * sweeps when a mouse comes over it and each time the number goes up (the code was copied).
  */
 export function Ticket({
   color, top, bottom, className, shine,

@@ -19,7 +19,7 @@ export interface PostCardProps {
   entering?: boolean
   onHeart: (on: boolean) => void
   onPersonTap?: (id: string) => void
-  /** Emoji reactions (preview). They include the heart, so they replace the heart pill. */
+  /** Emoji reactions. They include the heart, so they replace the heart pill. */
   reactions?: ReactNode
 }
 
@@ -104,7 +104,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
           </div>
         )}
         {reactions ? (
-          // Reactions (preview) include the heart as their first emoji, so they replace the heart pill
+          // Reactions include the heart as their first emoji, so they replace the heart pill
           // and the who-hearted stack. Double-tap still hearts, through onHeart.
           <div className="mt-3">{reactions}</div>
         ) : (

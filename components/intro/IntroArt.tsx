@@ -2,6 +2,7 @@ import { Avatar } from '@/components/checkin/Avatar'
 import { Card } from '@/components/checkin/Card'
 import { HeatmapGrid, type HeatDay } from '@/components/checkin/HeatmapGrid'
 import { PostCard } from '@/components/checkin/PostCard'
+import { Reactions } from '@/components/checkin/Reactions'
 import type { Hue } from '@/lib/colors'
 import type { FeedItem } from '@/lib/data'
 
@@ -57,6 +58,10 @@ const SAMPLE: FeedItem = {
   createdAt: new Date().toISOString(),
   localDate: '',
   hearts: { count: 3, byMe: true, people: [] },
+  reactions: [
+    { emoji: '❤️', count: 3, mine: true },
+    { emoji: '💪', count: 2, mine: false },
+  ],
 }
 
 /** Slide 2: a check-in card on a tilted backing card. */
@@ -65,7 +70,7 @@ export function CheckInArt() {
     <div className="relative w-[min(300px,100%)]" aria-hidden="true">
       <div className="absolute right-[-6px] bottom-[-14px] left-[14px] top-[18px] rotate-[4deg] rounded-lg border border-border bg-muted shadow-card" />
       <div className="pointer-events-none relative">
-        <PostCard item={SAMPLE} onHeart={() => {}} />
+        <PostCard item={SAMPLE} onHeart={() => {}} reactions={<Reactions chips={SAMPLE.reactions} onReact={() => {}} />} />
       </div>
     </div>
   )

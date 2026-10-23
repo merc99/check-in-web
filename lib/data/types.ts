@@ -73,8 +73,10 @@ export interface Reaction {
   id: UUID
   check_in_id: UUID
   user_id: UUID
+  /** One of lib/reactions.ts. A person can leave several different emoji on one check-in. */
+  emoji: string
   created_at: Timestamp
-  /** Unhearting sets this; hearting again clears it. */
+  /** Taking a reaction back sets this; reacting again clears it. */
   deleted_at: Timestamp | null
 }
 
@@ -158,12 +160,22 @@ export interface FeedItem {
   tags: { id: UUID; name: string }[]
   createdAt: Timestamp
   localDate: LocalDate
+  /** The ❤️ reactions only (double-tap checks byMe). */
   hearts: {
     count: number
     byMe: boolean
     /** Up to three other people who hearted, most recent first. */
     people: Person[]
   }
+  /** Every emoji on this check-in, in the order each was first left. */
+  reactions: ReactionCount[]
+}
+
+export interface ReactionCount {
+  emoji: string
+  count: number
+  /** You're one of the people who left it. */
+  mine: boolean
 }
 
 export interface JoinRequestItem {

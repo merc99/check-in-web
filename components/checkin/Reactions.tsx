@@ -26,27 +26,27 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from 'react'
+import type { ReactionCount } from '@/lib/data'
 import { prefersReducedMotion } from '@/lib/motion'
+import { REACTIONS } from '@/lib/reactions'
 import { cn } from '@/lib/utils'
 import styles from './Reactions.module.css'
 
-/** The crew set. `k` names the emoji's arrival animation in Reactions.module.css. */
-export const REACTION_SET = [
-  { e: '❤️', label: 'Heart', k: 'heart' },
-  { e: '💪', label: 'Strong', k: 'flex' },
-  { e: '🔥', label: 'On fire', k: 'flicker' },
-  { e: '👏', label: 'Clap', k: 'beat' },
-  { e: '🙌', label: 'Hands up', k: 'raise' },
-  { e: '🫡', label: 'Respect', k: 'nod' },
-  { e: '😮‍💨', label: 'Tough one', k: 'droop' },
-] as const
-
-export interface ReactionChip {
-  emoji: string
-  count: number
-  /** You're one of the people who left it. */
-  mine: boolean
+/** Each emoji's arrival animation (Reactions.module.css). The set itself lives in lib/reactions.ts. */
+const KIND: Record<string, string> = {
+  '❤️': 'heart',
+  '💪': 'flex',
+  '🔥': 'flicker',
+  '👏': 'beat',
+  '🙌': 'raise',
+  '🙏': 'nod',
+  '😅': 'droop',
 }
+
+/** The picker: emoji, label and arrival, in order. */
+export const REACTION_SET = REACTIONS.map((r) => ({ e: r.emoji, label: r.label, k: KIND[r.emoji] ?? 'nod' }))
+
+export type ReactionChip = ReactionCount
 
 export interface ReactionsProps {
   chips: ReactionChip[]
@@ -107,6 +107,8 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
   const mounted = useRef(false)
   const hold = useRef({ timer: 0, sliding: false, touch: false })
   const keyboardOpen = useRef(false)
+  /** Counts openings, so a close that lands after a reopen leaves the new pill alone. */
+  const opens = useRef(0)
 
   /** A point on the page, in the block's own pixels. */
   const local = (r: DOMRect) => {
@@ -167,7 +169,12 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
       { duration: 600, easing: 'cubic-bezier(0.35, 0, 0.3, 1)', fill: 'forwards' },
     )
     const e = landing.e
-    anim.onfinish = () => {
+    // Land once: when the flight ends, or after a beat if it never does (a hidden tab pauses
+    // animations, and the chip must not sit on the old count until someone comes back).
+    let landed = false
+    const land = () => {
+      if (landed) return
+      landed = true
       fly.remove()
       setFlying(null)
       const chip = row.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(e)}"]`)
@@ -177,10 +184,13 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
       )
       play(chipEmoji(e)?.firstElementChild)
     }
+    anim.onfinish = land
+    window.setTimeout(land, 900)
   }, [chips, landing])
 
   // ── the pill ──
   const show = (viaKeyboard = false) => {
+    opens.current++
     keyboardOpen.current = viaKeyboard
     setOpen(true)
   }
@@ -188,7 +198,12 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
     setOn(-1)
     const p = pill.current
     if (!p || prefersReducedMotion()) return setOpen(false)
-    p.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150 }).onfinish = () => setOpen(false)
+    const opening = opens.current
+    const close = () => {
+      if (opens.current === opening) setOpen(false) // not if it was reopened meanwhile
+    }
+    p.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' }).onfinish = close
+    window.setTimeout(close, 250) // in case the fade never finishes (hidden tab)
   }
 
   // Opening: the pill grows out of the button and the emoji rise in, one after another.

@@ -28,6 +28,7 @@ export {
   leaveGroup,
   onCheckIn,
   onHeart,
+  react,
   removeMember,
   requestToJoin,
   subscribe,

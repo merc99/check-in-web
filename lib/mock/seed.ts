@@ -1,6 +1,9 @@
 import { getTagHue, type Hue } from '@/lib/colors'
 import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag } from '@/lib/data/types'
 import { addDays, DAY, HOUR, localDate, MINUTE, startOfDay } from '@/lib/dates'
+import { HEART } from '@/lib/reactions'
+
+const SEED_EMOJI = ['💪', '🔥', '👏', '🙌', '🙏', '😅']
 
 // Seeded like the prototype: the 5am Lifters and Sketchbook Daily crews you're in,
 // five public crews to explore, and months of history behind everyone's streaks.
@@ -103,6 +106,8 @@ function mulberry32(seed: number) {
 
 export function createSeed(now: Date = new Date()): Tables {
   const rand = mulberry32(42)
+  // A separate stream for reaction emoji, so adding them didn't reshuffle the rest of the demo.
+  const emojiRand = mulberry32(7)
   const pick = <T,>(a: readonly T[]) => a[Math.floor(rand() * a.length)]
   const today = startOfDay(now)
   const iso = (d: Date) => d.toISOString()
@@ -187,11 +192,13 @@ export function createSeed(now: Date = new Date()): Tables {
       const t = tagId(groupId, name)
       if (t) check_in_tags.push({ check_in_id: id, tag_id: t })
     }
+    // Mostly hearts, with some of the crew set mixed in (a person leaves one emoji here).
     hearts.forEach((uid, i) =>
       reactions.push({
         id: `r-${id}-${uid}`,
         check_in_id: id,
         user_id: uid,
+        emoji: emojiRand() < 0.55 ? HEART : SEED_EMOJI[Math.floor(emojiRand() * SEED_EMOJI.length)],
         created_at: iso(new Date(at.getTime() + (i + 1) * 7 * MINUTE)),
         deleted_at: null,
       }),

@@ -22,11 +22,14 @@ import type {
   Profile,
   ProfilePatch,
   PublicProfile,
+  Reaction,
+  ReactionCount,
   RecentCheckIn,
   Tag,
   UUID,
 } from '@/lib/data/types'
 import { bestStreak, currentStreak, localDate, type LocalDate } from '@/lib/dates'
+import { HEART, REACTIONS } from '@/lib/reactions'
 import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
 
@@ -117,9 +120,17 @@ function summary(g: Group): GroupSummary {
 }
 
 function toFeedItem(c: CheckIn): FeedItem {
-  const reactions = alive(db().reactions)
-    .filter((r) => r.check_in_id === c.id)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+  const all = alive(db().reactions).filter((r) => r.check_in_id === c.id)
+  const reactions = all.filter((r) => r.emoji === HEART).sort((a, b) => b.created_at.localeCompare(a.created_at))
+  // One chip per emoji, in the order each was first left.
+  const chips: ReactionCount[] = []
+  for (const r of [...all].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
+    const chip = chips.find((x) => x.emoji === r.emoji)
+    if (chip) {
+      chip.count++
+      chip.mine ||= r.user_id === ME_ID
+    } else chips.push({ emoji: r.emoji, count: 1, mine: r.user_id === ME_ID })
+  }
   return {
     id: c.id,
     groupId: c.group_id,
@@ -134,6 +145,7 @@ function toFeedItem(c: CheckIn): FeedItem {
       byMe: reactions.some((r) => r.user_id === ME_ID),
       people: reactions.filter((r) => r.user_id !== ME_ID).slice(0, 3).map((r) => personOf(r.user_id)),
     },
+    reactions: chips,
   }
 }
 
@@ -206,15 +218,15 @@ export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => vo
   })
 }
 
-/** Someone else hearted one of your check-ins. */
-export function onHeart(listener: (heart: { checkInId: UUID; groupId: UUID; person: Person }) => void): () => void {
+/** Someone else reacted to one of your check-ins (a heart or any other emoji). */
+export function onHeart(listener: (reaction: { checkInId: UUID; groupId: UUID; person: Person; emoji: string }) => void): () => void {
   return onChange((c) => {
     if (c.table !== 'reactions' || c.type === 'DELETE') return
-    const row = c.row as { check_in_id: UUID; user_id: UUID; deleted_at: string | null }
+    const row = c.row as Reaction
     if (row.deleted_at) return
     const target = db().check_ins.find((x) => x.id === row.check_in_id)
     if (!target || target.user_id !== ME_ID || row.user_id === ME_ID) return
-    listener({ checkInId: target.id, groupId: target.group_id, person: personOf(row.user_id) })
+    listener({ checkInId: target.id, groupId: target.group_id, person: personOf(row.user_id), emoji: row.emoji })
   })
 }
 
@@ -532,14 +544,15 @@ export async function checkIn(input: CheckInInput): Promise<FeedItem> {
   return insertCheckIn(ME_ID, input)
 }
 
-/** Also used by the live simulation. Returns whether `userId` now hearts it. */
-export function setHeart(userId: UUID, checkInId: UUID, on: boolean): boolean {
+/** Also used by the live simulation. Returns whether `userId` now has `emoji` on it. */
+export function setReaction(userId: UUID, checkInId: UUID, emoji: string, on: boolean): boolean {
   const c = alive(db().check_ins).find((x) => x.id === checkInId)
   if (!c || !isMember(userId, c.group_id)) throw new Error('not authorized')
-  // set_heart RPC: one row per person per check-in, soft-deleted when unhearted.
-  const row = db().reactions.find((r) => r.check_in_id === checkInId && r.user_id === userId)
+  if (!REACTIONS.some((r) => r.emoji === emoji)) throw new Error('unknown reaction')
+  // set_reaction RPC: one row per person per check-in per emoji, soft-deleted when taken back.
+  const row = db().reactions.find((r) => r.check_in_id === checkInId && r.user_id === userId && r.emoji === emoji)
   if (on && !row) {
-    const fresh = { id: newId(), check_in_id: checkInId, user_id: userId, created_at: nowIso(), deleted_at: null }
+    const fresh = { id: newId(), check_in_id: checkInId, user_id: userId, emoji, created_at: nowIso(), deleted_at: null }
     db().reactions.push(fresh)
     emit({ table: 'reactions', type: 'INSERT', row: fresh })
   } else if (row && on === !!row.deleted_at) {
@@ -550,10 +563,20 @@ export function setHeart(userId: UUID, checkInId: UUID, on: boolean): boolean {
   return on
 }
 
+export function setHeart(userId: UUID, checkInId: UUID, on: boolean): boolean {
+  return setReaction(userId, checkInId, HEART, on)
+}
+
 export async function toggleHeart(checkInId: UUID): Promise<boolean> {
   await settle()
-  const on = !alive(db().reactions).some((r) => r.check_in_id === checkInId && r.user_id === ME_ID)
+  const on = !alive(db().reactions).some((r) => r.check_in_id === checkInId && r.user_id === ME_ID && r.emoji === HEART)
   return setHeart(ME_ID, checkInId, on)
+}
+
+/** Add (`on`) or take back your `emoji` on a check-in. */
+export async function react(checkInId: UUID, emoji: string, on: boolean): Promise<boolean> {
+  await settle()
+  return setReaction(ME_ID, checkInId, emoji, on)
 }
 
 // ─── Join requests ───

@@ -3,7 +3,8 @@
 import { useEffect, useRef } from 'react'
 import type { CheckIn } from '@/lib/data/types'
 import { localDate } from '@/lib/dates'
-import { insertCheckIn, setHeart } from './api'
+import { HEART } from '@/lib/reactions'
+import { insertCheckIn, setReaction } from './api'
 import { db, onChange } from './db'
 import { ME_ID, NOTES } from './seed'
 
@@ -38,7 +39,7 @@ export function simulateArrival(activeGroupId?: string | null): boolean {
   return true
 }
 
-/** Someone else in the crew hearts this check-in. */
+/** Someone else in the crew reacts to this check-in: usually a heart, sometimes another of the set. */
 export function simulateHeart(checkInId: string): boolean {
   const t = db()
   const c = t.check_ins.find((x) => x.id === checkInId)
@@ -48,7 +49,8 @@ export function simulateHeart(checkInId: string): boolean {
     .map((m) => m.user_id)
     .filter((uid) => !t.reactions.some((r) => r.check_in_id === checkInId && r.user_id === uid && !r.deleted_at))
   if (!fans.length) return false
-  setHeart(pick(fans), checkInId, true)
+  const emoji = Math.random() < 0.6 ? HEART : pick(['💪', '🔥', '👏', '🙌'])
+  setReaction(pick(fans), checkInId, emoji, true)
   return true
 }
 

@@ -124,6 +124,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
 
       <Ticket
         color={g.color}
+        shine={wave}
         className="mt-5"
         top={
           <div className="px-5 pb-[18px] pt-5">
