@@ -25,6 +25,12 @@ export function onChange(listener: Listener): () => void {
   }
 }
 
+/** Throw everything away and re-seed. Every table reports a change so screens refetch. */
+export function resetDb() {
+  tables = createSeed(new Date())
+  for (const table of Object.keys(tables) as (keyof Tables)[]) emit({ table, type: 'UPDATE', row: null })
+}
+
 export function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()

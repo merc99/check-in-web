@@ -23,3 +23,6 @@ The mock already behaves the way the prototype needs; each item is where the liv
 
 - An invite code that matches no crew joins the first open public crew (`joinGroupBySlug`), copied from the prototype so demo visitors get somewhere.
 - The live simulation (`lib/mock/simulation.ts`): replace it with a realtime subscription on `check_ins` and `reactions`.
+- `deleteAccount` resets the demo to its seeded state; the real one calls `delete_my_account` and signs out.
+- "Sign out" just goes to `/` until email OTP auth exists.
+- Profile photos are kept as data URLs on the profile; the real one uploads to Supabase storage (`avatars` bucket, migration 005).

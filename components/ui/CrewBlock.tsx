@@ -1,9 +1,10 @@
 import { cn } from '@/lib/cn'
 import { COLOR_CLASS, type BrandColor } from '@/lib/colors'
 
-type Size = 'sm' | 'md' | 'lg' | 'xl'
+type Size = 'sm' | 'list' | 'md' | 'lg' | 'xl'
 const SIZE: Record<Size, string> = {
   sm: 'size-8 rounded-[10px] text-sm', // tag manager rows
+  list: 'size-[38px] rounded-input text-base', // You tab crew list
   md: 'size-[42px] rounded-input text-[17px]', // crew switcher, You tab
   lg: 'size-[52px] rounded-card text-[22px]', // explore cards
   xl: 'size-16 rounded-card text-[28px]', // new crew preview

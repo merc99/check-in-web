@@ -27,7 +27,7 @@ import type {
   UUID,
 } from '@/lib/data/types'
 import { bestStreak, currentStreak, localDate, type LocalDate } from '@/lib/dates'
-import { db, emit, newId, nowIso, onChange } from './db'
+import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
 
 // Mock implementation of the data API. Every function is async and returns view
@@ -248,6 +248,15 @@ export async function updateProfile(patch: ProfilePatch): Promise<Me> {
   if (patch.avatar_url !== undefined) p.avatar_url = patch.avatar_url
   emit({ table: 'profiles', type: 'UPDATE', row: p })
   return { profile: { ...p }, person: toPerson(p) }
+}
+
+/**
+ * delete_my_account RPC. In the mock there's no "after", so it resets the demo
+ * to its seeded state instead (the live prototype starts over for the visitor).
+ */
+export async function deleteAccount(): Promise<void> {
+  await settle()
+  resetDb()
 }
 
 export async function getMyStats(): Promise<MyStats> {

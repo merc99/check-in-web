@@ -7,6 +7,7 @@ export {
   checkIn,
   createGroup,
   declineJoinRequest,
+  deleteAccount,
   deleteGroup,
   deleteTags,
   getAchievements,

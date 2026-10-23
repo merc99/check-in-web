@@ -32,6 +32,7 @@ const config: Config = {
       'sh3-pressed': '2px 2px 0 #1F1D1A',
       focus: '2px 3px 0 #1F1D1A, 0 0 0 4px #B8E5B5', // input focus: sh2 + mint ring
       you: '0 0 0 3px #B8E5B5, 0 0 0 4.5px #1F1D1A', // signed-in user's avatar ring
+      selected: '0 0 0 3px #FCEFD7, 0 0 0 4.5px #1F1D1A', // chosen color swatch: peach gap + ink ring
     },
     borderRadius: {
       none: '0',

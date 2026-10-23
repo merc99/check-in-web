@@ -9,6 +9,7 @@ import { FormField, Input, Textarea } from '@/components/ui/FormField'
 import { HeatmapGrid, weekDays } from '@/components/ui/HeatmapGrid'
 import { CheckIcon, PlusIcon, ShareIcon } from '@/components/ui/icons'
 import { useLive } from '@/components/ui/LivePill'
+import { SectionTitle } from '@/components/ui/SectionTitle'
 import { Segmented } from '@/components/ui/Segmented'
 import { Sheet } from '@/components/ui/Sheet'
 import { TabBar, type TabKey } from '@/components/ui/TabBar'
@@ -24,10 +25,7 @@ const NAMES = ['Maya', 'Dre', 'Priya', 'Sam', 'Theo']
 function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
     <section>
-      <div className="mb-[14px] mt-9 flex items-baseline justify-between">
-        <h2 className="font-display text-[19px] leading-none">{title}</h2>
-        {note && <small className="text-[13px] text-ink-mute">{note}</small>}
-      </div>
+      <SectionTitle title={title} note={note} />
       {children}
     </section>
   )
