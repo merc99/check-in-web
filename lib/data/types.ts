@@ -149,6 +149,10 @@ export interface GroupDetail extends GroupSummary {
   /** Me first, then by join date. */
   members: MemberRow[]
   tags: Tag[]
+  /** Consecutive days with at least one member check-in. */
+  streak: number
+  /** Members who checked in on each of the last 14 days, oldest first (today last). */
+  recent: number[]
 }
 
 export interface FeedItem {
@@ -276,4 +280,16 @@ export interface GroupPatch {
   color?: Hue
   pinned_message?: string | null
   is_public?: boolean
+}
+
+/** The You dashboard. */
+export interface MyInsights {
+  /** Your check-ins per week for the last 12 weeks, oldest first (this week last). */
+  weeks: number[]
+  /** All-time check-ins in each crew you're in, most first. */
+  byCrew: { id: UUID; name: string; color: Hue; count: number }[]
+  /** Everyone in your crews, by current streak (any crew), then all-time count. */
+  leaderboard: { person: Person; isMe: boolean; streak: number; total: number }[]
+  thisMonth: number
+  lastMonth: number
 }

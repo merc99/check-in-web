@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
+import { CrewDonut } from '@/components/you/CrewDonut'
+import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
 import { StatsGrid } from '@/components/you/StatsGrid'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
 import { Avatar } from '@/components/checkin/Avatar'
@@ -22,7 +24,7 @@ import { HoldButton } from '@/components/fx/HoldButton'
 import { useSound } from '@/components/fx/sound'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
-import { deleteAccount, getAchievements, getMe, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
+import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 
 export default function YouPage() {
@@ -35,6 +37,7 @@ export default function YouPage() {
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
+  const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
 
   const week = useMemo(() => {
     const days = new Set(stats.data?.days)
@@ -55,7 +58,8 @@ export default function YouPage() {
   const unlocked = achievements.data?.filter((a) => a.unlocked).length ?? 0
 
   return (
-    <main className="px-5 pb-[150px]">
+    // Desktop: the wide layout, a dashboard of glossy stat cards and two columns under them.
+    <main data-layout="wide" className="px-5 pb-[150px] lg:mx-auto lg:w-full lg:max-w-[1040px] lg:px-8 lg:pb-16">
       <section className="flex items-center gap-5 pb-2 pt-8">
         <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you className="rotate-[-4deg]" />
         <div className="min-w-0 flex-1">
@@ -68,7 +72,10 @@ export default function YouPage() {
         </div>
       </section>
 
-      <StatsGrid stats={stats.data} />
+      <StatsGrid stats={stats.data} insights={insights.data} />
+
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+      <div className="min-w-0">
 
       <SectionTitle title="This week" />
       <Card>
@@ -95,30 +102,6 @@ export default function YouPage() {
           </div>
         </>
       )}
-
-      <SectionTitle title="Your crews" />
-      <List>
-        {groups?.map((g) => (
-          <div key={g.id} className={listRow}>
-            <CrewBlock name={g.name} color={g.color} size="list" />
-            <span className="min-w-0 flex-1">
-              <b>{g.name}</b>
-              <br />
-              <span className="text-[12.5px] text-muted-foreground">
-                <span className="tnum">{g.inToday}</span> of <span className="tnum">{g.memberCount}</span> in today
-              </span>
-            </span>
-            <IconLink href={`/group-settings/${g.id}`} label={`${g.name} settings`} size="sm">
-              <GearIcon size={16} />
-            </IconLink>
-          </div>
-        ))}
-        <div className={listRow}>
-          <TextLink href="/new-group" className="py-1 pl-0">
-            <PlusIcon size={16} /> Start or join a crew
-          </TextLink>
-        </div>
-      </List>
 
       {recent.data && recent.data.length > 0 && (
         <>
@@ -149,6 +132,45 @@ export default function YouPage() {
         </>
       )}
 
+      </div>
+
+      <div className="min-w-0">
+        {insights.data && (
+          <>
+            <SectionTitle title="Crew streaks" />
+            <CrewLeaderboard rows={insights.data.leaderboard} />
+            <SectionTitle title="Where your check-ins go" />
+            <CrewDonut crews={insights.data.byCrew} />
+          </>
+        )}
+      <SectionTitle title="Your crews" />
+      <List>
+        {groups?.map((g) => (
+          <div key={g.id} className={listRow}>
+            <CrewBlock name={g.name} color={g.color} size="list" />
+            <span className="min-w-0 flex-1">
+              <b>{g.name}</b>
+              <br />
+              <span className="text-[12.5px] text-muted-foreground">
+                <span className="tnum">{g.inToday}</span> of <span className="tnum">{g.memberCount}</span> in today
+              </span>
+            </span>
+            <IconLink href={`/group-settings/${g.id}`} label={`${g.name} settings`} size="sm">
+              <GearIcon size={16} />
+            </IconLink>
+          </div>
+        ))}
+        <div className={listRow}>
+          <TextLink href="/new-group" className="py-1 pl-0">
+            <PlusIcon size={16} /> Start or join a crew
+          </TextLink>
+        </div>
+      </List>
+
+      </div>
+      </div>
+
+      <div className="lg:mx-auto lg:max-w-app">
       <SectionTitle title="Settings" />
       <Card className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
@@ -177,6 +199,7 @@ export default function YouPage() {
           detail="Your check-ins, crews and profile go away. Your crews keep going without you."
           onConfirm={deleteMe}
         />
+      </div>
       </div>
     </main>
   )

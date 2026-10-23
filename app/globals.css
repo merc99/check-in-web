@@ -207,6 +207,7 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-pixel: var(--font-pixelify), ui-monospace, monospace; /* the logo wordmark only */
   --tracking-tighter: -0.02em;
   --tracking-tightest: -0.035em;
   --container-app: 640px;         /* max-w-app */

@@ -24,11 +24,12 @@ import type {
   PublicProfile,
   Reaction,
   ReactionCount,
+  MyInsights,
   RecentCheckIn,
   Tag,
   UUID,
 } from '@/lib/data/types'
-import { bestStreak, currentStreak, localDate, type LocalDate } from '@/lib/dates'
+import { addDays, bestStreak, currentStreak, localDate, startOfDay, type LocalDate } from '@/lib/dates'
 import { HEART, REACTIONS } from '@/lib/reactions'
 import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
@@ -284,6 +285,37 @@ export async function getMyStats(): Promise<MyStats> {
   }
 }
 
+export async function getMyInsights(): Promise<MyInsights> {
+  await settle()
+  const mine = checkInsOf((c) => c.user_id === ME_ID)
+  const now = new Date()
+  // Weeks start on Monday, like the heatmap.
+  const monday = addDays(startOfDay(now), -((now.getDay() + 6) % 7))
+  const weeks = Array.from({ length: 12 }, (_, i) => {
+    const from = localDate(addDays(monday, (i - 11) * 7))
+    const to = localDate(addDays(monday, (i - 10) * 7))
+    return mine.filter((c) => c.local_date >= from && c.local_date < to).length
+  })
+  const crews = alive(db().group_members).filter((m) => m.user_id === ME_ID).map((m) => group(m.group_id))
+  const byCrew = crews
+    .map((g) => ({ id: g.id, name: g.name, color: g.color, count: mine.filter((c) => c.group_id === g.id).length }))
+    .sort((a, b) => b.count - a.count)
+  const people = new Set(crews.flatMap((g) => membersOf(g.id).map((m) => m.user_id)))
+  const leaderboard = Array.from(people)
+    .map((uid) => ({ person: personOf(uid), isMe: uid === ME_ID, streak: currentStreak(daysOf(uid)), total: checkInsOf((c) => c.user_id === uid).length }))
+    .sort((a, b) => b.streak - a.streak || b.total - a.total)
+  const month = (d: Date) => localDate(d).slice(0, 7)
+  const thisMonth = month(now)
+  const lastMonth = month(new Date(now.getFullYear(), now.getMonth() - 1, 15))
+  return {
+    weeks,
+    byCrew,
+    leaderboard,
+    thisMonth: mine.filter((c) => c.local_date.startsWith(thisMonth)).length,
+    lastMonth: mine.filter((c) => c.local_date.startsWith(lastMonth)).length,
+  }
+}
+
 export async function getMyRecentCheckIns(limit = 3): Promise<RecentCheckIn[]> {
   await settle()
   return checkInsOf((c) => c.user_id === ME_ID)
@@ -384,6 +416,11 @@ export async function getGroup(groupId: UUID): Promise<GroupDetail> {
     tags: alive(db().tags)
       .filter((t) => t.group_id === groupId)
       .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+    streak: groupStreak(groupId),
+    recent: Array.from({ length: 14 }, (_, i) => {
+      const day = localDate(addDays(new Date(), i - 13))
+      return new Set(checkInsOf((c) => c.group_id === groupId && c.local_date === day).map((c) => c.user_id)).size
+    }),
   }
 }
 

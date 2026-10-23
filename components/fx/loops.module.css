@@ -32,7 +32,18 @@
 }
 @keyframes turn { to { --fx-ang: 360deg; } }
 
+/* ── SheenOnce: the same sheen, one pass, for something that just arrived ── */
+.once {
+  position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+  background-image: linear-gradient(115deg, transparent 30%, rgb(255 140 225 / .5), rgb(140 225 255 / .5), rgb(255 240 140 / .5), transparent 70%);
+  background-size: 300% 100%;
+  animation: once 1.2s var(--ease-out) .15s;
+}
+:global(html:not(.dark)) .once { mix-blend-mode: soft-light; }
+@keyframes once { 0% { opacity: 1; background-position: 100% 0; } 85% { opacity: 1; } 100% { opacity: 0; background-position: 0% 0; } }
+
 @media (prefers-reduced-motion: reduce) {
+  .once { display: none; }
   .sheen { animation: none; background-position: 50% 50%; }
   .aurora::before { animation: none; }
 }

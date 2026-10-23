@@ -4,6 +4,8 @@
 // The reference to check after changing an effect or a --fx-* token. Real components, real demo data.
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
+import { BrandMark } from '@/components/checkin/BrandMark'
+import { Gloss, GlassInset, GlossPill, Sparkline } from '@/components/fx/Gloss'
 import { Button } from '@/components/checkin/Button'
 import { CrewHero } from '@/components/checkin/CrewHero'
 import { XIcon } from '@/components/checkin/icons'
@@ -84,6 +86,27 @@ export default function FxPreview() {
       </div>
 
       <div className="mx-auto max-w-[880px]">
+        <Fx name="Logo" tier="calm" where="BrandMark: the sidebar, the intro (lg, with the tagline), empty states. The gauge shimmers once on load and on hover.">
+          <div className="flex flex-wrap items-center justify-around gap-8">
+            <BrandMark size="lg" />
+            <BrandMark />
+          </div>
+        </Fx>
+
+        <Fx name="Glossy panels and sparklines" tier="calm" where="CrewHero, the You stat cards and the crew leaderboard. Static; the sparkline draws in once.">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {(['primary', 'clay', 'grape'] as const).map((h, i) => (
+              <Gloss key={h} hue={h} className="rounded-xl p-4">
+                <GlossPill>{['All time', 'Day streak', 'Best streak'][i]}</GlossPill>
+                <div className="mt-3 font-display text-[44px] leading-none tracking-tightest">{[41, 6, 14][i]}</div>
+                <GlassInset className="mt-3 px-3 py-2">
+                  <Sparkline values={[[3, 5, 4, 6, 5, 7, 6, 7], [1, 2, 3, 4, 5, 6, 7, 6], [5, 6, 9, 12, 14, 10, 8, 6]][i]} height={36} label="Example" />
+                </GlassInset>
+              </Gloss>
+            ))}
+          </div>
+        </Fx>
+
         <Fx name="Foil achievements" tier="calm" where="You → Achievements, and inside the milestone reveal. Tilts under a mouse; one sweep on a tap.">
           <div className="flex flex-wrap justify-center gap-3">
             {list.filter((a) => a.unlocked).slice(0, 4).map((a, i) => (
@@ -111,7 +134,7 @@ export default function FxPreview() {
 
         {g && (
           <Fx name="Aurora frame" tier="scoped" where="The crew hero, only while the whole crew is in today.">
-            <CrewHero color={g.color} members={g.members.map((m) => ({ ...m, inToday: true }))} arrivedId={null} />
+            <CrewHero color={g.color} members={g.members.map((m) => ({ ...m, inToday: true }))} arrivedId={null} streak={g.streak} recent={g.recent} />
           </Fx>
         )}
 

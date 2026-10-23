@@ -41,6 +41,7 @@ import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
 import { useDesktop } from '@/lib/viewport'
+import { cn } from '@/lib/utils'
 import { burstFrom } from '@/components/fx/burst'
 import { flyArc } from '@/components/fx/fly'
 import { RevealCard } from '@/components/fx/RevealCard'
@@ -100,6 +101,11 @@ export default function FeedPage() {
       const name = <b>{item.user.name}</b>
       if (item.groupId === activeId) {
         arrive(item)
+        // A small burst from their sticker in the hero: live crew activity, the one unprompted motion.
+        requestAnimationFrame(() => {
+          const sticker = document.querySelector(`[data-person="${item.user.id}"]`)
+          if (sticker) burstFrom(sticker, [`--${item.user.color}`, 'white', '--primary'], 22)
+        })
         live({ user: item.user, message: <>{name} just checked in</>, onTap: scrollTop })
       } else {
         const crew = groups?.find((g) => g.id === item.groupId)?.name ?? 'your crew'
@@ -214,16 +220,15 @@ export default function FeedPage() {
   }
 
   const items = feed.data ?? []
-  let lastDay = ''
 
-  const hero = <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} />
+  const hero = <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} streak={g.streak} recent={g.recent} />
 
   return (
     // Phones: one column (hero above the posts, FAB for check-in).
     // Desktop: the posts on the left, a sticky rail on the right with check-in, the crew's day and your week.
     <main
       data-layout="wide"
-      className="px-5 pb-[150px] lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 lg:px-8 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-10"
+      className="px-5 pb-[150px] lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 lg:px-8 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-10 2xl:grid-cols-[minmax(0,1fr)_360px]"
     >
       <div className="min-w-0">
       <FeedHeader group={g} onSwitch={() => setSwitcherOpen(true)} />
@@ -253,18 +258,19 @@ export default function FeedPage() {
           <p className="mt-2 text-muted-foreground">Be the first one in today.</p>
         </div>
       ) : (
-        items.map((item) => {
-          const label = dayLabel(item.localDate)
-          const divider = label !== lastDay
-          lastDay = label
-          return (
-            <Fragment key={item.id}>
-              {divider && (
-                <h2 className="mb-[14px] mt-8 flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border">
-                  {label}
-                </h2>
-              )}
-              <div className={divider ? undefined : 'mt-[14px]'}>
+        // One column, two on very wide screens; day headings span both.
+        <div className="grid grid-cols-1 gap-[14px] 2xl:grid-cols-2 2xl:items-start">
+          {items.map((item, i) => {
+            const label = dayLabel(item.localDate)
+            const divider = i === 0 || dayLabel(items[i - 1].localDate) !== label
+            const first = i === 0
+            return (
+              <Fragment key={item.id}>
+                {divider && (
+                  <h2 className={cn('col-span-full flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border', first ? 'mt-8' : 'mt-6')}>
+                    {label}
+                  </h2>
+                )}
                 <PostCard
                   item={item}
                   entering={entering.has(item.id)}
@@ -272,10 +278,10 @@ export default function FeedPage() {
                   reactions={<Reactions chips={item.reactions} onReact={(emoji, on) => react(item.id, emoji, on)} />}
                   onPersonTap={setProfileId}
                 />
-              </div>
-            </Fragment>
-          )
-        })
+              </Fragment>
+            )
+          })}
+        </div>
       )}
       </div>
 

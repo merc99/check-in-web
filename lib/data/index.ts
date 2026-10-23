@@ -20,6 +20,7 @@ export {
   getJoinRequests,
   getMe,
   getMyGroups,
+  getMyInsights,
   getMyRecentCheckIns,
   getMyStats,
   getTags,

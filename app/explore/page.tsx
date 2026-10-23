@@ -28,10 +28,11 @@ export default function ExplorePage() {
     )
 
   return (
-    <main className="px-5 pb-[150px]">
+    // Desktop: the wide layout, so the ring shows at full size and the list runs in two columns.
+    <main data-layout="wide" className="px-5 pb-[150px] lg:mx-auto lg:w-full lg:max-w-[1040px] lg:px-8 lg:pb-16">
       <PageHead title="Explore" lead="Public crews looking for one more person who shows up." />
       <SearchInput
-        className="mt-5"
+        className="mt-5 lg:max-w-app"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search crews"
@@ -47,7 +48,7 @@ export default function ExplorePage() {
         </>
       )}
 
-      <div className="mt-5 flex flex-col gap-[14px]">
+      <div className="mt-5 grid grid-cols-1 gap-[14px] lg:grid-cols-2">
         {crews.data?.map((c) => <CrewCard key={c.id} crew={c} onOpen={() => setOpenId(c.id)} />)}
         {crews.data && crews.data.length === 0 && (
           <div className="px-2 py-10 text-center">

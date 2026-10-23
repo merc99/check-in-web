@@ -342,7 +342,12 @@ export function RingCarousel({
     const fit = () => {
       const w = root.clientWidth || stageWidth
       const s = w >= stageWidth ? 1 : Math.min(1, w / (cardWidth + 40))
-      root.style.overflow = w >= stageWidth ? 'visible' : 'hidden'
+      const clipped = w < stageWidth
+      root.style.overflow = clipped ? 'hidden' : 'visible'
+      // Where side cards run off the edge, they fade out instead of being cut.
+      const fade = clipped ? 'linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent)' : 'none'
+      root.style.maskImage = fade
+      root.style.setProperty('-webkit-mask-image', fade)
       stage.style.transform = `translateX(-50%) scale(${s.toFixed(4)})`
       root.style.height = `${Math.round(stageHeight * s)}px`
     }

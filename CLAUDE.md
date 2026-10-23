@@ -66,10 +66,14 @@ plus a few Check-in extras, so registry components inherit the theme.
   `rounded-full` (buttons, chips, avatars).
 - **Type:** `font-display` (Bricolage Grotesque 600–800) for titles, crew names, big numbers, with `tracking-tighter`
   (titles) or `tracking-tightest` (numbers 40px+). `font-sans` (Geist) for everything else. Changing numbers get `tnum`.
+- **Logo:** `BrandMark` / `LogoMark` (components/checkin/BrandMark.tsx): the red → yellow → green gauge with a check, and
+  the lowercase pixel wordmark (`font-pixel`, Pixelify Sans) "check-in". `size="lg"` adds "stay consistent with
+  people." (the intro's first slide). Don't redraw it elsewhere.
 - **Layout:** phones get one centered column, `max-w-app` (640px), with the bottom tab bar: Explore · Feed · You.
-  Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB. Pages stay one
-  centered column unless their `<main>` sets `data-layout="wide"` (the feed: posts + a sticky right rail with check-in,
-  `CrewHero` and your week). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
+  Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
+  1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (posts, two
+  columns from `2xl`, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
+  crews in two columns) and You (glossy stat cards, then two columns: week, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; default follows the system; `ThemeToggle` on the You tab. Check every screen in both.
 
@@ -117,6 +121,11 @@ Loops are scoped to exactly one place each. Nothing else idles. Never add a seco
 | `HoldButton` (hold to confirm, no sheet) | calm | Destructive actions only: delete a crew or your account, leave a crew, remove a member |
 | Toast stack (frosted, batched) | calm | Confirmations and live news; up to three, 4.2s, tap to dismiss |
 | Frosted glass (`--fx-glass` + blur, opaque fallback) | calm | The tab dock and toasts |
+| `Gloss` + `GlossPill` + `GlassInset` (glossy hue panel, mmo-style) | calm (static) | `CrewHero`, the You stat cards and the crew leaderboard |
+| `Sparkline` (draws in once) | calm | Inside a `Gloss`: the crew's last 14 days, your last 12 weeks |
+| `SheenOnce` (one holo pass) | calm | A feed post as it arrives (yours or a crewmate's) |
+| Arrival burst (`burstFrom`, small) | live activity | A crewmate's sticker in the hero when they check in |
+| `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.

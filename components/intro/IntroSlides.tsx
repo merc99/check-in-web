@@ -8,13 +8,15 @@ import { cn } from '@/lib/utils'
 import { CheckInArt, OrbitArt, StreakArt } from './IntroArt'
 
 const SLIDES: { title: string; lead: string; art: () => ReactNode }[] = [
+  // The logo lockup, as on the original brand card.
+  { title: 'No shame days, just show up.', lead: 'A small crew, one check-in a day, and a count that never goes down.', art: () => <BrandMark size="lg" /> },
   { title: 'Your crew notices.', lead: 'Join a small group of 3 to 15 people. Showing up is easier when someone sees it.', art: OrbitArt },
   { title: 'Check in, daily.', lead: 'A quick note and a couple of tags. That’s the whole thing.', art: CheckInArt },
   { title: 'Streaks, minus the shame.', lead: 'Miss a day? It happens. Your all-time count never goes down.', art: StreakArt },
 ]
 const SWIPE_PX = 60
 
-/** Three-panel intro. Swipe, arrow keys, Next or Skip; the last panel hands off to `onStart`. */
+/** Four-panel intro (the logo, then three). Swipe, arrow keys, Next or Skip; the last panel hands off to `onStart`. */
 export function IntroSlides({ onStart }: { onStart: () => void }) {
   const [step, setStep] = useState(0)
   const [dx, setDx] = useState(0)

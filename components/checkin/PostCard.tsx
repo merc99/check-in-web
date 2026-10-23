@@ -9,6 +9,7 @@ import { useNow } from '@/lib/useNow'
 import { Avatar } from './Avatar'
 import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
+import { SheenOnce } from '@/components/fx/loops'
 
 const DOUBLE_TAP_MS = 300
 const DOUBLE_TAP_PX = 30
@@ -147,6 +148,9 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
         </div>
         )}
       </div>
+
+      {/* A card that just arrived gets one pass of the holo sheen (fx/SheenOnce). */}
+      {entering && <SheenOnce />}
 
       {burst > 0 && (
         <span key={burst} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 animate-burst opacity-0">

@@ -32,3 +32,8 @@ export function AuroraFrame({ on, className, children }: { on: boolean; classNam
   usePauseWhenHidden()
   return <div className={cn(on && styles.aurora, className)}>{children}</div>
 }
+
+/** One pass of the holo sheen over its parent, for a card that just arrived (feed posts). */
+export function SheenOnce() {
+  return <span aria-hidden="true" className={styles.once} />
+}
