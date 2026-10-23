@@ -33,7 +33,7 @@ export function TabBar({ active, onSelect }: TabBarProps) {
       {TABS.map(({ key, label, href, Icon }) => {
         const current = key === active
         const className = cn(
-          'relative z-[1] flex flex-1 items-center justify-center gap-[6px] rounded-full px-1 py-[11px] text-[13.5px] font-bold transition-colors duration-[250ms]',
+          'relative z-1 flex flex-1 items-center justify-center gap-[6px] rounded-full px-1 py-[11px] text-[13.5px] font-bold transition-colors duration-250',
           current ? 'text-peach' : 'text-ink-soft',
         )
         const inner = (
@@ -80,8 +80,8 @@ export function TabBarDock() {
       ref={dock}
       aria-hidden={!match}
       className={cn(
-        'pointer-events-none fixed inset-x-0 bottom-0 z-[24] mx-auto max-w-app px-4 pb-[calc(14px+env(safe-area-inset-bottom))]',
-        'transition-transform duration-[350ms] ease-spring',
+        'pointer-events-none fixed inset-x-0 bottom-0 z-24 mx-auto max-w-app px-4 pb-[calc(14px+env(safe-area-inset-bottom))]',
+        'transition-transform duration-350 ease-spring',
         match ? 'translate-y-0' : 'translate-y-[130%]',
       )}
     >

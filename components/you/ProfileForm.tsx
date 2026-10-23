@@ -81,7 +81,7 @@ export function ProfileForm({
 
       <div className="mt-6 flex flex-col gap-4">
         <div className="flex items-center gap-5">
-          <Avatar name={name} color={color} photoUrl={photo} size="xl" you className="-rotate-[4deg]" />
+          <Avatar name={name} color={color} photoUrl={photo} size="xl" you className="rotate-[-4deg]" />
           <div className="flex flex-col items-start gap-3">
             <Button size="sm" onClick={() => fileInput.current?.click()}>
               Upload photo

@@ -36,7 +36,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
   return (
     <section
       aria-label="Who’s in today"
-      className={cn('relative overflow-hidden rounded-lg border border-ink p-5 shadow-sh3 transition-colors duration-[400ms]', COLOR_CLASS[color].bg)}
+      className={cn('relative overflow-hidden rounded-lg border border-ink p-5 shadow-sh3 transition-colors duration-400', COLOR_CLASS[color].bg)}
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -72,7 +72,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
               <span
                 aria-hidden="true"
                 className={cn(
-                  'absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-ink bg-mint transition-transform duration-[350ms] ease-spring',
+                  'absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-ink bg-mint transition-transform duration-350 ease-spring',
                   inToday ? 'scale-100' : 'scale-0',
                   arrived && 'animate-tickpop',
                 )}

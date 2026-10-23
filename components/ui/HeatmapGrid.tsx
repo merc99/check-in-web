@@ -33,7 +33,7 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
             className={cn(
               'grid aspect-square place-items-center rounded-input border',
               d.done ? 'border-ink bg-mint shadow-sh1' : 'border-rule bg-peach-deep',
-              d.today && 'outline outline-[2.5px] outline-offset-2 outline-ink',
+              d.today && 'outline-solid outline-[2.5px] outline-offset-2 outline-ink',
               d.future && 'opacity-45',
               animate && d.done && 'animate-cellin',
             )}

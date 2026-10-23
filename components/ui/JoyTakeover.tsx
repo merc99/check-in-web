@@ -80,10 +80,10 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
       ref={root}
       role="status"
       onClick={close}
-      className="fixed inset-0 z-[70] mx-auto grid max-w-app cursor-pointer place-items-center overflow-hidden bg-mint transition-[clip-path] duration-700 ease-out"
+      className="fixed inset-0 z-70 mx-auto grid max-w-app cursor-pointer place-items-center overflow-hidden bg-mint transition-[clip-path] duration-700 ease-out"
       style={{ clipPath: `circle(${open ? '150%' : '0px'} at ${at.x}px ${at.y}px)` }}
     >
-      <div className="relative z-[2] p-6 text-center">
+      <div className="relative z-2 p-6 text-center">
         <div className="font-display text-[64px] leading-[.92]">
           {WORDS.map((w, i) => (
             <span key={w}>
@@ -116,7 +116,7 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
             key={i}
             aria-hidden="true"
             className={cn(
-              'absolute -top-[30px] z-[1] animate-fall border border-ink',
+              'absolute top-[-30px] z-1 animate-fall border border-ink',
               c.round ? 'size-4 rounded-full' : 'h-6 w-[14px] rounded-tiny',
               COLOR_CLASS[c.color].bg,
             )}

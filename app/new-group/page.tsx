@@ -88,13 +88,13 @@ export default function NewGroupPage() {
             <div
               aria-hidden="true"
               className={cn(
-                'mt-5 flex min-h-[116px] items-center gap-4 rounded-lg border border-ink p-5 shadow-sh3 transition-colors duration-[350ms]',
+                'mt-5 flex min-h-[116px] items-center gap-4 rounded-lg border border-ink p-5 shadow-sh3 transition-colors duration-350',
                 COLOR_CLASS[color].bg,
               )}
             >
               <CrewBlock name={shownName || '?'} color={color} size="xl" white />
               <div className="min-w-0 flex-1">
-                <h2 className="break-words font-display text-[26px] leading-none">{shownName || 'Your crew'}</h2>
+                <h2 className="wrap-break-word font-display text-[26px] leading-none">{shownName || 'Your crew'}</h2>
                 <div className="mt-[10px] flex items-center gap-[10px]">
                   <CapacityDots filled={1} max={max} />
                   <span className="text-[13px] font-bold">

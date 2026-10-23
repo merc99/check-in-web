@@ -75,7 +75,7 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
             top={
               <div className="px-5 pb-6 pt-8">
                 <p className="font-bold">You’re invited to join</p>
-                <h1 className="mt-3 break-words font-display text-[42px] leading-[.95]">{p.name}</h1>
+                <h1 className="mt-3 wrap-break-word font-display text-[42px] leading-[.95]">{p.name}</h1>
                 <div className="mt-5 flex justify-center">
                   {p.preview.map((m, i) => (
                     <Avatar key={m.id} name={m.name} color={m.color} photoUrl={m.photoUrl} className={i ? '-ml-2' : undefined} />

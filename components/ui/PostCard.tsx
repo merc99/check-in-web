@@ -118,7 +118,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
               width={16}
               height={16}
               aria-hidden="true"
-              className={cn('transition-transform duration-[350ms] ease-spring', pop && 'rotate-[-10deg] scale-[1.45]')}
+              className={cn('transition-transform duration-350 ease-spring', pop && 'rotate-[-10deg] scale-[1.45]')}
             >
               <path
                 d={HEART_PATH}
@@ -133,7 +133,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
           {item.hearts.people.length > 0 && (
             <span className="flex" aria-label={`Hearted by ${item.hearts.people.map((p) => p.name).join(', ')}`}>
               {item.hearts.people.map((p, i) => (
-                <Avatar key={p.id} name={p.name} color={p.color} photoUrl={p.photoUrl} size="xs" className={i ? '-ml-[6px]' : undefined} />
+                <Avatar key={p.id} name={p.name} color={p.color} photoUrl={p.photoUrl} size="xs" className={i ? 'ml-[-6px]' : undefined} />
               ))}
             </span>
           )}

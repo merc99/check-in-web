@@ -78,7 +78,7 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
       <div
         id={panelId}
         ref={panel}
-        className={cn('grid transition-[grid-template-rows] duration-[400ms] ease-out', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}
+        className={cn('grid transition-[grid-template-rows] duration-400 ease-out', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}
       >
         <div className="overflow-hidden">
           <div className="flex flex-col gap-4 px-4 pb-[18px] pt-1">

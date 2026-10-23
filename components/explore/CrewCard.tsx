@@ -27,19 +27,19 @@ export function CrewCard({ crew, onOpen }: { crew: ExploreGroup; onOpen: () => v
       onClick={onOpen}
       className={cn(
         'group block w-full rounded-lg border border-ink bg-card p-4 text-left shadow-sh2',
-        'transition-[transform,box-shadow] duration-[180ms] ease-spring active:!translate-y-px active:!shadow-sh1-pressed',
+        'transition-[transform,box-shadow] duration-180 ease-spring active:translate-y-px! active:shadow-sh1-pressed!',
         '[@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-sh3',
       )}
     >
       <div className="flex items-start gap-[14px]">
-        <CrewBlock name={crew.name} color={crew.color} size="lg" className="group-hover:rotate-[3deg] group-hover:scale-105" />
+        <CrewBlock name={crew.name} color={crew.color} size="lg" className="group-hover:rotate-3 group-hover:scale-105" />
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-[19px] leading-[1.05]">{crew.name}</h3>
           {crew.description && <p className="mt-1 text-sm text-ink-soft">{crew.description}</p>}
         </div>
         <StatusTag status={crew.status} />
       </div>
-      <div className="mt-[14px] flex items-center gap-[10px] whitespace-nowrap border-t-[1.5px] border-rule pt-3 text-[12.5px]">
+      <div className="mt-[14px] flex items-center gap-[10px] whitespace-nowrap border-t border-rule pt-3 text-[12.5px]">
         <span className="flex">
           {crew.preview.map((p, i) => (
             <Avatar key={p.id} name={p.name} color={p.color} photoUrl={p.photoUrl} size="xs" className={i ? '-ml-2' : undefined} />

@@ -1,9 +1,225 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-peach: #fcefd7;
+  --color-peach-deep: #f7e3bc;
+
+  --color-card: #ffffff;
+  --color-card-alt: #fffaf0;
+
+  --color-ink: #1f1d1a;
+  --color-ink-soft: #5a574f;
+  --color-ink-mute: #8a8779;
+
+  --color-mint: #b8e5b5;
+  --color-mint-deep: #8fcf8c;
+
+  --color-rule: #ead9b5;
+
+  --color-sky: #a8d8e8;
+  --color-sky-ink: #2a5e73;
+
+  --color-coral: #f5a78e;
+  --color-coral-ink: #8a3e2a;
+
+  --color-rose: #ed8aa0;
+  --color-rose-ink: #7a2e45;
+
+  --color-grape: #b89bd6;
+  --color-grape-ink: #4f356e;
+
+  --color-indigo: #8a95d6;
+  --color-indigo-ink: #2e3870;
+
+  --color-lemon: #f0d86e;
+  --color-lemon-ink: #6b5a1a;
+
+  --color-leaf: #9dcb8f;
+  --color-leaf-ink: #3a6432;
+
+  --color-clay: #d9a574;
+  --color-clay-ink: #6b4220;
+
+  --color-danger: #e27272;
+  --color-danger-ink: #6b1c1c;
+
+  --shadow-*: initial;
+  --shadow-none: none;
+  --shadow-sh1: 0 2px 0 #1f1d1a;
+  --shadow-sh2: 2px 3px 0 #1f1d1a;
+  --shadow-sh3: 2px 4px 0 #1f1d1a;
+  --shadow-sh1-pressed: 0 1px 0 #1f1d1a;
+  --shadow-sh3-pressed: 2px 2px 0 #1f1d1a;
+  --shadow-focus: 2px 3px 0 #1f1d1a, 0 0 0 4px #b8e5b5;
+  --shadow-you: 0 0 0 3px #b8e5b5, 0 0 0 4.5px #1f1d1a;
+  --shadow-selected: 0 0 0 3px #fcefd7, 0 0 0 4.5px #1f1d1a;
+
+  --radius-*: initial;
+  --radius-none: 0;
+  --radius-tiny: 4px;
+  --radius-input: 12px;
+  --radius-card: 14px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  --default-border-width: 1.5px;
+
+  --font-display: var(--font-bowlby), Impact, Arial Black, sans-serif;
+  --font-sans:
+    var(--font-inter), system-ui, -apple-system, Segoe UI, sans-serif;
+
+  --container-app: 640px;
+
+  --ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --animate-enter: enter 0.7s cubic-bezier(0.34, 1.45, 0.64, 1);
+  --animate-bump: bump 0.3s cubic-bezier(0.34, 1.45, 0.64, 1);
+  --animate-burst: burst 0.8s cubic-bezier(0.34, 1.45, 0.64, 1);
+  --animate-word: word 0.6s cubic-bezier(0.34, 1.45, 0.64, 1) forwards;
+  --animate-stickpop: stickpop 0.6s cubic-bezier(0.34, 1.45, 0.64, 1);
+  --animate-tickpop: tickpop 0.5s 0.15s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  --animate-cellin: cellin 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  --animate-wave: wave 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  --animate-draw: draw 0.35s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  --animate-fall: fall linear forwards;
+  --animate-ping: ping 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(-18px) scale(0.94);
+      clip-path: inset(0 0 100% 0 round 18px);
+    }
+    60% {
+      clip-path: inset(0 0 0 0 round 18px);
+    }
+  }
+  @keyframes bump {
+    50% {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0) rotate(-15deg);
+    }
+    30% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1) rotate(4deg);
+    }
+    70% {
+      opacity: 1;
+      transform: translate(-50%, -60%) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -90%) scale(0.8);
+    }
+  }
+  @keyframes word {
+    from {
+      opacity: 0;
+      transform: translateY(40px) rotate(-6deg);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes stickpop {
+    30% {
+      transform: translateY(-6px) rotate(-6deg) scale(1.1);
+    }
+  }
+  @keyframes tickpop {
+    from {
+      transform: scale(0) rotate(-90deg);
+    }
+  }
+  @keyframes cellin {
+    from {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+  }
+  @keyframes wave {
+    40% {
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes fall {
+    to {
+      transform: translateY(1100px) rotate(var(--r));
+    }
+  }
+  @keyframes ping {
+    from {
+      transform: scale(0.4);
+      opacity: 1;
+    }
+    to {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility grain {
+  /* Paper grain over the app shell. Ink-tinted noise, so no new color. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 90;
+    opacity: 0.045;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .12 0 0 0 0 .11 0 0 0 0 .1 0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 @layer base {
-  html { color-scheme: light; background: theme(colors.peach.DEFAULT); }
+  html { color-scheme: light; background: var(--color-peach); }
   body {
     @apply bg-peach text-ink font-sans antialiased;
     font-size: 15px;
@@ -11,19 +227,7 @@
     font-feature-settings: "cv11", "ss01";
     -webkit-tap-highlight-color: transparent;
   }
-  :focus-visible { outline: 2px solid theme(colors.ink.DEFAULT); outline-offset: 3px; }
-}
-
-@layer utilities {
-  /* Paper grain over the app shell. Ink-tinted noise, so no new color. */
-  .grain::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 90;
-    opacity: .045; mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .12 0 0 0 0 .11 0 0 0 0 .1 0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  }
-  .tnum { font-variant-numeric: tabular-nums; }
-  .no-scrollbar { scrollbar-width: none; }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

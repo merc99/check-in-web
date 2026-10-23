@@ -34,7 +34,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
     >
       <span
         aria-hidden="true"
-        className="absolute inset-y-1 left-1 rounded-full bg-ink transition-transform duration-[400ms] ease-spring"
+        className="absolute inset-y-1 left-1 rounded-full bg-ink transition-transform duration-400 ease-spring"
         style={{ width: `calc((100% - 8px) / ${options.length})`, transform: `translateX(${index * 100}%)` }}
       />
       {options.map((o) => {
@@ -48,7 +48,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(o.value)}
             className={cn(
-              'relative z-[1] flex-1 rounded-full p-[11px] font-bold transition-colors duration-200',
+              'relative z-1 flex-1 rounded-full p-[11px] font-bold transition-colors duration-200',
               selected ? 'text-peach' : 'text-ink',
             )}
           >

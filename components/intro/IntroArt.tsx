@@ -63,7 +63,7 @@ const SAMPLE: FeedItem = {
 export function CheckInArt() {
   return (
     <div className="relative w-[min(300px,100%)]" aria-hidden="true">
-      <div className="absolute -right-[6px] bottom-[-14px] left-[14px] top-[18px] rotate-[4deg] rounded-lg border border-ink bg-peach-deep shadow-sh2" />
+      <div className="absolute right-[-6px] bottom-[-14px] left-[14px] top-[18px] rotate-[4deg] rounded-lg border border-ink bg-peach-deep shadow-sh2" />
       <div className="pointer-events-none relative">
         <PostCard item={SAMPLE} onHeart={() => {}} />
       </div>

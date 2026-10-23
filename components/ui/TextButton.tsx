@@ -25,7 +25,7 @@ export function TextLink({ href, className, children }: { href: string; classNam
 /** "‹ Back" at the top of non-tab screens. */
 export function BackLink({ href, label = 'Back' }: { href: string; label?: string }) {
   return (
-    <TextLink href={href} className="-ml-[6px] mt-[14px] gap-1 no-underline">
+    <TextLink href={href} className="ml-[-6px] mt-[14px] gap-1 no-underline">
       <BackIcon size={18} />
       <span className="underline decoration-[1.5px] underline-offset-[3px]">{label}</span>
     </TextLink>

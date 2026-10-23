@@ -139,7 +139,7 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
         tabIndex={-1}
         className={cn(
           'absolute inset-x-0 bottom-0 max-h-[90%] overflow-y-auto overscroll-contain rounded-t-lg border-t border-ink bg-peach',
-          'px-5 pb-[calc(24px+env(safe-area-inset-bottom))] pt-1 outline-none',
+          'px-5 pb-[calc(24px+env(safe-area-inset-bottom))] pt-1 outline-hidden',
           'transition-transform duration-500 ease-spring',
           shown ? 'translate-y-0' : 'translate-y-[105%]',
         )}

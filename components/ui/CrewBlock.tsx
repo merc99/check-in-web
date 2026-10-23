@@ -18,7 +18,7 @@ export function CrewBlock({
     <span
       aria-hidden="true"
       className={cn(
-        'grid flex-none -rotate-[4deg] place-items-center border border-ink font-display leading-none shadow-sh1 transition-transform duration-300 ease-spring',
+        'grid flex-none rotate-[-4deg] place-items-center border border-ink font-display leading-none shadow-sh1 transition-transform duration-300 ease-spring',
         white ? 'bg-card' : COLOR_CLASS[color].bg,
         SIZE[size],
         className,

@@ -43,9 +43,9 @@ export default function YouPage() {
   return (
     <main className="px-5 pb-[150px]">
       <section className="flex items-center gap-5 pb-2 pt-8">
-        <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you className="-rotate-[4deg]" />
+        <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you className="rotate-[-4deg]" />
         <div className="min-w-0 flex-1">
-          <h1 className="break-words font-display text-4xl leading-[.95]">{person.name}</h1>
+          <h1 className="wrap-break-word font-display text-4xl leading-[.95]">{person.name}</h1>
           {profile.handle && <p className="mt-[6px] text-ink-soft">@{profile.handle}</p>}
           {profile.bio && <p className="mt-[6px]">{profile.bio}</p>}
           <Button size="sm" className="mt-3" onClick={() => router.push('/profile/edit')}>

@@ -11,11 +11,11 @@ export function AchievementCard({ achievement: a, tilt }: { achievement: Achieve
     <div
       className={cn(
         'relative w-[118px] flex-none snap-start overflow-hidden rounded-card border border-ink px-[10px] py-4 text-center',
-        tilt === 'left' ? '-rotate-[1.5deg]' : 'rotate-[1.2deg]',
+        tilt === 'left' ? 'rotate-[-1.5deg]' : 'rotate-[1.2deg]',
         a.unlocked
           ? [
               'bg-card shadow-sh2',
-              'after:pointer-events-none after:absolute after:inset-0 after:-translate-x-[120%] after:bg-gradient-to-r',
+              'after:pointer-events-none after:absolute after:inset-0 after:translate-x-[-120%] after:bg-linear-to-r',
               'after:from-transparent after:from-35% after:via-card/75 after:via-50% after:to-transparent after:to-65%',
               'hover:after:translate-x-[120%] hover:after:transition-transform hover:after:duration-700 hover:after:ease-out',
             ].join(' ')

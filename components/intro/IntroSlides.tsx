@@ -77,7 +77,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
         aria-roledescription="carousel"
       >
         <div
-          className={cn('flex h-full', !dragging && 'transition-transform duration-[550ms] ease-spring')}
+          className={cn('flex h-full', !dragging && 'transition-transform duration-550 ease-spring')}
           style={{ transform: `translateX(calc(${-step * 100}% + ${dx}px))` }}
         >
           {SLIDES.map((s, i) => (

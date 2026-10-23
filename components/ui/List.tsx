@@ -6,7 +6,7 @@ export function List({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        'divide-y-[1.5px] divide-rule overflow-hidden rounded-card border border-ink bg-card shadow-sh2',
+        'divide-y divide-rule overflow-hidden rounded-card border border-ink bg-card shadow-sh2',
         className,
       )}
       {...props}

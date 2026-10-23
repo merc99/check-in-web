@@ -41,7 +41,7 @@ export function FormField({ label, optional, hint, as = 'label', className, chil
 }
 
 const FIELD =
-  'w-full rounded-input border border-ink bg-card px-[14px] py-[13px] text-base shadow-sh2 outline-none transition-shadow duration-150 placeholder:text-ink-mute focus:shadow-focus'
+  'w-full rounded-input border border-ink bg-card px-[14px] py-[13px] text-base shadow-sh2 outline-hidden transition-shadow duration-150 placeholder:text-ink-mute focus:shadow-focus'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className, ...props },

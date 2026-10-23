@@ -31,9 +31,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         role="status"
         aria-live="polite"
         className={cn(
-          'pointer-events-none fixed bottom-[calc(112px+env(safe-area-inset-bottom))] left-1/2 z-[60] -translate-x-1/2',
+          'pointer-events-none fixed bottom-[calc(112px+env(safe-area-inset-bottom))] left-1/2 z-60 -translate-x-1/2',
           'whitespace-nowrap rounded-full bg-ink px-5 py-3 text-sm font-bold text-peach',
-          'transition-[opacity,transform] duration-[400ms] ease-spring',
+          'transition-[opacity,transform] duration-400 ease-spring',
           show ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-6 scale-90 opacity-0',
         )}
       >

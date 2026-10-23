@@ -21,7 +21,7 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
       {p && (
         <div className="flex flex-col gap-4 text-center">
           <div className="flex justify-center pt-2">
-            <Avatar name={p.person.name} color={p.person.color} photoUrl={p.person.photoUrl} size="xl" className="-rotate-[4deg]" />
+            <Avatar name={p.person.name} color={p.person.color} photoUrl={p.person.photoUrl} size="xl" className="rotate-[-4deg]" />
           </div>
           <h2 className="font-display text-[30px] leading-none">{p.person.name}</h2>
           <p className="text-ink-soft">Member since {monthYear(p.memberSince)}</p>

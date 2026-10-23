@@ -212,7 +212,7 @@ export default function FeedPage() {
       <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} />
 
       {g.pinnedMessage && (
-        <div className="mt-4 flex items-start gap-[10px] rounded-input border-[1.5px] border-dashed border-ink-mute px-[14px] py-3 text-sm text-ink-soft">
+        <div className="mt-4 flex items-start gap-[10px] rounded-input border border-dashed border-ink-mute px-[14px] py-3 text-sm text-ink-soft">
           <PinIcon size={17} className="mt-px flex-none" />
           <p>{g.pinnedMessage}</p>
         </div>

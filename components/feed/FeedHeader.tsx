@@ -21,7 +21,7 @@ export function FeedHeader({
     <>
       <header
         className={cn(
-          'sticky top-0 z-20 -mx-5 flex items-center gap-3 border-b-[1.5px] px-5 pb-[10px] pt-[14px] transition-colors duration-200',
+          'sticky top-0 z-20 -mx-5 flex items-center gap-3 border-b px-5 pb-[10px] pt-[14px] transition-colors duration-200',
           collapsed ? 'border-rule bg-peach' : 'border-transparent bg-transparent',
         )}
       >

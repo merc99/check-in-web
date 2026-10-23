@@ -53,7 +53,7 @@ export function LivePill({ notice, show, onTap }: { notice: LiveNotice | null; s
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-[calc(12px+env(safe-area-inset-top))] z-[36] mx-auto flex max-w-app justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 top-[calc(12px+env(safe-area-inset-top))] z-36 mx-auto flex max-w-app justify-center px-4"
     >
       {notice && (
         <button
@@ -64,8 +64,8 @@ export function LivePill({ notice, show, onTap }: { notice: LiveNotice | null; s
           className={cn(
             'pointer-events-auto flex max-w-full items-center gap-[10px] whitespace-nowrap rounded-full border border-ink bg-card',
             'py-[5px] pl-[5px] pr-4 text-[13.5px] font-medium shadow-sh2',
-            'transition-transform duration-[550ms] ease-spring',
-            show ? 'translate-y-0' : '-translate-y-[90px]',
+            'transition-transform duration-550 ease-spring',
+            show ? 'translate-y-0' : 'translate-y-[-90px]',
           )}
         >
           <Avatar name={notice.user.name} color={notice.user.color} photoUrl={notice.user.photoUrl} size="sm" />

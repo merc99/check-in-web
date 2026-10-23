@@ -19,7 +19,7 @@ export const SearchInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTML
         ref={ref}
         type="search"
         autoComplete="off"
-        className="min-w-0 flex-1 bg-transparent py-3 text-base outline-none placeholder:text-ink-mute [&::-webkit-search-cancel-button]:hidden"
+        className="min-w-0 flex-1 bg-transparent py-3 text-base outline-hidden placeholder:text-ink-mute [&::-webkit-search-cancel-button]:hidden"
         {...props}
       />
     </span>
