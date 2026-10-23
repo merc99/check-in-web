@@ -6,7 +6,7 @@ import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
 import { Sheet } from '@/components/checkin/Sheet'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import type { GroupSummary } from '@/lib/data'
 
 export function CrewSwitcherSheet({
@@ -31,13 +31,13 @@ export function CrewSwitcherSheet({
                 type="button"
                 onClick={() => onPick(g.id)}
                 aria-current={active ? 'true' : undefined}
-                className={cn(listRow, active && 'bg-peach-deep')}
+                className={cn(listRow, active && 'bg-muted')}
               >
                 <CrewBlock name={g.name} color={g.color} />
                 <span className="min-w-0 flex-1">
                   <b>{g.name}</b>
                   <br />
-                  <span className="tnum text-[12.5px] text-ink-mute">
+                  <span className="tnum text-[12.5px] text-muted-foreground">
                     {g.inToday} of {g.memberCount} in today
                   </span>
                 </span>

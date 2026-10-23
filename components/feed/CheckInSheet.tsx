@@ -7,8 +7,8 @@ import { FormField, Textarea } from '@/components/checkin/FormField'
 import { CheckIcon } from '@/components/checkin/icons'
 import { SearchInput } from '@/components/checkin/SearchInput'
 import { Sheet } from '@/components/checkin/Sheet'
-import { cn } from '@/lib/cn'
-import type { BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import type { Hue } from '@/lib/colors'
 import { prefersReducedMotion } from '@/lib/motion'
 
 const NOTE_MAX = 280
@@ -28,7 +28,7 @@ export function CheckInSheet({
 }: {
   open: boolean
   onClose: () => void
-  group: { name: string; color: BrandColor }
+  group: { name: string; color: Hue }
   tags: string[]
   onSubmit: (draft: CheckInDraft) => void
 }) {
@@ -91,7 +91,7 @@ export function CheckInSheet({
             maxLength={NOTE_MAX}
             placeholder="How’d it go?"
           />
-          <span className="tnum mt-[6px] block text-right text-xs text-ink-mute">
+          <span className="tnum mt-[6px] block text-right text-xs text-muted-foreground">
             {note.length} / {NOTE_MAX}
           </span>
         </FormField>
@@ -115,7 +115,7 @@ export function CheckInSheet({
             <ToggleChip key={t} label={t} selected={selected.has(t)} onToggle={() => toggle(t)} />
           ))}
           {canAdd && <AddChip name={q} onAdd={add} />}
-          {!visible.length && !canAdd && <p className="text-[12.5px] text-ink-mute">No tags yet. Type one to add it.</p>}
+          {!visible.length && !canAdd && <p className="text-[12.5px] text-muted-foreground">No tags yet. Type one to add it.</p>}
         </div>
 
         <div className="flex justify-center pt-3">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, type PointerEvent } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import type { FeedItem } from '@/lib/data'
 import { HOUR, timeAgo } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -63,8 +63,8 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
     <article
       onPointerUp={onPointerUp}
       className={cn(
-        'relative touch-manipulation select-none rounded-lg border border-ink p-4 shadow-sh2',
-        item.isMine ? 'bg-card-alt' : 'bg-card',
+        'relative touch-manipulation select-none rounded-lg border border-border p-4 shadow-card',
+        item.isMine ? 'bg-card' : 'bg-card',
         entering && 'animate-enter',
       )}
     >
@@ -74,7 +74,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
             type="button"
             onClick={() => onPersonTap(item.user.id)}
             aria-label={`View ${item.user.name}`}
-            className="rounded-full transition-transform duration-200 ease-spring hover:scale-[1.06]"
+            className="rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
           >
             {avatar}
           </button>
@@ -83,10 +83,10 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
         )}
         <p className="min-w-0 flex-1">
           <span className="font-bold">{item.isMine ? 'You' : item.user.name}</span>
-          <span className="ml-[6px] text-[13px] text-ink-mute">{timeAgo(item.createdAt, now)}</span>
+          <span className="ml-[6px] text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
         </p>
         {justIn && (
-          <span className="ml-auto rounded-full border border-ink bg-mint px-2 py-[5px] text-[10.5px] font-bold leading-none tracking-[.08em] shadow-sh1">
+          <span className="ml-auto rounded-full bg-primary-soft px-2 text-primary-ink py-[5px] text-[10.5px] font-bold leading-none tracking-[.08em] shadow-xs">
             JUST IN
           </span>
         )}
@@ -108,9 +108,9 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
             aria-pressed={item.hearts.byMe}
             aria-label={item.hearts.byMe ? 'Remove heart' : 'Send a heart'}
             className={cn(
-              'tnum inline-flex items-center gap-[6px] rounded-full border border-ink py-[5px] pl-[9px] pr-3 text-[13px] font-bold shadow-sh1',
-              'transition-[background-color,color,transform,box-shadow] duration-200 active:translate-y-px active:shadow-sh1-pressed',
-              item.hearts.byMe ? 'bg-rose text-rose-ink' : 'bg-card',
+              'tnum inline-flex items-center gap-[6px] rounded-full border border-border py-[5px] pl-[9px] pr-3 text-[13px] font-bold shadow-xs',
+              'transition-[background-color,color,transform,box-shadow] duration-200 active:translate-y-px active:shadow-none',
+              item.hearts.byMe ? 'bg-rose-soft text-rose-ink' : 'bg-card',
             )}
           >
             <svg
@@ -125,7 +125,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinejoin="round"
-                className={item.hearts.byMe ? 'fill-card' : 'fill-none'}
+                className={item.hearts.byMe ? 'fill-current' : 'fill-none'}
               />
             </svg>
             {item.hearts.count > 0 && item.hearts.count}
@@ -143,7 +143,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
       {burst > 0 && (
         <span key={burst} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 animate-burst opacity-0">
           <svg viewBox="0 0 24 24" width={88} height={88}>
-            <path d={HEART_PATH} className="fill-rose stroke-ink" strokeWidth={1.2} />
+            <path d={HEART_PATH} className="fill-rose stroke-foreground" strokeWidth={1.2} />
           </svg>
         </span>
       )}

@@ -57,7 +57,7 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
       {preview.error ? (
         <div className="text-center">
           <h1 className="font-display text-[30px] leading-none">Can’t reach Check-in right now.</h1>
-          <p className="mx-auto mt-3 max-w-[32ch] text-ink-soft">The invite is fine. Give it a moment and try again.</p>
+          <p className="mx-auto mt-3 max-w-[32ch] text-muted-foreground">The invite is fine. Give it a moment and try again.</p>
           <Button size="sm" className="mt-5" onClick={preview.refetch}>
             Try again
           </Button>
@@ -65,7 +65,7 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
       ) : !p ? (
         <div className="text-center">
           <h1 className="font-display text-[30px] leading-none">This invite doesn’t match a crew.</h1>
-          <p className="mx-auto mt-3 max-w-[32ch] text-ink-soft">The code may have changed, or the crew was deleted. Ask whoever sent it for a fresh one.</p>
+          <p className="mx-auto mt-3 max-w-[32ch] text-muted-foreground">The code may have changed, or the crew was deleted. Ask whoever sent it for a fresh one.</p>
         </div>
       ) : (
         <>

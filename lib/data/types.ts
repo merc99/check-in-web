@@ -1,4 +1,4 @@
-import type { BrandColor, TagColor } from '@/lib/colors'
+import type { Hue } from '@/lib/colors'
 import type { LocalDate } from '@/lib/dates'
 
 // ─── Rows: shaped exactly like the Supabase tables (snake_case, nullable where the column is) ───
@@ -13,7 +13,7 @@ export interface Profile {
   handle: string | null
   bio: string | null
   avatar_url: string | null
-  avatar_color: BrandColor | null
+  avatar_color: Hue | null
   timezone: string
   created_at: Timestamp
   deleted_at: Timestamp | null
@@ -23,7 +23,7 @@ export interface Group {
   id: UUID
   name: string
   description: string | null
-  color: BrandColor
+  color: Hue
   invite_slug: string
   created_by: UUID | null
   max_members: number
@@ -48,7 +48,7 @@ export interface Tag {
   id: UUID
   group_id: UUID
   name: string
-  color: TagColor
+  color: Hue
   usage_count: number
   created_at: Timestamp
   deleted_at: Timestamp | null
@@ -112,7 +112,7 @@ export interface Change<T = unknown> {
 export interface Person {
   id: UUID
   name: string
-  color: BrandColor
+  color: Hue
   photoUrl: string | null
 }
 
@@ -124,7 +124,7 @@ export interface Me {
 export interface GroupSummary {
   id: UUID
   name: string
-  color: BrandColor
+  color: Hue
   memberCount: number
   maxMembers: number
   inToday: number
@@ -178,7 +178,7 @@ export type MembershipStatus = 'member' | 'pending' | 'full' | null
 export interface ExploreGroup {
   id: UUID
   name: string
-  color: BrandColor
+  color: Hue
   description: string | null
   memberCount: number
   maxMembers: number
@@ -196,7 +196,7 @@ export interface ExploreDetail extends ExploreGroup {
 export interface GroupPreview {
   id: UUID
   name: string
-  color: BrandColor
+  color: Hue
   memberCount: number
   maxMembers: number
   preview: Person[]
@@ -215,7 +215,7 @@ export interface MyStats {
 
 export interface RecentCheckIn {
   id: UUID
-  group: { id: UUID; name: string; color: BrandColor }
+  group: { id: UUID; name: string; color: Hue }
   note: string | null
   tags: { id: UUID; name: string }[]
   createdAt: Timestamp
@@ -226,7 +226,7 @@ export interface Achievement {
   title: string
   subtitle: string
   glyph: string
-  color: BrandColor
+  color: Hue
   unlocked: boolean
 }
 
@@ -235,7 +235,7 @@ export interface PublicProfile {
   memberSince: Timestamp
   total: number
   streak: number
-  sharedGroups: { id: UUID; name: string; color: BrandColor; streak: number }[]
+  sharedGroups: { id: UUID; name: string; color: Hue; streak: number }[]
 }
 
 export interface CheckInInput {
@@ -247,7 +247,7 @@ export interface CheckInInput {
 
 export interface NewGroupInput {
   name: string
-  color: BrandColor
+  color: Hue
   maxMembers: number
 }
 
@@ -255,13 +255,13 @@ export interface ProfilePatch {
   name?: string
   handle?: string | null
   bio?: string | null
-  avatar_color?: BrandColor
+  avatar_color?: Hue
   avatar_url?: string | null
 }
 
 export interface GroupPatch {
   name?: string
-  color?: BrandColor
+  color?: Hue
   pinned_message?: string | null
   is_public?: boolean
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from '
 import { BrandMark } from '@/components/checkin/BrandMark'
 import { Button } from '@/components/checkin/Button'
 import { TextButton } from '@/components/checkin/TextButton'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import { CheckInArt, OrbitArt, StreakArt } from './IntroArt'
 
 const SLIDES: { title: string; lead: string; art: () => ReactNode }[] = [
@@ -77,7 +77,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
         aria-roledescription="carousel"
       >
         <div
-          className={cn('flex h-full', !dragging && 'transition-transform duration-550 ease-spring')}
+          className={cn('flex h-full', !dragging && 'transition-transform duration-200 ease-out')}
           style={{ transform: `translateX(calc(${-step * 100}% + ${dx}px))` }}
         >
           {SLIDES.map((s, i) => (
@@ -93,7 +93,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
             >
               <div className="grid min-h-[280px] flex-1 select-none place-items-center py-4">{s.art()}</div>
               <h1 className="font-display text-[44px] leading-[.95] max-[380px]:text-[38px]">{s.title}</h1>
-              <p className="mt-[14px] max-w-[30ch] text-[17px] text-ink-soft">{s.lead}</p>
+              <p className="mt-[14px] max-w-[30ch] text-[17px] text-muted-foreground">{s.lead}</p>
             </div>
           ))}
         </div>
@@ -103,7 +103,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
         {SLIDES.map((s, i) => (
           <span
             key={s.title}
-            className={cn('h-[10px] rounded-full border border-ink transition-colors duration-200', i === step ? 'w-[30px] bg-ink' : 'w-[10px] bg-card')}
+            className={cn('h-[10px] rounded-full border border-border transition-colors duration-200', i === step ? 'w-[30px] bg-foreground' : 'w-[10px] bg-card')}
           />
         ))}
       </div>

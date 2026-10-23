@@ -1,4 +1,4 @@
-import { AVATAR_COLORS, getTagColor, type BrandColor } from '@/lib/colors'
+import { AVATAR_HUES, getTagHue, type Hue } from '@/lib/colors'
 import type {
   Achievement,
   Change,
@@ -49,7 +49,7 @@ function profile(id: UUID): Profile {
 }
 
 export function toPerson(p: Profile): Person {
-  return { id: p.id, name: p.name?.trim() || 'Member', color: p.avatar_color ?? 'mint', photoUrl: p.avatar_url }
+  return { id: p.id, name: p.name?.trim() || 'Member', color: p.avatar_color ?? 'leaf', photoUrl: p.avatar_url }
 }
 const personOf = (id: UUID) => toPerson(profile(id))
 
@@ -169,7 +169,7 @@ function findOrCreateTag(groupId: UUID, raw: string): Tag | null {
     id: newId(),
     group_id: groupId,
     name,
-    color: getTagColor(name),
+    color: getTagHue(name),
     usage_count: 0,
     created_at: nowIso(),
     deleted_at: null,
@@ -243,7 +243,7 @@ export async function updateProfile(patch: ProfilePatch): Promise<Me> {
   }
   if (patch.bio !== undefined) p.bio = patch.bio?.trim().slice(0, 140) || null
   if (patch.avatar_color !== undefined) {
-    if (!AVATAR_COLORS.includes(patch.avatar_color)) throw new Error('Unknown avatar color')
+    if (!AVATAR_HUES.includes(patch.avatar_color)) throw new Error('Unknown avatar color')
     p.avatar_color = patch.avatar_color
   }
   if (patch.avatar_url !== undefined) p.avatar_url = patch.avatar_url
@@ -281,7 +281,7 @@ export async function getMyRecentCheckIns(limit = 3): Promise<RecentCheckIn[]> {
       const g = db().groups.find((x) => x.id === c.group_id)
       return {
         id: c.id,
-        group: { id: c.group_id, name: g?.name ?? '', color: g?.color ?? 'mint' },
+        group: { id: c.group_id, name: g?.name ?? '', color: g?.color ?? 'leaf' },
         note: c.note,
         tags: tagsFor(c.id),
         createdAt: c.created_at,
@@ -304,7 +304,7 @@ export async function getAchievements(): Promise<Achievement[]> {
     }
     return Array.from(byDay.values()).some((s) => s.size >= members.size)
   })
-  const a = (key: string, title: string, subtitle: string, glyph: string, color: BrandColor, unlocked: boolean) => ({
+  const a = (key: string, title: string, subtitle: string, glyph: string, color: Hue, unlocked: boolean) => ({
     key,
     title,
     subtitle,
@@ -313,7 +313,7 @@ export async function getAchievements(): Promise<Achievement[]> {
     unlocked,
   })
   return [
-    a('first', 'First check-in', 'You showed up', '1', 'mint', total >= 1),
+    a('first', 'First check-in', 'You showed up', '1', 'rose', total >= 1),
     a('starter', 'Crew starter', 'Started a crew', 'C', 'sky', alive(db().groups).some((g) => g.created_by === ME_ID)),
     a('forty', 'Forty deep', '40 check-ins', '40', 'lemon', total >= 40),
     a('week', 'Week one', '7 days in a row', '7', 'coral', best >= 7),

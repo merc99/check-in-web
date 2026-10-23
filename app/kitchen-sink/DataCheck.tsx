@@ -58,20 +58,20 @@ export function DataCheck() {
       </div>
 
       {stats.data && (
-        <p className="tnum text-[13px] text-ink-soft">
-          You: <b className="text-ink">{stats.data.total}</b> all time · {stats.data.streak}-day streak · best{' '}
+        <p className="tnum text-[13px] text-muted-foreground">
+          You: <b className="text-foreground">{stats.data.total}</b> all time · {stats.data.streak}-day streak · best{' '}
           {stats.data.best} · {stats.data.checkedInToday ? 'in today' : 'not in yet'}
         </p>
       )}
 
       <div className="flex flex-col gap-3">
         {feed.data?.map((item) => (
-          <Card key={item.id} className={item.isMine ? 'bg-card-alt' : undefined}>
+          <Card key={item.id} className={item.isMine ? 'bg-card' : undefined}>
             <div className="flex items-center gap-3">
               <Avatar name={item.user.name} color={item.user.color} you={item.isMine} size="sm" />
               <p className="min-w-0 flex-1">
                 <b>{item.isMine ? 'You' : item.user.name}</b>
-                <span className="ml-[6px] text-[13px] text-ink-mute">{timeAgo(item.createdAt)}</span>
+                <span className="ml-[6px] text-[13px] text-muted-foreground">{timeAgo(item.createdAt)}</span>
               </p>
               <button
                 type="button"
@@ -80,8 +80,8 @@ export function DataCheck() {
                 onClick={() => toggleHeart(item.id)}
                 className={
                   item.hearts.byMe
-                    ? 'tnum inline-flex items-center gap-[6px] rounded-full border border-ink bg-rose py-[5px] pl-[9px] pr-3 text-[13px] font-bold text-rose-ink shadow-sh1'
-                    : 'tnum inline-flex items-center gap-[6px] rounded-full border border-ink bg-card py-[5px] pl-[9px] pr-3 text-[13px] font-bold shadow-sh1'
+                    ? 'tnum inline-flex items-center gap-[6px] rounded-full border border-border bg-rose py-[5px] pl-[9px] pr-3 text-[13px] font-bold text-rose-ink shadow-xs'
+                    : 'tnum inline-flex items-center gap-[6px] rounded-full border border-border bg-card py-[5px] pl-[9px] pr-3 text-[13px] font-bold shadow-xs'
                 }
               >
                 <HeartIcon size={16} />
@@ -112,7 +112,7 @@ export function DataCheck() {
           Simulate an arrival
         </Button>
       </div>
-      <p className="text-[12.5px] text-ink-mute">
+      <p className="text-[12.5px] text-muted-foreground">
         Live simulation is {SIMULATE_LIVE ? 'on: someone arrives every 9–16 seconds' : 'off in this build'}.
       </p>
     </div>

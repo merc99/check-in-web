@@ -14,20 +14,20 @@ export function JoinRequestCard({
 }) {
   const { person } = request
   return (
-    <Card className="mb-4 bg-card-alt">
+    <Card className="mb-4 bg-card">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => onPersonTap(person.id)}
           aria-label={`View ${person.name}`}
-          className="rounded-full transition-transform duration-200 ease-spring hover:scale-[1.06]"
+          className="rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
         >
           <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} />
         </button>
         <p className="min-w-0 flex-1">
           <b>{person.name}</b> wants to join your crew.
           <br />
-          <span className="text-[13px] text-ink-mute">
+          <span className="text-[13px] text-muted-foreground">
             <span className="tnum">{request.totalCheckIns}</span> check-ins so far
           </span>
         </p>

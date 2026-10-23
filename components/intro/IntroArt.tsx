@@ -2,14 +2,14 @@ import { Avatar } from '@/components/checkin/Avatar'
 import { Card } from '@/components/checkin/Card'
 import { HeatmapGrid, type HeatDay } from '@/components/checkin/HeatmapGrid'
 import { PostCard } from '@/components/checkin/PostCard'
-import type { BrandColor } from '@/lib/colors'
+import type { Hue } from '@/lib/colors'
 import type { FeedItem } from '@/lib/data'
 
 // Illustrations for the three intro slides. Static on purpose: CLAUDE.md keeps
 // ambient motion to live crew arrivals, so the prototype's spinning orbit and
 // floating card stand still here.
 
-const CREW: { name: string; color: BrandColor }[] = [
+const CREW: { name: string; color: Hue }[] = [
   { name: 'Maya', color: 'coral' },
   { name: 'Dre', color: 'sky' },
   { name: 'Priya', color: 'grape' },
@@ -21,7 +21,7 @@ const CREW: { name: string; color: BrandColor }[] = [
 export function OrbitArt() {
   return (
     <div className="relative size-[250px]" aria-hidden="true">
-      <div className="absolute inset-0 rounded-full border-2 border-dashed border-rule" />
+      <div className="absolute inset-0 rounded-full border-2 border-dashed border-border" />
       {CREW.map((p, i) => {
         const a = (i / CREW.length) * Math.PI * 2 - Math.PI / 2
         return (
@@ -34,7 +34,7 @@ export function OrbitArt() {
           </span>
         )
       })}
-      <div className="absolute inset-[62px] grid place-items-center rounded-full border border-ink bg-mint text-center shadow-sh3">
+      <div className="absolute inset-[62px] grid place-items-center rounded-full border border-border bg-primary text-center text-primary-foreground shadow-raised">
         <div>
           <div className="font-display text-[46px] leading-none">5/5</div>
           <div className="mt-1 text-[13px] font-bold">in today</div>
@@ -63,7 +63,7 @@ const SAMPLE: FeedItem = {
 export function CheckInArt() {
   return (
     <div className="relative w-[min(300px,100%)]" aria-hidden="true">
-      <div className="absolute right-[-6px] bottom-[-14px] left-[14px] top-[18px] rotate-[4deg] rounded-lg border border-ink bg-peach-deep shadow-sh2" />
+      <div className="absolute right-[-6px] bottom-[-14px] left-[14px] top-[18px] rotate-[4deg] rounded-lg border border-border bg-muted shadow-card" />
       <div className="pointer-events-none relative">
         <PostCard item={SAMPLE} onHeart={() => {}} />
       </div>
@@ -78,7 +78,7 @@ export function StreakArt() {
   return (
     <Card size="lg" className="w-[min(300px,100%)] text-center" aria-hidden="true">
       <div className="tnum font-display text-[72px] leading-[.9]">142</div>
-      <p className="mt-2 font-medium text-ink-soft">check-ins, all time</p>
+      <p className="mt-2 font-medium text-muted-foreground">check-ins, all time</p>
       <div className="mt-5">
         <HeatmapGrid days={WEEK} animate />
       </div>

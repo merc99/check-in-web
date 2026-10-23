@@ -2,8 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { cn } from '@/lib/cn'
-import { COLOR_CLASS, TAG_COLORS } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { HUE_CLASS, HUES } from '@/lib/colors'
 import { prefersReducedMotion, useCountUp } from '@/lib/motion'
 
 const AUTO_CLOSE_MS = 2900
@@ -39,7 +39,7 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
     prefersReducedMotion()
       ? []
       : Array.from({ length: 42 }, (_, i) => ({
-          color: TAG_COLORS[i % TAG_COLORS.length],
+          color: HUES[i % HUES.length],
           round: i % 3 === 0,
           left: Math.random() * 100,
           rotate: Math.round(Math.random() * 900 - 450),
@@ -80,7 +80,7 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
       ref={root}
       role="status"
       onClick={close}
-      className="fixed inset-0 z-70 mx-auto grid max-w-app cursor-pointer place-items-center overflow-hidden bg-mint transition-[clip-path] duration-700 ease-out"
+      className="fixed inset-0 z-70 mx-auto grid max-w-app cursor-pointer place-items-center overflow-hidden bg-primary text-primary-foreground transition-[clip-path] duration-700 ease-out"
       style={{ clipPath: `circle(${open ? '150%' : '0px'} at ${at.x}px ${at.y}px)` }}
     >
       <div className="relative z-2 p-6 text-center">
@@ -99,7 +99,7 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
         </div>
         <div
           className={cn(
-            'mt-6 inline-flex items-baseline gap-2 rounded-full border border-ink bg-card px-[18px] py-[10px] font-bold opacity-0 shadow-sh2 motion-reduce:opacity-100',
+            'mt-6 inline-flex items-baseline gap-2 rounded-full border border-border bg-card px-[18px] py-[10px] font-bold opacity-0 shadow-card motion-reduce:opacity-100',
             open && 'animate-word',
           )}
           style={{ animationDelay: '.55s' }}
@@ -116,9 +116,9 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
             key={i}
             aria-hidden="true"
             className={cn(
-              'absolute top-[-30px] z-1 animate-fall border border-ink',
-              c.round ? 'size-4 rounded-full' : 'h-6 w-[14px] rounded-tiny',
-              COLOR_CLASS[c.color].bg,
+              'absolute top-[-30px] z-1 animate-fall border border-border',
+              c.round ? 'size-4 rounded-full' : 'h-6 w-[14px] rounded-sm',
+              HUE_CLASS[c.color].solid,
             )}
             style={
               {

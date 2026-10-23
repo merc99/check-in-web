@@ -24,7 +24,7 @@ export function ConfirmSheet({
     <Sheet open={open} onClose={onClose} label={title}>
       <div className="flex flex-col gap-4 pt-2">
         <h2 className="font-display text-[28px] leading-none">{title}</h2>
-        <p className="text-ink-soft">{body}</p>
+        <p className="text-muted-foreground">{body}</p>
         {children}
         <Button variant="danger" block onClick={onConfirm}>
           {confirmLabel}

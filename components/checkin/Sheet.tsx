@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 
 const CLOSE_MS = 420 // a little under the 500ms open spring; the tail of the spring is off screen
 const DISMISS_PX = 110
@@ -128,7 +128,7 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
       <div
         aria-hidden="true"
         onClick={onClose}
-        className={cn('absolute inset-0 bg-ink/40 transition-opacity duration-300', shown ? 'opacity-100' : 'opacity-0')}
+        className={cn('absolute inset-0 bg-black/40 transition-opacity duration-200', shown ? 'opacity-100' : 'opacity-0')}
       />
       <div
         ref={panel}
@@ -138,9 +138,9 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
         aria-label={title ? undefined : label}
         tabIndex={-1}
         className={cn(
-          'absolute inset-x-0 bottom-0 max-h-[90%] overflow-y-auto overscroll-contain rounded-t-lg border-t border-ink bg-peach',
+          'absolute inset-x-0 bottom-0 max-h-[90%] overflow-y-auto overscroll-contain rounded-t-lg border-t border-border bg-background',
           'px-5 pb-[calc(24px+env(safe-area-inset-bottom))] pt-1 outline-hidden',
-          'transition-transform duration-500 ease-spring',
+          'transition-transform duration-200 ease-out',
           shown ? 'translate-y-0' : 'translate-y-[105%]',
         )}
       >
@@ -152,7 +152,7 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
           onPointerCancel={onPointerEnd}
           className="-mx-5 grid h-7 cursor-grab touch-none place-items-center active:cursor-grabbing"
         >
-          <span className="h-[5px] w-11 rounded-full bg-ink-mute" />
+          <span className="h-[5px] w-11 rounded-full bg-border-strong" />
         </div>
         {title && (
           <div className="mb-5 flex items-center gap-3">

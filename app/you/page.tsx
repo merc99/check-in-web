@@ -46,7 +46,7 @@ export default function YouPage() {
         <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you className="rotate-[-4deg]" />
         <div className="min-w-0 flex-1">
           <h1 className="wrap-break-word font-display text-4xl leading-[.95]">{person.name}</h1>
-          {profile.handle && <p className="mt-[6px] text-ink-soft">@{profile.handle}</p>}
+          {profile.handle && <p className="mt-[6px] text-muted-foreground">@{profile.handle}</p>}
           {profile.bio && <p className="mt-[6px]">{profile.bio}</p>}
           <Button size="sm" className="mt-3" onClick={() => router.push('/profile/edit')}>
             Edit profile
@@ -59,7 +59,7 @@ export default function YouPage() {
       <SectionTitle title="This week" />
       <Card>
         <HeatmapGrid days={week} animate />
-        <p className="mt-[14px] text-[12.5px] text-ink-mute">
+        <p className="mt-[14px] text-[12.5px] text-muted-foreground">
           {stats.data.checkedInToday ? 'You’re in for today.' : 'Today’s still open. No rush.'}
         </p>
       </Card>
@@ -90,7 +90,7 @@ export default function YouPage() {
             <span className="min-w-0 flex-1">
               <b>{g.name}</b>
               <br />
-              <span className="text-[12.5px] text-ink-mute">
+              <span className="text-[12.5px] text-muted-foreground">
                 <span className="tnum">{g.inToday}</span> of <span className="tnum">{g.memberCount}</span> in today
               </span>
             </span>
@@ -111,13 +111,13 @@ export default function YouPage() {
           <SectionTitle title="Recent check-ins" />
           <div className="flex flex-col gap-[10px]">
             {recent.data.map((c) => (
-              <div key={c.id} className="rounded-card border border-ink bg-card-alt px-4 py-[14px]">
+              <div key={c.id} className="rounded-lg border border-border bg-card px-4 py-[14px]">
                 <div className="flex items-center justify-between gap-3">
                   <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold">
                     <CrewDot color={c.group.color} />
                     <span className="truncate">{c.group.name}</span>
                   </span>
-                  <span className="flex-none text-[12.5px] text-ink-mute">
+                  <span className="flex-none text-[12.5px] text-muted-foreground">
                     {timeAgo(c.createdAt) === 'now' ? 'just now' : `${timeAgo(c.createdAt)} ago`}
                   </span>
                 </div>

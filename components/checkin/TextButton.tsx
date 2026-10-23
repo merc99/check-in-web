@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import { BackIcon } from './icons'
 
 const base =
@@ -9,14 +9,14 @@ const base =
 /** Underlined text action ("Skip", "Remove photo"). `danger` for destructive ones. */
 export const TextButton = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { danger?: boolean }>(
   function TextButton({ danger, className, type = 'button', ...props }, ref) {
-    return <button ref={ref} type={type} className={cn(base, danger ? 'text-danger-ink' : 'text-ink', className)} {...props} />
+    return <button ref={ref} type={type} className={cn(base, danger ? 'text-destructive-ink' : 'text-foreground', className)} {...props} />
   },
 )
 
 /** Same look, navigates. */
 export function TextLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
   return (
-    <Link href={href} className={cn(base, 'text-ink', className)}>
+    <Link href={href} className={cn(base, 'text-foreground', className)}>
       {children}
     </Link>
   )

@@ -1,37 +1,40 @@
 import type { Metadata, Viewport } from 'next'
-import { Bowlby_One, Inter, Geist } from 'next/font/google'
+import { Bricolage_Grotesque, Geist } from 'next/font/google'
+import { ThemeProvider } from 'next-themes'
 import { TabBarDock } from '@/components/checkin/TabBar'
 import { Providers } from './providers'
 import './globals.css'
-import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+// Display: Bricolage Grotesque keeps the playful edge. Body: Geist for the clean, modern read.
+const display = Bricolage_Grotesque({ subsets: ['latin'], weight: ['500', '600', '700', '800'], variable: '--font-bricolage', display: 'swap' })
+const sans = Geist({ subsets: ['latin'], variable: '--font-geist-sans', display: 'swap' })
 
-const bowlby = Bowlby_One({ weight: '400', subsets: ['latin'], variable: '--font-bowlby', display: 'swap' })
-const inter = Inter({ weight: ['400', '500', '700'], subsets: ['latin'], variable: '--font-inter', display: 'swap' })
-
-export const metadata: Metadata = {
-  title: 'Check-in',
-  description: 'No shame days, just show up.',
-}
+export const metadata: Metadata = { title: 'Check-in', description: 'No shame days, just show up.' }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#FCEFD7',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FAF9F6' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B0B0C' },
+  ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn(bowlby.variable, inter.variable, "font-sans", geist.variable)}>
+    <html lang="en" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
       <body>
-        <div className="grain relative mx-auto min-h-dvh max-w-app">
-          <Providers>
-            {children}
-            <TabBarDock />
-          </Providers>
-        </div>
+        {/* .dark goes on <html>. Default follows the system; the You tab has a toggle. */}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <div className="relative mx-auto min-h-dvh max-w-app">
+            {/* Project: toasts, live pill, demo sign-in, active crew + simulation, then the tab dock. */}
+            <Providers>
+              {children}
+              <TabBarDock />
+            </Providers>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   )

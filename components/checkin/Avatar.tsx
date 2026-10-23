@@ -1,5 +1,5 @@
-import { cn } from '@/lib/cn'
-import { COLOR_CLASS, type BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { HUE_CLASS, type Hue } from '@/lib/colors'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 const SIZE: Record<Size, string> = {
@@ -12,7 +12,7 @@ const SIZE: Record<Size, string> = {
 
 export interface AvatarProps {
   name?: string
-  color?: BrandColor
+  color?: Hue
   photoUrl?: string | null
   size?: Size
   /** The signed-in user: gets the mint ring. */
@@ -22,12 +22,12 @@ export interface AvatarProps {
   className?: string
 }
 
-export function Avatar({ name, color = 'mint', photoUrl, size = 'md', you, pending, className }: AvatarProps) {
+export function Avatar({ name, color = 'leaf', photoUrl, size = 'md', you, pending, className }: AvatarProps) {
   return (
     <span
       className={cn(
-        'relative grid flex-none place-items-center overflow-hidden rounded-full border border-ink font-display leading-none text-ink transition-opacity duration-300',
-        pending ? 'border-dashed bg-card opacity-55' : COLOR_CLASS[color].bg,
+        'relative grid flex-none place-items-center overflow-hidden rounded-full border border-border font-display leading-none transition-opacity duration-200',
+        pending ? 'border-dashed bg-card text-muted-foreground opacity-55' : cn(HUE_CLASS[color].solid, 'text-on-color'),
         SIZE[size],
         you && 'shadow-you',
         className,
@@ -40,8 +40,8 @@ export function Avatar({ name, color = 'mint', photoUrl, size = 'md', you, pendi
         name.trim()[0]?.toUpperCase()
       ) : (
         <svg viewBox="0 0 24 24" className="size-[62%]" aria-hidden="true">
-          <circle cx="12" cy="9" r="4" className="fill-ink-mute" />
-          <path d="M4 21c1.4-4 4.4-6 8-6s6.6 2 8 6" className="fill-ink-mute" />
+          <circle cx="12" cy="9" r="4" className="fill-muted-foreground" />
+          <path d="M4 21c1.4-4 4.4-6 8-6s6.6 2 8 6" className="fill-muted-foreground" />
         </svg>
       )}
     </span>

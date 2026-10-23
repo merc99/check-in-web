@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 
 export interface FormFieldProps {
   label: ReactNode
@@ -20,15 +20,15 @@ export function FormField({ label, optional, hint, as = 'label', className, chil
     <>
       <span
         id={id}
-        className="mb-2 flex justify-between text-[11px] font-bold uppercase tracking-[.07em] text-ink-soft"
+        className="mb-2 flex justify-between text-[11px] font-bold uppercase tracking-[.07em] text-muted-foreground"
       >
         {label}
         {optional && (
-          <em className="text-xs font-medium normal-case not-italic tracking-normal text-ink-mute">optional</em>
+          <em className="text-xs font-medium normal-case not-italic tracking-normal text-muted-foreground">optional</em>
         )}
       </span>
       {children}
-      {hint && <p className="mt-2 text-[12.5px] text-ink-mute">{hint}</p>}
+      {hint && <p className="mt-2 text-[12.5px] text-muted-foreground">{hint}</p>}
     </>
   )
   return as === 'group' ? (
@@ -41,7 +41,7 @@ export function FormField({ label, optional, hint, as = 'label', className, chil
 }
 
 const FIELD =
-  'w-full rounded-input border border-ink bg-card px-[14px] py-[13px] text-base shadow-sh2 outline-hidden transition-shadow duration-150 placeholder:text-ink-mute focus:shadow-focus'
+  'w-full rounded-md border border-border bg-card px-[14px] py-[13px] text-base shadow-card outline-hidden transition-shadow duration-150 placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/25'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className, ...props },

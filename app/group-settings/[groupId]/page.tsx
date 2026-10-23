@@ -19,8 +19,8 @@ import { BackLink, TextButton } from '@/components/checkin/TextButton'
 import { CodeTiles, Ticket } from '@/components/checkin/Ticket'
 import { useToast } from '@/components/checkin/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
-import { cn } from '@/lib/cn'
-import { GROUP_COLORS } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { CREW_HUES } from '@/lib/colors'
 import { deleteGroup, getGroup, leaveGroup, removeMember, updateGroup, useQuery, type MemberRow } from '@/lib/data'
 
 type Confirm = { kind: 'remove'; member: MemberRow } | { kind: 'delete' } | { kind: 'leave' } | null
@@ -56,7 +56,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
         <BackLink href="/feed" label="Feed" />
         <div className="px-2 py-10 text-center">
           <h1 className="font-display text-[26px] leading-none">This crew isn’t one of yours.</h1>
-          <p className="mt-2 text-ink-soft">It may have been deleted, or you left it.</p>
+          <p className="mt-2 text-muted-foreground">It may have been deleted, or you left it.</p>
         </div>
       </main>
     )
@@ -147,13 +147,13 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
       {g.isOwner && (
         <>
           <SectionTitle title="Theme color" />
-          <Swatches colors={GROUP_COLORS} value={g.color} onChange={(color) => updateGroup(g.id, { color }).catch(fail)} />
+          <Swatches colors={CREW_HUES} value={g.color} onChange={(color) => updateGroup(g.id, { color }).catch(fail)} />
 
           <SectionTitle title="Who can find it" />
           <Card className="flex items-center gap-4">
             <div className="min-w-0 flex-1">
               <p className="font-bold">Show in Explore</p>
-              <p className="mt-1 text-[13px] text-ink-soft">
+              <p className="mt-1 text-[13px] text-muted-foreground">
                 {g.isPublic ? 'Anyone can find this crew and ask to join.' : 'Invite code only. Nobody finds it by browsing.'}
               </p>
             </div>
@@ -193,16 +193,16 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
                 type="button"
                 onClick={() => setProfileId(m.person.id)}
                 aria-label={`View ${m.person.name}`}
-                className="rounded-full transition-transform duration-200 ease-spring hover:scale-[1.06]"
+                className="rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
               >
                 <Avatar name={m.person.name} color={m.person.color} photoUrl={m.person.photoUrl} size="sm" />
               </button>
             )}
             <span className="min-w-0 flex-1">
               <b>{m.isMe ? 'You' : m.person.name}</b>
-              {m.isCreator && <span className="text-xs text-ink-mute"> started this crew</span>}
+              {m.isCreator && <span className="text-xs text-muted-foreground"> started this crew</span>}
               <br />
-              <span className={cn('inline-flex items-center gap-1 text-[12.5px]', m.inToday ? 'font-bold text-leaf-ink' : 'font-medium text-ink-mute')}>
+              <span className={cn('inline-flex items-center gap-1 text-[12.5px]', m.inToday ? 'font-bold text-leaf-ink' : 'font-medium text-muted-foreground')}>
                 {m.inToday ? (
                   <>
                     <CheckIcon size={13} /> In today
@@ -231,7 +231,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
       <SectionTitle title="Tags" />
       <Card>
         <div className="flex flex-wrap gap-2">
-          {g.tags.length ? g.tags.map((t) => <TagChip key={t.id} name={t.name} />) : <span className="text-[12.5px] text-ink-mute">No tags yet.</span>}
+          {g.tags.length ? g.tags.map((t) => <TagChip key={t.id} name={t.name} />) : <span className="text-[12.5px] text-muted-foreground">No tags yet.</span>}
         </div>
         <Button size="sm" className="mt-4" onClick={() => router.push(`/manage-tags/${g.id}`)}>
           Manage tags

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, type KeyboardEvent } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 
 export interface SegmentedProps<T extends string> {
   options: readonly { value: T; label: string }[]
@@ -30,11 +30,11 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
       role="tablist"
       aria-label={label}
       onKeyDown={onKeyDown}
-      className="relative flex rounded-full border border-ink bg-card p-1 shadow-sh2"
+      className="relative flex rounded-full border border-border bg-card p-1 shadow-card"
     >
       <span
         aria-hidden="true"
-        className="absolute inset-y-1 left-1 rounded-full bg-ink transition-transform duration-400 ease-spring"
+        className="absolute inset-y-1 left-1 rounded-full bg-foreground transition-transform duration-200 ease-out"
         style={{ width: `calc((100% - 8px) / ${options.length})`, transform: `translateX(${index * 100}%)` }}
       />
       {options.map((o) => {
@@ -49,7 +49,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
             onClick={() => onChange(o.value)}
             className={cn(
               'relative z-1 flex-1 rounded-full p-[11px] font-bold transition-colors duration-200',
-              selected ? 'text-peach' : 'text-ink',
+              selected ? 'text-background' : 'text-foreground',
             )}
           >
             {o.label}

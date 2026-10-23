@@ -1,4 +1,4 @@
-import { getTagColor, type BrandColor } from '@/lib/colors'
+import { getTagHue, type Hue } from '@/lib/colors'
 import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag } from '@/lib/data/types'
 import { addDays, DAY, HOUR, localDate, MINUTE, startOfDay } from '@/lib/dates'
 
@@ -11,7 +11,7 @@ export const ME_ID = 'me'
 interface PersonSeed {
   id: string
   name: string
-  color: BrandColor
+  color: Hue
   /** Days since they signed up. */
   joined: number
   streak: number
@@ -23,7 +23,7 @@ interface PersonSeed {
 }
 
 const PEOPLE: PersonSeed[] = [
-  { id: ME_ID, name: 'Ben', color: 'mint', joined: 52, streak: 6, total: 41, bestRun: 14, handle: 'benwoods', bio: 'Showing up, mostly.' },
+  { id: ME_ID, name: 'Ben', color: 'leaf', joined: 52, streak: 6, total: 41, bestRun: 14, handle: 'benwoods', bio: 'Showing up, mostly.' },
   { id: 'u1', name: 'Maya', color: 'coral', joined: 140, streak: 12, total: 88 },
   { id: 'u2', name: 'Dre', color: 'sky', joined: 100, streak: 4, total: 37 },
   { id: 'u3', name: 'Priya', color: 'grape', joined: 190, streak: 21, total: 112 },
@@ -44,7 +44,7 @@ const PEOPLE: PersonSeed[] = [
 interface GroupSeed {
   id: string
   name: string
-  color: BrandColor
+  color: Hue
   slug: string
   max: number
   createdBy: string
@@ -155,7 +155,7 @@ export function createSeed(now: Date = new Date()): Tables {
       id: `t-${g.id}-${name.replace(/\s+/g, '-')}`,
       group_id: g.id,
       name,
-      color: getTagColor(name),
+      color: getTagHue(name),
       usage_count: 0,
       created_at: daysAgo(200),
       deleted_at: null,

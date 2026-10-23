@@ -153,7 +153,7 @@ export default function FeedPage() {
         </div>
         <div className="px-2 py-10 text-center">
           <h2 className="font-display text-[26px] leading-none">Can’t reach your crew right now.</h2>
-          <p className="mt-2 text-ink-soft">Nothing’s lost. Give it a moment and try again.</p>
+          <p className="mt-2 text-muted-foreground">Nothing’s lost. Give it a moment and try again.</p>
           <Button size="sm" className="mt-5" onClick={group.refetch}>
             Try again
           </Button>
@@ -176,7 +176,7 @@ export default function FeedPage() {
             {me.data && <Avatar size="lg" name={me.data.person.name} color={me.data.person.color} photoUrl={me.data.person.photoUrl} you className="-ml-2" />}
           </div>
           <h2 className="font-display text-[30px] leading-none">Find your crew.</h2>
-          <p className="mx-auto mb-6 mt-3 max-w-[32ch] text-ink-soft">
+          <p className="mx-auto mb-6 mt-3 max-w-[32ch] text-muted-foreground">
             Check-ins live inside a small group. Start one with friends, or join one that’s already going.
           </p>
           <div className="mx-auto flex max-w-[320px] flex-col gap-4">
@@ -212,7 +212,7 @@ export default function FeedPage() {
       <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} />
 
       {g.pinnedMessage && (
-        <div className="mt-4 flex items-start gap-[10px] rounded-input border border-dashed border-ink-mute px-[14px] py-3 text-sm text-ink-soft">
+        <div className="mt-4 flex items-start gap-[10px] rounded-md border border-dashed border-border-strong px-[14px] py-3 text-sm text-muted-foreground">
           <PinIcon size={17} className="mt-px flex-none" />
           <p>{g.pinnedMessage}</p>
         </div>
@@ -221,7 +221,7 @@ export default function FeedPage() {
       {items.length === 0 ? (
         <div className="px-2 py-10 text-center">
           <h2 className="font-display text-[26px] leading-none">Quiet so far.</h2>
-          <p className="mt-2 text-ink-soft">Be the first one in today.</p>
+          <p className="mt-2 text-muted-foreground">Be the first one in today.</p>
         </div>
       ) : (
         items.map((item) => {
@@ -231,7 +231,7 @@ export default function FeedPage() {
           return (
             <Fragment key={item.id}>
               {divider && (
-                <h2 className="mb-[14px] mt-8 flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-rule">
+                <h2 className="mb-[14px] mt-8 flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border">
                   {label}
                 </h2>
               )}

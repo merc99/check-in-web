@@ -41,7 +41,7 @@ export default function ExplorePage() {
         {crews.data?.map((c) => <CrewCard key={c.id} crew={c} onOpen={() => setOpenId(c.id)} />)}
         {crews.data && crews.data.length === 0 && (
           <div className="px-2 py-10 text-center">
-            <p className="text-ink-soft">No crews match “{q}”. Start one and name it whatever you like.</p>
+            <p className="text-muted-foreground">No crews match “{q}”. Start one and name it whatever you like.</p>
             <Button size="sm" className="mt-4" onClick={() => router.push('/new-group')}>
               Start a crew
             </Button>

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import { CheckIcon } from './icons'
 
 export interface HeatDay {
@@ -31,9 +31,9 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
         <div key={i}>
           <div
             className={cn(
-              'grid aspect-square place-items-center rounded-input border',
-              d.done ? 'border-ink bg-mint shadow-sh1' : 'border-rule bg-peach-deep',
-              d.today && 'outline-solid outline-[2.5px] outline-offset-2 outline-ink',
+              'grid aspect-square place-items-center rounded-md border',
+              d.done ? 'border-transparent bg-primary text-primary-foreground shadow-xs' : 'border-border bg-muted',
+              d.today && 'outline-solid outline-[2.5px] outline-offset-2 outline-foreground',
               d.future && 'opacity-45',
               animate && d.done && 'animate-cellin',
             )}
@@ -44,7 +44,7 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
               {DAY_NAMES[i] ?? d.label}: {d.done ? 'checked in' : d.future ? 'still to come' : 'open'}
             </span>
           </div>
-          <div aria-hidden="true" className="mt-2 text-center text-[11.5px] font-bold text-ink-soft">
+          <div aria-hidden="true" className="mt-2 text-center text-[11.5px] font-bold text-muted-foreground">
             {d.label}
           </div>
         </div>

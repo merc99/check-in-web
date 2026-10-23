@@ -14,7 +14,7 @@ import { Segmented } from '@/components/checkin/Segmented'
 import { Sheet } from '@/components/checkin/Sheet'
 import { TabBar, type TabKey } from '@/components/checkin/TabBar'
 import { useToast } from '@/components/checkin/Toast'
-import { AVATAR_COLORS } from '@/lib/colors'
+import { AVATAR_HUES } from '@/lib/colors'
 import { DataCheck } from './DataCheck'
 
 const VARIANTS = ['primary', 'dark', 'secondary', 'danger'] as const
@@ -56,7 +56,7 @@ export default function KitchenSink() {
     <main className="px-5 pb-[150px]">
       <header className="pb-1 pt-7">
         <h1 className="font-display text-[40px] leading-[.95]">Kitchen sink</h1>
-        <p className="mt-[10px] max-w-[36ch] text-[15.5px] text-ink-soft">
+        <p className="mt-[10px] max-w-[36ch] text-[15.5px] text-muted-foreground">
           Every piece in components/ui, in all its variants. Press things.
         </p>
       </header>
@@ -109,11 +109,11 @@ export default function KitchenSink() {
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap items-center gap-3">
             {AVATAR_SIZES.map((s, i) => (
-              <Avatar key={s} name={NAMES[i]} color={AVATAR_COLORS[i]} size={s} />
+              <Avatar key={s} name={NAMES[i]} color={AVATAR_HUES[i]} size={s} />
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {AVATAR_COLORS.map((c, i) => (
+            {AVATAR_HUES.map((c, i) => (
               <Avatar key={c} name={NAMES[i]} color={c} />
             ))}
             <Avatar />
@@ -121,7 +121,7 @@ export default function KitchenSink() {
           </div>
           <div className="flex">
             {NAMES.slice(0, 4).map((n, i) => (
-              <Avatar key={n} name={n} color={AVATAR_COLORS[i]} size="xs" className={i ? '-ml-2' : undefined} />
+              <Avatar key={n} name={n} color={AVATAR_HUES[i]} size="xs" className={i ? '-ml-2' : undefined} />
             ))}
           </div>
         </div>
@@ -131,11 +131,11 @@ export default function KitchenSink() {
         <div className="flex flex-col gap-[14px]">
           <Card>
             <p className="font-bold">Card, md</p>
-            <p className="mt-1 text-ink-soft">14px radius, 16px padding, sh2. Posts, lists, stats.</p>
+            <p className="mt-1 text-muted-foreground">14px radius, 16px padding, sh2. Posts, lists, stats.</p>
           </Card>
           <Card size="lg">
             <p className="font-bold">Card, lg</p>
-            <p className="mt-1 text-ink-soft">18px radius, 20px padding. Hero and feature cards.</p>
+            <p className="mt-1 text-muted-foreground">18px radius, 20px padding. Hero and feature cards.</p>
           </Card>
         </div>
       </Section>
@@ -181,7 +181,7 @@ export default function KitchenSink() {
         <Card>
           <HeatmapGrid key={heatRun} days={week} animate />
           <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="text-[12.5px] text-ink-mute">Today’s still open. No rush.</p>
+            <p className="text-[12.5px] text-muted-foreground">Today’s still open. No rush.</p>
             <Button size="sm" onClick={() => setHeatRun((n) => n + 1)}>
               Replay
             </Button>
@@ -227,7 +227,7 @@ export default function KitchenSink() {
         <div className="flex flex-col gap-4">
           <FormField label="Note" optional>
             <Textarea placeholder="How’d it go?" maxLength={280} value={note} onChange={(e) => setNote(e.target.value)} />
-            <p className="tnum mt-[6px] text-right text-xs text-ink-mute">{note.length} / 280</p>
+            <p className="tnum mt-[6px] text-right text-xs text-muted-foreground">{note.length} / 280</p>
           </FormField>
           <FormField label="Tags" as="group" optional>
             <div className="flex flex-wrap gap-2">

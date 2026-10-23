@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/lib/cn'
-import { COLOR_CLASS, type BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { HUE_CLASS, type Hue } from '@/lib/colors'
 import type { Person } from '@/lib/data'
 import { useCountUp } from '@/lib/motion'
 import { Avatar } from './Avatar'
@@ -14,7 +14,7 @@ export interface HeroMember {
 }
 
 export interface CrewHeroProps {
-  color: BrandColor
+  color: Hue
   members: HeroMember[]
   /** The person who just arrived: their sticker pops and their check badge spins in. */
   arrivedId?: string | null
@@ -36,7 +36,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
   return (
     <section
       aria-label="Who’s in today"
-      className={cn('relative overflow-hidden rounded-lg border border-ink p-5 shadow-sh3 transition-colors duration-400', COLOR_CLASS[color].bg)}
+      className={cn('relative overflow-hidden rounded-lg border border-border p-5 shadow-raised transition-colors duration-200', HUE_CLASS[color].soft)}
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -62,7 +62,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
                   type="button"
                   onClick={() => onPersonTap(person.id)}
                   aria-label={`View ${person.name}`}
-                  className="block rounded-full transition-transform duration-200 ease-spring hover:scale-[1.06]"
+                  className="block rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
                 >
                   {avatar}
                 </button>
@@ -72,7 +72,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
               <span
                 aria-hidden="true"
                 className={cn(
-                  'absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-ink bg-mint transition-transform duration-350 ease-spring',
+                  'absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-border bg-primary text-primary-foreground transition-transform duration-350 ease-spring',
                   inToday ? 'scale-100' : 'scale-0',
                   arrived && 'animate-tickpop',
                 )}
@@ -87,10 +87,10 @@ export function CrewHero({ color, members, arrivedId, onPersonTap }: CrewHeroPro
 
       <div aria-hidden="true" className="mt-5 flex gap-[6px]">
         {members.map((m, i) => (
-          <span key={m.person.id} className="relative h-[10px] flex-1 overflow-hidden rounded-full border border-ink bg-card">
+          <span key={m.person.id} className="relative h-[10px] flex-1 overflow-hidden rounded-full border border-border bg-card">
             <span
               className={cn(
-                'absolute inset-0 origin-left bg-ink transition-transform duration-500 ease-out',
+                'absolute inset-0 origin-left bg-foreground transition-transform duration-200 ease-out',
                 i < n ? 'scale-x-100' : 'scale-x-0',
               )}
             />

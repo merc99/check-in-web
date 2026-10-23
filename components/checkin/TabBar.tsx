@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import { CompassIcon, FeedIcon, UserIcon } from './icons'
 
 export type TabKey = 'explore' | 'feed' | 'you'
@@ -24,17 +24,17 @@ export interface TabBarProps {
 export function TabBar({ active, onSelect }: TabBarProps) {
   const index = TABS.findIndex((t) => t.key === active)
   return (
-    <nav aria-label="Main" className="relative flex rounded-full border border-ink bg-card p-[6px] shadow-sh2">
+    <nav aria-label="Main" className="relative flex rounded-full border border-border bg-card p-[6px] shadow-card">
       <span
         aria-hidden="true"
-        className="absolute inset-y-[6px] left-[6px] w-[calc((100%-12px)/3)] rounded-full bg-ink transition-transform duration-500 ease-spring"
+        className="absolute inset-y-[6px] left-[6px] w-[calc((100%-12px)/3)] rounded-full bg-foreground transition-transform duration-200 ease-out"
         style={{ transform: `translateX(${index * 100}%)` }}
       />
       {TABS.map(({ key, label, href, Icon }) => {
         const current = key === active
         const className = cn(
-          'relative z-1 flex flex-1 items-center justify-center gap-[6px] rounded-full px-1 py-[11px] text-[13.5px] font-bold transition-colors duration-250',
-          current ? 'text-peach' : 'text-ink-soft',
+          'relative z-1 flex flex-1 items-center justify-center gap-[6px] rounded-full px-1 py-[11px] text-[13.5px] font-bold transition-colors duration-200',
+          current ? 'text-background' : 'text-muted-foreground',
         )
         const inner = (
           <>
@@ -81,7 +81,7 @@ export function TabBarDock() {
       aria-hidden={!match}
       className={cn(
         'pointer-events-none fixed inset-x-0 bottom-0 z-24 mx-auto max-w-app px-4 pb-[calc(14px+env(safe-area-inset-bottom))]',
-        'transition-transform duration-350 ease-spring',
+        'transition-transform duration-200 ease-out',
         match ? 'translate-y-0' : 'translate-y-[130%]',
       )}
     >

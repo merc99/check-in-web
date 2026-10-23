@@ -1,12 +1,12 @@
 import type { HTMLAttributes } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 
 /** White card that holds rows, divided by rule lines. Children are the rows. */
 export function List({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        'divide-y divide-rule overflow-hidden rounded-card border border-ink bg-card shadow-sh2',
+        'divide-y divide-border overflow-hidden rounded-lg border border-border bg-card shadow-card',
         className,
       )}
       {...props}

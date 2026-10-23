@@ -24,14 +24,14 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
             <Avatar name={p.person.name} color={p.person.color} photoUrl={p.person.photoUrl} size="xl" className="rotate-[-4deg]" />
           </div>
           <h2 className="font-display text-[30px] leading-none">{p.person.name}</h2>
-          <p className="text-ink-soft">Member since {monthYear(p.memberSince)}</p>
+          <p className="text-muted-foreground">Member since {monthYear(p.memberSince)}</p>
           <div className="grid grid-cols-2 gap-3 text-left">
             <StatCard big value={p.total} label="check-ins, all time" />
             <StatCard value={p.streak} label="day streak" />
             <StatCard value={p.sharedGroups.length} label="crews with you" />
           </div>
           {p.sharedGroups.length > 0 && (
-            <p className="text-[13.5px] text-ink-soft">
+            <p className="text-[13.5px] text-muted-foreground">
               You’re both in {p.sharedGroups.map((g) => g.name).join(' and ')}.
             </p>
           )}

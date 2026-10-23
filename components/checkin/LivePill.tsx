@@ -1,14 +1,14 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
-import { cn } from '@/lib/cn'
-import type { BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import type { Hue } from '@/lib/colors'
 import { Avatar } from './Avatar'
 
 const HIDE_MS = 3400
 
 export interface LiveNotice {
-  user: { name: string; color?: BrandColor; photoUrl?: string | null }
+  user: { name: string; color?: Hue; photoUrl?: string | null }
   /** e.g. <><b>Dre</b> just checked in</> */
   message: ReactNode
   onTap?: () => void
@@ -62,9 +62,9 @@ export function LivePill({ notice, show, onTap }: { notice: LiveNotice | null; s
           tabIndex={show ? 0 : -1}
           aria-hidden={!show}
           className={cn(
-            'pointer-events-auto flex max-w-full items-center gap-[10px] whitespace-nowrap rounded-full border border-ink bg-card',
-            'py-[5px] pl-[5px] pr-4 text-[13.5px] font-medium shadow-sh2',
-            'transition-transform duration-550 ease-spring',
+            'pointer-events-auto flex max-w-full items-center gap-[10px] whitespace-nowrap rounded-full border border-border bg-card',
+            'py-[5px] pl-[5px] pr-4 text-[13.5px] font-medium shadow-card',
+            'transition-transform duration-200 ease-out',
             show ? 'translate-y-0' : 'translate-y-[-90px]',
           )}
         >

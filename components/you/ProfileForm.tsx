@@ -8,7 +8,7 @@ import { PageHead } from '@/components/checkin/SectionTitle'
 import { Swatches } from '@/components/checkin/Swatches'
 import { TextButton } from '@/components/checkin/TextButton'
 import { useToast } from '@/components/checkin/Toast'
-import { AVATAR_COLORS, type BrandColor } from '@/lib/colors'
+import { AVATAR_HUES, type Hue } from '@/lib/colors'
 import { getMe, updateProfile } from '@/lib/data'
 
 const PHOTO_MAX_BYTES = 5 * 1024 * 1024
@@ -33,7 +33,7 @@ export function ProfileForm({
   const [name, setName] = useState('')
   const [handle, setHandle] = useState('')
   const [bio, setBio] = useState('')
-  const [color, setColor] = useState<BrandColor>('mint')
+  const [color, setColor] = useState<Hue>('leaf')
   const [photo, setPhoto] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
@@ -43,7 +43,7 @@ export function ProfileForm({
       setName(profile.name ?? '')
       setHandle(profile.handle ? `@${profile.handle}` : '')
       setBio(profile.bio ?? '')
-      setColor(profile.avatar_color ?? 'mint')
+      setColor(profile.avatar_color ?? 'leaf')
       setPhoto(profile.avatar_url)
       setReady(true)
     })
@@ -105,7 +105,7 @@ export function ProfileForm({
         </div>
 
         <FormField label="Avatar color" as="group">
-          <Swatches colors={AVATAR_COLORS} value={color} onChange={setColor} />
+          <Swatches colors={AVATAR_HUES} value={color} onChange={setColor} />
         </FormField>
         <FormField label="Name">
           <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder="What your crew calls you" />

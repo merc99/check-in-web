@@ -7,7 +7,7 @@ import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { Input } from '@/components/checkin/FormField'
 import { ChevronIcon } from '@/components/checkin/icons'
 import { useToast } from '@/components/checkin/Toast'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import { addTag, deleteTags, getTags, useQuery, type GroupSummary } from '@/lib/data'
 
 /** One crew's tags: tap to select, delete the selection, or add a new one with a live chip preview. */
@@ -71,14 +71,14 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
       >
         <CrewBlock name={group.name} color={group.color} size="sm" />
         <span className="min-w-0 truncate">{group.name}</span>
-        <span className="tnum font-medium text-ink-mute">{list.length}</span>
-        <ChevronIcon size={18} className={cn('ml-auto flex-none transition-transform duration-300 ease-spring', open && 'rotate-180')} />
+        <span className="tnum font-medium text-muted-foreground">{list.length}</span>
+        <ChevronIcon size={18} className={cn('ml-auto flex-none transition-transform duration-200 ease-out', open && 'rotate-180')} />
       </button>
       {/* Height animates via grid rows (0fr → 1fr), so no measuring. */}
       <div
         id={panelId}
         ref={panel}
-        className={cn('grid transition-[grid-template-rows] duration-400 ease-out', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}
+        className={cn('grid transition-[grid-template-rows] duration-200 ease-out', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}
       >
         <div className="overflow-hidden">
           <div className="flex flex-col gap-4 px-4 pb-[18px] pt-1">
@@ -86,7 +86,7 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
               {list.length ? (
                 list.map((t) => <ToggleChip key={t.id} label={t.name} selected={selected.has(t.id)} onToggle={() => toggle(t.id)} />)
               ) : (
-                <p className="text-[12.5px] text-ink-mute">No tags yet.</p>
+                <p className="text-[12.5px] text-muted-foreground">No tags yet.</p>
               )}
             </div>
             {selected.size > 0 && (

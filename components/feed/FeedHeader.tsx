@@ -3,8 +3,8 @@
 import { CrewDot } from '@/components/checkin/CrewBlock'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
-import { cn } from '@/lib/cn'
-import type { BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import type { Hue } from '@/lib/colors'
 import { useScrolledPast } from '@/lib/motion'
 
 /**
@@ -13,7 +13,7 @@ import { useScrolledPast } from '@/lib/motion'
  */
 export function FeedHeader({
   group, onSwitch,
-}: { group: { id: string; name: string; color: BrandColor }; onSwitch: () => void }) {
+}: { group: { id: string; name: string; color: Hue }; onSwitch: () => void }) {
   const collapsed = useScrolledPast(70)
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
 
@@ -22,7 +22,7 @@ export function FeedHeader({
       <header
         className={cn(
           'sticky top-0 z-20 -mx-5 flex items-center gap-3 border-b px-5 pb-[10px] pt-[14px] transition-colors duration-200',
-          collapsed ? 'border-rule bg-peach' : 'border-transparent bg-transparent',
+          collapsed ? 'border-border bg-background' : 'border-transparent bg-transparent',
         )}
       >
         <button
@@ -32,7 +32,7 @@ export function FeedHeader({
           tabIndex={collapsed ? 0 : -1}
           aria-hidden={!collapsed}
           className={cn(
-            'inline-flex min-w-0 items-center gap-2 px-1 py-[6px] font-display text-[17px] transition-[opacity,transform] duration-300 ease-spring',
+            'inline-flex min-w-0 items-center gap-2 px-1 py-[6px] font-display text-[17px] transition-[opacity,transform] duration-200 ease-out',
             collapsed ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
           )}
         >
@@ -47,7 +47,7 @@ export function FeedHeader({
       </header>
 
       <div className="pb-5 pt-1">
-        <p className="text-[13.5px] font-medium text-ink-soft">{date}</p>
+        <p className="text-[13.5px] font-medium text-muted-foreground">{date}</p>
         <h1 className="mt-[6px]">
           <button
             type="button"
@@ -56,7 +56,7 @@ export function FeedHeader({
             className="group flex max-w-full items-center gap-2 text-left font-display text-[40px] leading-[.95] max-[380px]:text-[34px]"
           >
             {group.name}
-            <ChevronIcon size={26} className="flex-none transition-transform duration-200 ease-spring group-hover:translate-y-[3px]" />
+            <ChevronIcon size={26} className="flex-none transition-transform duration-150 ease-out group-hover:translate-y-[3px]" />
           </button>
         </h1>
       </div>

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 
 /** On/off pill. The knob slides (transform) and the track fills mint when on. */
 export function Switch({
@@ -13,14 +13,14 @@ export function Switch({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-8 w-[52px] flex-none rounded-full border border-ink shadow-sh1 transition-colors duration-200 disabled:opacity-45',
-        checked ? 'bg-mint' : 'bg-peach-deep',
+        'relative h-8 w-[52px] flex-none rounded-full border border-border shadow-xs transition-colors duration-200 disabled:opacity-45',
+        checked ? 'bg-primary' : 'bg-muted',
       )}
     >
       <span
         aria-hidden="true"
         className={cn(
-          'absolute left-[3px] top-[3px] size-[23px] rounded-full border border-ink bg-card transition-transform duration-300 ease-spring',
+          'absolute left-[3px] top-[3px] size-[23px] rounded-full border border-border bg-card transition-transform duration-200 ease-out',
           checked && 'translate-x-5',
         )}
       />

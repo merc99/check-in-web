@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/cn'
-import { COLOR_CLASS, type BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { HUE_CLASS, type Hue } from '@/lib/colors'
 
 /**
  * Invite ticket in the crew color: a main section, a perforated divider with
@@ -8,14 +8,14 @@ import { COLOR_CLASS, type BrandColor } from '@/lib/colors'
  */
 export function Ticket({
   color, top, bottom, className,
-}: { color: BrandColor; top: ReactNode; bottom: ReactNode; className?: string }) {
+}: { color: Hue; top: ReactNode; bottom: ReactNode; className?: string }) {
   return (
-    <div className={cn('relative rounded-lg border border-ink shadow-sh3 transition-colors duration-400', COLOR_CLASS[color].bg, className)}>
+    <div className={cn('relative rounded-lg border border-border shadow-raised transition-colors duration-200', HUE_CLASS[color].soft, className)}>
       {top}
-      <div aria-hidden="true" className="relative mx-[22px] h-0 border-t-2 border-dashed border-ink">
+      <div aria-hidden="true" className="relative mx-[22px] h-0 border-t-2 border-dashed border-border">
         {/* Notches: peach circles clipped to the half that sits inside the ticket. */}
-        <span className="absolute left-[-34px] -top-3 size-[22px] rounded-full border border-ink bg-peach [clip-path:inset(0_0_0_50%)]" />
-        <span className="absolute right-[-34px] -top-3 size-[22px] rounded-full border border-ink bg-peach [clip-path:inset(0_50%_0_0)]" />
+        <span className="absolute left-[-34px] -top-3 size-[22px] rounded-full border border-border bg-background [clip-path:inset(0_0_0_50%)]" />
+        <span className="absolute right-[-34px] -top-3 size-[22px] rounded-full border border-border bg-background [clip-path:inset(0_50%_0_0)]" />
       </div>
       {bottom}
     </div>
@@ -30,7 +30,7 @@ export function CodeTiles({ code, wave }: { code: string; wave: number }) {
         <span
           key={i}
           className={cn(
-            'grid h-[54px] w-[42px] place-items-center rounded-[10px] border border-ink bg-card font-display text-[26px] shadow-sh1',
+            'grid h-[54px] w-[42px] place-items-center rounded-[10px] border border-border bg-card font-display text-[26px] shadow-xs',
             'max-[380px]:h-12 max-[380px]:w-9 max-[380px]:text-[22px]',
             wave > 0 && 'animate-wave',
           )}

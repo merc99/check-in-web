@@ -5,4 +5,6 @@ import nextTypescript from 'eslint-config-next/typescript'
 export default defineConfig([
   globalIgnores(['.next/**', 'node_modules/**', 'next-env.d.ts', 'prototype/**']),
   { extends: [...nextCoreWebVitals, ...nextTypescript] },
+  // Small Node helpers (npm run ui:add) are CommonJS on purpose.
+  { files: ['scripts/**/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
 ])

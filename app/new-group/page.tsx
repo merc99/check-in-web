@@ -13,8 +13,8 @@ import { Swatches } from '@/components/checkin/Swatches'
 import { BackLink, TextLink } from '@/components/checkin/TextButton'
 import { useToast } from '@/components/checkin/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
-import { cn } from '@/lib/cn'
-import { COLOR_CLASS, GROUP_COLORS, type BrandColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { HUE_CLASS, CREW_HUES, type Hue } from '@/lib/colors'
 import { createGroup, getGroup, joinGroupBySlug } from '@/lib/data'
 
 const SIZES = [5, 8, 10, 15] as const
@@ -25,7 +25,7 @@ export default function NewGroupPage() {
   const { groups, setActiveId } = useActiveCrew()
   const [mode, setMode] = useState<'create' | 'join'>('create')
   const [name, setName] = useState('')
-  const [color, setColor] = useState<BrandColor>('mint')
+  const [color, setColor] = useState<Hue>('leaf')
   const [max, setMax] = useState<number>(8)
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
@@ -88,8 +88,8 @@ export default function NewGroupPage() {
             <div
               aria-hidden="true"
               className={cn(
-                'mt-5 flex min-h-[116px] items-center gap-4 rounded-lg border border-ink p-5 shadow-sh3 transition-colors duration-350',
-                COLOR_CLASS[color].bg,
+                'mt-5 flex min-h-[116px] items-center gap-4 rounded-lg border border-border p-5 shadow-raised transition-colors duration-200',
+                HUE_CLASS[color].soft,
               )}
             >
               <CrewBlock name={shownName || '?'} color={color} size="xl" white />
@@ -114,12 +114,12 @@ export default function NewGroupPage() {
               />
             </FormField>
             <FormField label="Color" as="group">
-              <Swatches colors={GROUP_COLORS} value={color} onChange={setColor} />
+              <Swatches colors={CREW_HUES} value={color} onChange={setColor} />
             </FormField>
             <FormField label="Max size" as="group" hint="Small on purpose. Everyone should notice everyone.">
               <div className="flex flex-wrap gap-2">
                 {SIZES.map((n) => (
-                  <ToggleChip key={n} label={`${n} people`} color="mint" size="l" selected={max === n} onToggle={() => setMax(n)} />
+                  <ToggleChip key={n} label={`${n} people`} color="leaf" size="l" selected={max === n} onToggle={() => setMax(n)} />
                 ))}
               </div>
             </FormField>

@@ -55,7 +55,7 @@ export function DeleteAccountSheets({ open, onClose }: { open: boolean; onClose:
         title="Last check."
         body={
           <>
-            Type <b className="text-ink">delete</b> to confirm. This can’t be undone.
+            Type <b className="text-foreground">delete</b> to confirm. This can’t be undone.
           </>
         }
         confirmLabel="Delete my account"
