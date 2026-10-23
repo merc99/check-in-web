@@ -3,16 +3,16 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
-// Demo sign-in. There are no accounts: "Get started" on the intro signs you in as
-// Ben, Sign out takes you back to the intro. Real email sign-in lives on the
-// `supabase` branch.
+// Demo sign-in. There are no accounts: the app opens signed in as Ben (no intro). Sign out
+// shows the welcome screen at `/`, where "Sign back in" returns. Real email sign-in lives on
+// the `supabase` branch.
 
 type Status = 'loading' | 'signedOut' | 'signedIn'
 
 interface Auth {
   status: Status
   userId: string | null
-  /** "Get started" on the intro. */
+  /** "Sign back in" on the welcome screen, or "Get started" on an invite. */
   enterDemo: () => void
   signOut: () => Promise<void>
 }
@@ -27,7 +27,7 @@ export function useAuth(): Auth {
 
 const PENDING_INVITE = 'checkin.pendingInvite'
 
-/** Remember an invite while someone goes through the intro, so they land back on it. */
+/** Remember an invite while someone is signed out, so they land back on it. */
 export function setPendingInvite(slug: string | null) {
   try {
     if (slug) localStorage.setItem(PENDING_INVITE, slug)
@@ -45,10 +45,8 @@ function pendingInvite(): string | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // A visit to `/` starts at the intro; deep links (/feed, /invite/…) go straight in.
-  // Decided once, from the path the app was opened on.
-  const path = usePathname()
-  const [status, setStatus] = useState<Status>(() => (path === '/' ? 'signedOut' : 'signedIn'))
+  // Every visit starts signed in, straight into the app; only Sign out leaves.
+  const [status, setStatus] = useState<Status>('signedIn')
 
   const value = useMemo<Auth>(
     () => ({
@@ -66,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 const isPublic = (path: string) => path === '/' || path.startsWith('/invite/')
 
 /**
- * Signed out → the intro. Signed in on the intro → a pending invite or the feed.
+ * Signed out → the welcome screen. Signed in on `/` → a pending invite or the feed.
  * Renders nothing until it knows, so screens never flash.
  */
 export function AuthGate({ children }: { children: ReactNode }) {

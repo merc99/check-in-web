@@ -1,0 +1,15 @@
+/* A soft light that follows a mouse across a surface (pattern: premium kit glare, mmo kit foil
+   highlight). Answers the pointer, rests when it leaves; touch never sees it. */
+.shine { position: relative; isolation: isolate; }
+.shine::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(260px circle at var(--sx, 50%) var(--sy, 0%), color-mix(in srgb, white 32%, transparent), transparent 60%);
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+:global(.dark) .shine::before {
+  background: radial-gradient(260px circle at var(--sx, 50%) var(--sy, 0%), color-mix(in srgb, white 14%, transparent), transparent 60%);
+}
+.shine[data-shine-on]::before { opacity: 1; }
+/* Keep content above the light. */
+.shine > * { position: relative; z-index: 1; }

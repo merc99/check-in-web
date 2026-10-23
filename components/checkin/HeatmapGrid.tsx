@@ -30,8 +30,9 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
       {days.map((d, i) => (
         <div key={i}>
           <div
+            title={`${DAY_NAMES[i] ?? d.label}: ${d.done ? 'checked in' : d.future ? 'still to come' : 'open'}`}
             className={cn(
-              'grid aspect-square place-items-center rounded-md border',
+              'grid aspect-square place-items-center rounded-md border transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5',
               d.done ? 'border-transparent bg-primary text-primary-foreground shadow-xs' : 'border-border bg-muted',
               d.today && 'outline-solid outline-[2.5px] outline-offset-2 outline-foreground',
               d.future && 'opacity-45',

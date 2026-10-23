@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Avatar } from '@/components/checkin/Avatar'
 import { Gloss, GlossPill } from '@/components/fx/Gloss'
 import type { MyInsights } from '@/lib/data'
@@ -9,7 +10,7 @@ const TOP = 7
  * Everyone in your crews by current streak (pattern: mmo nodes season leaderboard). Encouraging,
  * not competitive: you're always shown, even outside the top seven, and nobody is ranked last.
  */
-export function CrewLeaderboard({ rows }: { rows: MyInsights['leaderboard'] }) {
+export function CrewLeaderboard({ rows, onPersonTap }: { rows: MyInsights['leaderboard']; onPersonTap?: (id: string) => void }) {
   const max = Math.max(1, ...rows.map((r) => r.streak))
   const top = rows.slice(0, TOP)
   const meIndex = rows.findIndex((r) => r.isMe)
@@ -24,13 +25,16 @@ export function CrewLeaderboard({ rows }: { rows: MyInsights['leaderboard'] }) {
         {shown.map((r) => {
           const rank = rows.indexOf(r) + 1
           return (
-            <li
-              key={r.person.id}
-              className={cn(
-                'flex items-center gap-3 rounded-[12px] px-2 py-[7px]',
-                r.isMe ? 'bg-white/80 shadow-[inset_0_0_0_1px_rgb(255_255_255/.9)]' : 'bg-white/25 shadow-[inset_0_0_0_1px_rgb(255_255_255/.35)]',
-              )}
-            >
+            <li key={r.person.id}>
+              {/* A crewmate's row opens their profile; yours is just yours. */}
+              <Row
+                onClick={!r.isMe && onPersonTap ? () => onPersonTap(r.person.id) : undefined}
+                label={r.isMe ? undefined : `View ${r.person.name}, ${r.streak}-day streak`}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-[12px] px-2 py-[7px] text-left',
+                  r.isMe ? 'bg-white/80 shadow-[inset_0_0_0_1px_rgb(255_255_255/.9)]' : 'bg-white/25 shadow-[inset_0_0_0_1px_rgb(255_255_255/.35)]',
+                )}
+              >
               <span
                 className={cn(
                   'tnum grid size-6 flex-none place-items-center rounded-full text-[12px] font-bold',
@@ -50,10 +54,29 @@ export function CrewLeaderboard({ rows }: { rows: MyInsights['leaderboard'] }) {
               <span className="tnum w-8 text-right font-display text-[18px] leading-none" aria-label={`${r.streak}-day streak`}>
                 {r.streak}
               </span>
+              </Row>
             </li>
           )
         })}
       </ol>
     </Gloss>
+  )
+}
+
+/** A leaderboard row: a button when it can be tapped (hover lifts it, press sinks it), else a plain row. */
+function Row({ onClick, label, className, children }: { onClick?: () => void; label?: string; className: string; children: ReactNode }) {
+  if (!onClick) return <div className={className}>{children}</div>
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={cn(
+        className,
+        'transition-[transform,background-color] duration-150 ease-out active:scale-[.98] [@media(hover:hover)]:hover:-translate-y-px [@media(hover:hover)]:hover:bg-white/45',
+      )}
+    >
+      {children}
+    </button>
   )
 }

@@ -66,8 +66,10 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
     <article
       onPointerUp={onPointerUp}
       className={cn(
-        'relative touch-manipulation select-none rounded-lg border border-border p-4 shadow-card',
-        item.isMine ? 'bg-card' : 'bg-card',
+        'relative touch-manipulation select-none rounded-lg border border-border bg-card p-4 shadow-card lg:p-5',
+        // A mouse over a post lifts it a little (the interactive-card spec); touch has no hover.
+        'transition-[transform,box-shadow,border-color] duration-150 ease-out',
+        '[@media(hover:hover)]:hover:-translate-y-px [@media(hover:hover)]:hover:border-border-strong [@media(hover:hover)]:hover:shadow-raised',
         entering && 'animate-enter',
       )}
     >
@@ -96,7 +98,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
       </div>
 
       <div className="-mt-1 pl-[52px]">
-        {item.note && <p className="text-base leading-[1.45]">{item.note}</p>}
+        {item.note && <p className="text-base leading-[1.45] lg:text-[17px]">{item.note}</p>}
         {item.tags.length > 0 && (
           <div className="mt-[10px] flex flex-wrap gap-2">
             {item.tags.map((t) => (

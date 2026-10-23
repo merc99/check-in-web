@@ -221,14 +221,14 @@ export default function FeedPage() {
 
   const items = feed.data ?? []
 
-  const hero = <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} streak={g.streak} recent={g.recent} />
+  const hero = <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} recent={g.recent} />
 
   return (
     // Phones: one column (hero above the posts, FAB for check-in).
     // Desktop: the posts on the left, a sticky rail on the right with check-in, the crew's day and your week.
     <main
       data-layout="wide"
-      className="px-5 pb-[150px] lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 lg:px-8 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-10 2xl:grid-cols-[minmax(0,1fr)_360px]"
+      className="px-5 pb-[150px] lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 lg:px-8 lg:pb-16 xl:grid-cols-[minmax(0,760px)_340px] xl:justify-center xl:gap-10 2xl:grid-cols-[minmax(0,760px)_360px]"
     >
       <div className="min-w-0">
       <FeedHeader group={g} onSwitch={() => setSwitcherOpen(true)} />
@@ -258,8 +258,8 @@ export default function FeedPage() {
           <p className="mt-2 text-muted-foreground">Be the first one in today.</p>
         </div>
       ) : (
-        // One column, two on very wide screens; day headings span both.
-        <div className="grid grid-cols-1 gap-[14px] 2xl:grid-cols-2 2xl:items-start">
+        // One column of posts, always.
+        <div className="flex flex-col gap-[14px]">
           {items.map((item, i) => {
             const label = dayLabel(item.localDate)
             const divider = i === 0 || dayLabel(items[i - 1].localDate) !== label
@@ -267,7 +267,7 @@ export default function FeedPage() {
             return (
               <Fragment key={item.id}>
                 {divider && (
-                  <h2 className={cn('col-span-full flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border', first ? 'mt-8' : 'mt-6')}>
+                  <h2 className={cn('flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border', first ? 'mt-8' : 'mt-6')}>
                     {label}
                   </h2>
                 )}

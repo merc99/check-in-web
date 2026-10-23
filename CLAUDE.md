@@ -68,11 +68,11 @@ plus a few Check-in extras, so registry components inherit the theme.
   (titles) or `tracking-tightest` (numbers 40px+). `font-sans` (Geist) for everything else. Changing numbers get `tnum`.
 - **Logo:** `BrandMark` / `LogoMark` (components/checkin/BrandMark.tsx): the red → yellow → green gauge with a check, and
   the lowercase pixel wordmark (`font-pixel`, Pixelify Sans) "check-in". `size="lg"` adds "stay consistent with
-  people." (the intro's first slide). Don't redraw it elsewhere.
+  people." (the signed-out welcome screen at `/`). Don't redraw it elsewhere.
 - **Layout:** phones get one centered column, `max-w-app` (640px), with the bottom tab bar: Explore · Feed · You.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
-  1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (posts, two
-  columns from `2xl`, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
+  1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
+  up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
   crews in two columns) and You (glossy stat cards, then two columns: week, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; default follows the system; `ThemeToggle` on the You tab. Check every screen in both.
@@ -126,6 +126,9 @@ Loops are scoped to exactly one place each. Nothing else idles. Never add a seco
 | `SheenOnce` (one holo pass) | calm | A feed post as it arrives (yours or a crewmate's) |
 | Arrival burst (`burstFrom`, small) | live activity | A crewmate's sticker in the hero when they check in |
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
+| Pointer light (`useShine` + `shineClass`) | calm | Every `Gloss` and the feed's crew banner: a soft light follows a mouse |
+| Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
+| Hover lift / press | calm | Post cards, Explore crew cards, leaderboard rows, ring chart legend, heatmap and streak squares |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
@@ -147,6 +150,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
   `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
+- **FeedHeader:** a banner in the crew's tint (block, date in the crew ink, name + switch chevron, gear, members and
+  crew-streak pills, pointer light); scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).
@@ -155,12 +160,12 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   scrolls the feed to the top (or switches crew for an arrival elsewhere); a tap on a `HoldButton` explains the hold.
 
 ## Screens (routes)
-`/` intro · `/feed` · `/explore` · `/you` · `/group-settings/[groupId]` · `/new-group` · `/profile/edit` ·
+`/` welcome (signed out only) · `/feed` · `/explore` · `/you` · `/group-settings/[groupId]` · `/new-group` · `/profile/edit` ·
 `/manage-tags/[groupId]` · `/invite/[slug]` · `/kitchen-sink` (component reference).
 
 ## The demo (how the portfolio build behaves)
-- **No accounts.** `/` shows the three-panel intro; "Get started" signs straight in as Ben (`lib/auth.tsx`). Sign out
-  returns to the intro. Deep links (`/feed`, `/invite/...`) skip the intro. "Get started to join" on an invite page
+- **No accounts, no intro.** The app opens signed in as Ben (`lib/auth.tsx`); `/` sends you to the feed. Sign out
+  shows the welcome screen at `/` (logo lockup + "Sign back in"). "Get started to join" on an invite page
   remembers the invite and lands back on it.
 - **Fresh state on every page load.** The demo re-seeds from `lib/mock/seed.ts` (relative to "now", so the feed
   always looks like today); nothing persists. Only the chosen crew is remembered, in `localStorage`.

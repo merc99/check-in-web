@@ -1,7 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
 import { StatsGrid } from '@/components/you/StatsGrid'
@@ -38,6 +39,7 @@ export default function YouPage() {
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
+  const [profileId, setProfileId] = useState<string | null>(null)
 
   const week = useMemo(() => {
     const days = new Set(stats.data?.days)
@@ -138,7 +140,7 @@ export default function YouPage() {
         {insights.data && (
           <>
             <SectionTitle title="Crew streaks" />
-            <CrewLeaderboard rows={insights.data.leaderboard} />
+            <CrewLeaderboard rows={insights.data.leaderboard} onPersonTap={setProfileId} />
             <SectionTitle title="Where your check-ins go" />
             <CrewDonut crews={insights.data.byCrew} />
           </>
@@ -201,6 +203,8 @@ export default function YouPage() {
         />
       </div>
       </div>
+
+      <ProfileSheet userId={profileId} onClose={() => setProfileId(null)} />
     </main>
   )
 }

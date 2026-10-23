@@ -49,7 +49,19 @@ export function StatsGrid({ stats, insights }: { stats: MyStats; insights?: MyIn
               <span>Last 12 weeks</span>
               <span className="opacity-70">this week</span>
             </div>
-            <Sparkline values={insights.weeks} height={48} className="mt-1" label={`Check-ins per week, last 12 weeks: ${insights.weeks.join(', ')}`} />
+            <Sparkline
+              values={insights.weeks}
+              height={48}
+              className="mt-1"
+              label="Your check-ins per week, last 12 weeks"
+              pointLabel={(i) => {
+                const n = insights.weeks[i]
+                const count = `${n} check-in${n === 1 ? '' : 's'}`
+                if (i === insights.weeks.length - 1) return `This week · ${count}`
+                const monday = addDays(new Date(), -((new Date().getDay() + 6) % 7) - (insights.weeks.length - 1 - i) * 7)
+                return `Week of ${monday.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · ${count}`
+              }}
+            />
           </GlassInset>
         )}
       </Gloss>
@@ -66,7 +78,12 @@ export function StatsGrid({ stats, insights }: { stats: MyStats; insights?: MyIn
             {last14.map((d, i) => (
               <span
                 key={d}
-                className={cn('aspect-square rounded-[4px]', days.has(d) ? 'bg-on-color' : 'bg-white/35', i === 13 && 'ring-2 ring-white')}
+                title={`${i === 13 ? 'Today' : new Date(`${d}T12:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}: ${days.has(d) ? 'in' : 'not in'}`}
+                className={cn(
+                  'aspect-square rounded-[4px] transition-transform duration-150 ease-out [@media(hover:hover)]:hover:scale-125',
+                  days.has(d) ? 'bg-on-color' : 'bg-white/35',
+                  i === 13 && 'ring-2 ring-white',
+                )}
               />
             ))}
           </div>

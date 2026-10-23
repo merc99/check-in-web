@@ -4,6 +4,7 @@ import { Flame } from 'lucide-react'
 import { Gloss, GlassInset, GlossPill, Sparkline } from '@/components/fx/Gloss'
 import { AuroraFrame } from '@/components/fx/loops'
 import { RollingCount } from '@/components/fx/RollingCount'
+import { addDays } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 import type { Hue } from '@/lib/colors'
 import type { Person } from '@/lib/data'
@@ -73,7 +74,17 @@ export function CrewHero({ color, members, arrivedId, onPersonTap, streak, recen
               <span>Last 14 days</span>
               <span className="opacity-70">today</span>
             </div>
-            <Sparkline values={recent} height={44} className="mt-1" label={`Members in each day, last 14 days: ${recent.join(', ')}`} />
+            <Sparkline
+              values={recent}
+              height={44}
+              className="mt-1"
+              label="Members in each day, last 14 days"
+              pointLabel={(i) => {
+                const day = addDays(new Date(), i - (recent.length - 1))
+                const when = i === recent.length - 1 ? 'Today' : day.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+                return `${when} · ${recent[i]} in`
+              }}
+            />
           </GlassInset>
         )}
 
