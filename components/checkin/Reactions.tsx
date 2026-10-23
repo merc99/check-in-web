@@ -75,7 +75,7 @@ function play(el: Element | null | undefined) {
 }
 
 /** A count whose digits roll. Columns are keyed from the right, so 9 → 10 adds a column on the left. */
-function Count({ n }: { n: number }) {
+export function RollingCount({ n }: { n: number }) {
   const s = String(Math.max(0, n))
   return (
     <span className={styles.count} aria-hidden="true">
@@ -347,7 +347,7 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
                   {c.emoji}
                 </i>
               </span>
-              <Count n={shown} />
+              <RollingCount n={shown} />
             </button>
           )
         })}

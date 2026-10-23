@@ -1,0 +1,26 @@
+/* Candidate: the premium kit's original holographic foil (rainbow, color-dodge) and glare, driven by
+   the app's Foil wrapper (--mx / --my, [data-active]). No idle drift, per CLAUDE.md. */
+.rainbow,
+.glare {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+.rainbow {
+  mix-blend-mode: color-dodge;
+  background:
+    repeating-linear-gradient(115deg, #ff7eb3 0%, #ffd36e 7%, #7cf2c4 14%, #7fb7ff 21%, #c39bff 28%, #ff7eb3 35%),
+    repeating-linear-gradient(45deg, rgb(255 255 255 / .12) 0 1px, transparent 1px 5px);
+  background-size: 300% 300%, auto;
+  background-position: calc(var(--mx) * 100%) calc(var(--my) * 100%), 0 0;
+}
+.glare {
+  mix-blend-mode: overlay;
+  background: radial-gradient(circle, rgb(255 255 255 / .75) 0%, rgb(255 255 255 / .15) 20%, transparent 40%);
+  background-size: 200% 200%;
+  background-position: calc(100% - var(--mx) * 100%) calc(100% - var(--my) * 100%);
+}
+/* The kit's resting foil is .22; it rises to .38 under the hand. */
+.rainbow { opacity: .22; }
+[data-active] .rainbow { opacity: .38; }
+[data-active] .glare { opacity: 1; }
+:global(html:not(.dark)) .rainbow { mix-blend-mode: soft-light; }

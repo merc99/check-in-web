@@ -1,0 +1,170 @@
+/* Candidate ports of mmo-fx-kit/fx.css for the /fx-preview comparison, mapped to Check-in tokens.
+   Kept faithful to the kit (rings loop, foil is rainbow) so the comparison is fair; the verdicts
+   on the preview page judge them against CLAUDE.md. Whatever loses is deleted after review. */
+
+/* The ring's angle must be a registered property so it can animate. */
+@property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+/* ── holo card: hue gradient, hairline + top highlight, colored drop shadow ── */
+.card {
+  --c1: color-mix(in srgb, var(--hue) 45%, white);
+  --c2: var(--hue);
+  --c3: color-mix(in srgb, var(--hue) 55%, black);
+  position: relative;
+  isolation: isolate;
+  border-radius: 16px;
+  color: var(--on-color);
+  background:
+    radial-gradient(120% 60% at 20% 0%, color-mix(in srgb, var(--c1) 90%, white) 0%, transparent 60%),
+    linear-gradient(165deg, var(--c1) 0%, var(--c2) 45%, var(--c3) 100%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, white 35%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 60%, transparent),
+    0 30px 50px -28px var(--c3),
+    0 10px 20px -12px rgb(0 0 0 / .3);
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1);
+}
+.card[data-tilting] { transition: transform .08s linear; }
+
+/* film grain */
+.card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  opacity: .18; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.body { position: relative; z-index: 2; }
+
+/* rainbow foil, brightest where the cursor is (mask follows --gx/--gy) */
+.foil {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+  opacity: var(--foil-strength, .14); transition: opacity .4s; mix-blend-mode: overlay;
+  background:
+    radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), rgb(255 255 255 / .9) 0%, transparent 32%),
+    repeating-linear-gradient(115deg, #ff9fe0 0%, #9fdcff 5%, #bfa8ff 10%, #9fffe4 15%, #fff3a0 20%, #ff9fe0 25%),
+    radial-gradient(circle, rgb(255 255 255 / .9) 0 .7px, transparent 1.2px);
+  background-size: 100% 100%, 260% 260%, 6px 6px;
+  background-position: 0 0, var(--gx, 30%) var(--gy, 30%), calc(var(--gx, 30%) * .08) 0;
+  -webkit-mask: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), #000 0%, rgb(0 0 0 / .35) 55%, rgb(0 0 0 / .15) 100%);
+  mask: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), #000 0%, rgb(0 0 0 / .35) 55%, rgb(0 0 0 / .15) 100%);
+}
+[data-tilting] > .foil { opacity: .55; }
+
+/* Only the sparkle dots and the cursor highlight, no rainbow (used by the combo). */
+.sparkle {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+  opacity: 0; transition: opacity .3s; mix-blend-mode: overlay;
+  background:
+    radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), rgb(255 255 255 / .85) 0%, transparent 34%),
+    radial-gradient(circle, rgb(255 255 255 / .95) 0 .7px, transparent 1.2px);
+  background-size: 100% 100%, 6px 6px;
+  -webkit-mask: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), #000 0%, transparent 60%);
+  mask: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), #000 0%, transparent 60%);
+}
+[data-tilting] .sparkle { opacity: .7; }
+
+/* ── the light ring: a bright arc circling the border ── */
+.ring { position: relative; isolation: isolate; }
+.ring::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1.5px;
+  pointer-events: none; z-index: 4;
+  background: conic-gradient(from var(--ang), transparent 0 66%, var(--ring-color, white) 76%, color-mix(in srgb, var(--ring-color, white) 60%, transparent) 84%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: ring var(--ring-speed, 14s) linear infinite;
+}
+@keyframes ring { to { --ang: 360deg; } }
+
+/* aurora frame: multicolor conic border with glow */
+.aurora { position: relative; isolation: isolate; }
+.aurora::before {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit; padding: 3px; pointer-events: none; z-index: 4;
+  background: conic-gradient(from var(--ang), #6ae8ff, #6affb0, #c07aff, #ff7ad8, #6ae8ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  filter: drop-shadow(0 0 6px #6affb0) drop-shadow(0 0 12px #c07aff);
+  animation: ring 5s linear infinite;
+}
+
+/* moving holographic sheen across a face (loops) */
+.sheenLoop { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 5;
+  mix-blend-mode: screen; background-size: 300% 300%; animation: holo 3.5s linear infinite;
+  background-image: linear-gradient(115deg, transparent 15%, rgb(255 120 220 / .35), rgb(120 220 255 / .35), rgb(255 240 120 / .35), transparent 85%); }
+@keyframes holo { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+
+/* ── liquid glass ── */
+.glass {
+  background: color-mix(in srgb, var(--card) 55%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid color-mix(in srgb, white 60%, transparent);
+  box-shadow: 0 10px 30px -12px rgb(20 30 80 / .35);
+}
+:global(.dark) .glass { border-color: color-mix(in srgb, white 12%, transparent); }
+@supports (backdrop-filter: url(#liquid)) {
+  .liquid { backdrop-filter: url(#liquid) blur(3px) saturate(1.8); }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glass { background: var(--card); }
+}
+
+/* ── hold to confirm ── */
+.hold { position: relative; isolation: isolate; overflow: hidden; user-select: none; touch-action: none; }
+.hold::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; transform-origin: left;
+  transform: scaleX(var(--hold, 0));
+  background: var(--hold-fill, linear-gradient(90deg, #8fe9ff, #c7b6ff, #ff9fe0));
+}
+
+/* ── toast stack ── */
+.toasts {
+  position: fixed; right: 18px; bottom: 18px; z-index: 80; width: min(320px, calc(100vw - 32px));
+  display: flex; flex-direction: column-reverse; gap: 8px; pointer-events: none;
+}
+.toast {
+  pointer-events: auto; cursor: pointer; padding: 11px 14px 11px 16px; border-radius: 12px; font-size: 14px; line-height: 1.4;
+  background: color-mix(in srgb, var(--popover) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-left: 3px solid var(--primary); color: var(--foreground);
+  box-shadow: var(--elev-overlay);
+  animation: tin .35s cubic-bezier(.2, .8, .2, 1);
+}
+.toast[data-bye] { animation: tout .3s forwards; }
+.line + .line { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+@keyframes tin { from { opacity: 0; transform: translateX(24px); } }
+@keyframes tout { to { opacity: 0; transform: translateX(24px); } }
+@media (max-width: 700px) { .toasts { right: 50%; transform: translateX(50%); bottom: auto; top: 64px; flex-direction: column; } }
+
+/* ── fly to target ── */
+.fly { position: fixed; z-index: 90; pointer-events: none; font-family: var(--font-bricolage), sans-serif; font-weight: 800; font-size: 18px;
+  color: var(--primary-ink); white-space: nowrap; }
+.pulse { animation: pulseTarget .5s ease-out; }
+@keyframes pulseTarget { 40% { transform: scale(1.12); filter: brightness(1.15); } }
+
+/* ── reveal card ── */
+.reveal { position: fixed; inset: 0; z-index: 75; display: grid; place-items: center; }
+.scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .4); }
+.revealCard {
+  position: relative; width: min(340px, 92vw); display: grid; justify-items: center; gap: 10px; padding: 28px 22px 22px;
+  border-radius: 22px; text-align: center; color: var(--foreground);
+  background: var(--popover); border: 1px solid var(--border); box-shadow: var(--elev-overlay);
+  transition: background .5s, box-shadow .5s, color .5s; animation: pop .35s cubic-bezier(.2, 1.3, .4, 1);
+}
+@keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.94); } }
+.revealCard[data-revealed] {
+  color: var(--on-color);
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--hue) 70%, white), var(--hue) 60%, color-mix(in srgb, var(--hue) 75%, black));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hue) 70%, white), 0 30px 70px -18px var(--hue);
+}
+.medal { position: relative; display: grid; place-items: center; width: 96px; height: 96px; border-radius: 9999px;
+  background: var(--on-color); color: var(--hue); font-family: var(--font-bricolage), sans-serif; font-weight: 800; font-size: 34px; }
+.medal[data-shake] { animation: shake .8s ease-in-out; }
+@keyframes shake { 10%, 30%, 50%, 70% { transform: rotate(-6deg) scale(1.04); } 20%, 40%, 60%, 80% { transform: rotate(6deg) scale(1.06); } 100% { transform: none; } }
+.beam { position: absolute; left: 50%; bottom: 40%; width: 70%; height: 0; transform: translateX(-50%); opacity: 0; border-radius: 50% 50% 0 0;
+  background: linear-gradient(0deg, white, transparent); filter: blur(6px); }
+.medal[data-open] .beam { animation: beam 1s ease-out forwards; }
+@keyframes beam { 0% { height: 0; opacity: 0; } 30% { opacity: 1; } 100% { height: 160%; opacity: .5; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ring::before, .aurora::before, .sheenLoop, .medal[data-shake], .medal[data-open] .beam, .toast, .pulse { animation: none; }
+  .card { transition: none; }
+}
