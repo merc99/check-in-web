@@ -1,5 +1,10 @@
 # Supabase: decisions, fixes and going live
 
+> **Reference branch.** This `supabase` branch holds the Supabase data layer, OTP sign-in and
+> migration 018 as they stood on 2026-10-22. `master` went fake-data only for the portfolio build
+> and a reskin. Don't merge this branch back: port what's still useful once the reskin settles.
+> A copy of the migration is at `supabase/migrations/018_web_app.sql` (never applied).
+
 The gaps found while building the mock layer against migrations 001–017 are closed by
 **`CHECK-IN APP/supabase/migrations/018_web_app.sql`** (kept with the other migrations,
 since both apps share one database).
