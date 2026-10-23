@@ -20,9 +20,15 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
 
   const panel = useRef<HTMLDivElement>(null)
 
-  // Selection belongs to the open panel only; a closed panel can't be tabbed into.
-  useEffect(() => {
+  // Selection belongs to the open panel only.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (!open) setSelected(new Set())
+  }
+
+  // A closed panel can't be tabbed into.
+  useEffect(() => {
     panel.current?.toggleAttribute('inert', !open)
   }, [open])
 

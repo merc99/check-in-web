@@ -25,28 +25,35 @@ export interface SheetProps {
 /** Bottom sheet: spring open, drag the handle down (or flick) to dismiss, Escape closes, focus stays inside. */
 export function Sheet({ open, onClose, title, aside, label, children }: SheetProps) {
   const [mounted, setMounted] = useState(false)
-  const [shown, setShown] = useState(false)
+  const [entered, setEntered] = useState(false)
   const panel = useRef<HTMLDivElement>(null)
   const drag = useRef<{ y0: number; dy: number; t0: number } | null>(null)
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
   const titleId = useId()
 
-  // Mount, then flip to `shown` two frames later so the transform transition runs.
+  // Opening mounts right away (during render); closing unmounts after the slide-out.
+  if (open && !mounted) setMounted(true)
+  const shown = open && entered
+
+  // Flip to `entered` two frames after mounting so the transform transition runs.
   useEffect(() => {
     if (open) {
-      setMounted(true)
       let r2 = 0
       const r1 = requestAnimationFrame(() => {
-        r2 = requestAnimationFrame(() => setShown(true))
+        r2 = requestAnimationFrame(() => setEntered(true))
       })
       return () => {
         cancelAnimationFrame(r1)
         cancelAnimationFrame(r2)
       }
     }
-    setShown(false)
-    const t = setTimeout(() => setMounted(false), CLOSE_MS)
+    const t = setTimeout(() => {
+      setEntered(false)
+      setMounted(false)
+    }, CLOSE_MS)
     return () => clearTimeout(t)
   }, [open])
 

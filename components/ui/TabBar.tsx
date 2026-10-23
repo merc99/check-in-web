@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/cn'
 import { CompassIcon, FeedIcon, UserIcon } from './icons'
 
@@ -67,8 +67,8 @@ export function TabBarDock() {
   const pathname = usePathname()
   const match = TABS.find((t) => pathname === t.href || pathname.startsWith(`${t.href}/`))?.key
   // Keep the last tab while hidden so the pill doesn't jump as the dock slides out.
-  const last = useRef<TabKey>('feed')
-  if (match) last.current = match
+  const [last, setLast] = useState<TabKey>('feed')
+  if (match && match !== last) setLast(match)
   const dock = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export function TabBarDock() {
       )}
     >
       <div className="pointer-events-auto">
-        <TabBar active={last.current} />
+        <TabBar active={last} />
       </div>
     </div>
   )

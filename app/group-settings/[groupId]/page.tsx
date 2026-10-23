@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react';
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
@@ -25,13 +25,15 @@ import { deleteGroup, getGroup, leaveGroup, removeMember, updateGroup, useQuery,
 
 type Confirm = { kind: 'remove'; member: MemberRow } | { kind: 'delete' } | { kind: 'leave' } | null
 
-export default function GroupSettingsPage({ params }: { params: { groupId: string } }) {
+export default function GroupSettingsPage(props: { params: Promise<{ groupId: string }> }) {
+  const params = use(props.params);
   const { groupId } = params
   const router = useRouter()
   const toast = useToast()
   const { setActiveId } = useActiveCrew()
   const group = useQuery(() => getGroup(groupId), [groupId], ['groups', 'group_members', 'check_ins', 'tags', 'profiles'])
-  const [name, setName] = useState('')
+  // Your edit to the name, or null to show the saved name.
+  const [nameDraft, setNameDraft] = useState<string | null>(null)
   const [wave, setWave] = useState(0)
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [profileId, setProfileId] = useState<string | null>(null)
@@ -44,9 +46,7 @@ export default function GroupSettingsPage({ params }: { params: { groupId: strin
     if (g) setActiveId(g.id)
   }, [g?.id]) // eslint-disable-line react-hooks/exhaustive-deps -- only when the crew changes
 
-  useEffect(() => {
-    if (g) setName(g.name)
-  }, [g?.name]) // eslint-disable-line react-hooks/exhaustive-deps -- reset the field when the saved name changes
+  const name = nameDraft ?? g?.name ?? ''
 
   const fail = (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.')
 
@@ -82,7 +82,10 @@ export default function GroupSettingsPage({ params }: { params: { groupId: strin
 
   const rename = () => {
     if (!name.trim()) return
-    updateGroup(g.id, { name }).then(() => toast('Crew renamed'), fail)
+    updateGroup(g.id, { name }).then(() => {
+      setNameDraft(null)
+      toast('Crew renamed')
+    }, fail)
   }
 
   const runConfirm = async () => {
@@ -171,7 +174,7 @@ export default function GroupSettingsPage({ params }: { params: { groupId: strin
               rename()
             }}
           >
-            <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={32} aria-label="Crew name" className="min-w-0 flex-1" />
+            <Input value={name} onChange={(e) => setNameDraft(e.target.value)} maxLength={32} aria-label="Crew name" className="min-w-0 flex-1" />
             <Button type="submit" size="sm" variant="primary" disabled={!name.trim() || name.trim() === g.name}>
               Save
             </Button>

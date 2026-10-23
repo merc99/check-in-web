@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react';
 import { Avatar } from '@/components/ui/Avatar'
 import { BrandMark } from '@/components/ui/BrandMark'
 import { Button } from '@/components/ui/Button'
@@ -15,7 +15,8 @@ import { setPendingInvite, useAuth } from '@/lib/auth'
 import { getGroupPreview, joinGroupBySlug, useQuery } from '@/lib/data'
 
 /** Public invite page (works signed out once auth exists). Joining with the link skips the join request. */
-export default function InvitePage({ params }: { params: { slug: string } }) {
+export default function InvitePage(props: { params: Promise<{ slug: string }> }) {
+  const params = use(props.params);
   const router = useRouter()
   const toast = useToast()
   const { setActiveId } = useActiveCrew()

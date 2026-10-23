@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ConfirmSheet } from '@/components/ui/ConfirmSheet'
 import { Input } from '@/components/ui/FormField'
 import { useToast } from '@/components/ui/Toast'
@@ -14,11 +14,15 @@ export function DeleteAccountSheets({ open, onClose }: { open: boolean; onClose:
   const [step, setStep] = useState<1 | 2>(1)
   const [typed, setTyped] = useState('')
 
-  useEffect(() => {
-    if (!open) return
-    setStep(1)
-    setTyped('')
-  }, [open])
+  // Start at step 1 each time it opens.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setStep(1)
+      setTyped('')
+    }
+  }
 
   const confirm = async () => {
     if (typed.trim().toLowerCase() !== 'delete') {

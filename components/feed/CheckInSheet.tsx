@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { AddChip, TagChip, ToggleChip } from '@/components/ui/Chip'
 import { FormField, Textarea } from '@/components/ui/FormField'
@@ -38,14 +38,18 @@ export function CheckInSheet({
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [stamping, setStamping] = useState(false)
 
-  useEffect(() => {
-    if (!open) return
-    setNote('')
-    setQuery('')
-    setAdded([])
-    setSelected(new Set())
-    setStamping(false)
-  }, [open])
+  // Start fresh each time the sheet opens (adjusting state during render, not in an effect).
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setNote('')
+      setQuery('')
+      setAdded([])
+      setSelected(new Set())
+      setStamping(false)
+    }
+  }
 
   const q = query.trim().toLowerCase()
   const all = useMemo(() => [...tags, ...added.filter((t) => !tags.includes(t))], [tags, added])

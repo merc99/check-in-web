@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import type { FeedItem } from '@/lib/data'
 import { HOUR, timeAgo } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
+import { useNow } from '@/lib/useNow'
 import { Avatar } from './Avatar'
 import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
@@ -25,7 +26,8 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
   const [burst, setBurst] = useState(0)
   const [pop, setPop] = useState(false)
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
-  const justIn = item.isMine && Date.now() - new Date(item.createdAt).getTime() < HOUR
+  const now = useNow()
+  const justIn = item.isMine && now - new Date(item.createdAt).getTime() < HOUR
 
   const celebrate = () => {
     if (!prefersReducedMotion()) setBurst((b) => b + 1)
@@ -81,7 +83,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap }: PostCardProps
         )}
         <p className="min-w-0 flex-1">
           <span className="font-bold">{item.isMine ? 'You' : item.user.name}</span>
-          <span className="ml-[6px] text-[13px] text-ink-mute">{timeAgo(item.createdAt)}</span>
+          <span className="ml-[6px] text-[13px] text-ink-mute">{timeAgo(item.createdAt, now)}</span>
         </p>
         {justIn && (
           <span className="ml-auto rounded-full border border-ink bg-mint px-2 py-[5px] text-[10.5px] font-bold leading-none tracking-[.08em] shadow-sh1">

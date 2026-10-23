@@ -45,12 +45,10 @@ function pendingInvite(): string | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<Status>('loading')
-
   // A visit to `/` starts at the intro; deep links (/feed, /invite/…) go straight in.
-  useEffect(() => {
-    setStatus(window.location.pathname === '/' ? 'signedOut' : 'signedIn')
-  }, [])
+  // Decided once, from the path the app was opened on.
+  const path = usePathname()
+  const [status, setStatus] = useState<Status>(() => (path === '/' ? 'signedOut' : 'signedIn'))
 
   const value = useMemo<Auth>(
     () => ({

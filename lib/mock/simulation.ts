@@ -55,7 +55,9 @@ export function simulateHeart(checkInId: string): boolean {
 /** Mount once near the top of the app. Pass the crew on screen so most arrivals land there. */
 export function useLiveSimulation(activeGroupId: string | null = null, enabled = SIMULATE_LIVE) {
   const active = useRef(activeGroupId)
-  active.current = activeGroupId
+  useEffect(() => {
+    active.current = activeGroupId
+  }, [activeGroupId])
 
   useEffect(() => {
     if (!enabled) return

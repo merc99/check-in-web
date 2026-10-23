@@ -18,6 +18,7 @@ const SWIPE_PX = 60
 export function IntroSlides({ onStart }: { onStart: () => void }) {
   const [step, setStep] = useState(0)
   const [dx, setDx] = useState(0)
+  const [dragging, setDragging] = useState(false)
   const drag = useRef<number | null>(null)
   const slides = useRef<(HTMLDivElement | null)[]>([])
   const last = step === SLIDES.length - 1
@@ -41,6 +42,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
 
   const onDown = (e: PointerEvent<HTMLDivElement>) => {
     drag.current = e.clientX
+    setDragging(true)
     setDx(0)
   }
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -52,6 +54,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
   const onUp = () => {
     if (drag.current === null) return
     drag.current = null
+    setDragging(false)
     if (dx < -SWIPE_PX) go(step + 1)
     else if (dx > SWIPE_PX) go(step - 1)
     setDx(0)
@@ -74,7 +77,7 @@ export function IntroSlides({ onStart }: { onStart: () => void }) {
         aria-roledescription="carousel"
       >
         <div
-          className={cn('flex h-full', drag.current === null && 'transition-transform duration-[550ms] ease-spring')}
+          className={cn('flex h-full', !dragging && 'transition-transform duration-[550ms] ease-spring')}
           style={{ transform: `translateX(calc(${-step * 100}% + ${dx}px))` }}
         >
           {SLIDES.map((s, i) => (

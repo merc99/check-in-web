@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Sheet } from '@/components/ui/Sheet'
 import { StatCard } from '@/components/ui/StatCard'
@@ -11,9 +11,7 @@ import { monthYear } from '@/lib/dates'
 export function ProfileSheet({ userId, onClose }: { userId: string | null; onClose: () => void }) {
   // Keep showing the last person while the sheet slides away.
   const [shownId, setShownId] = useState(userId)
-  useEffect(() => {
-    if (userId) setShownId(userId)
-  }, [userId])
+  if (userId && userId !== shownId) setShownId(userId)
 
   const profile = useQuery(() => (shownId ? getUserProfile(shownId) : Promise.resolve(null)), [shownId], ['check_ins', 'group_members', 'profiles'])
   const p = profile.data

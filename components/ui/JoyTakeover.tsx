@@ -30,7 +30,9 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
   const closed = useRef(false)
   const shown = useCountUp(count, { from: count - 1, duration: 400, delay: 650 })
   const callbacks = useRef({ onDismiss, onClosed })
-  callbacks.current = { onDismiss, onClosed }
+  useEffect(() => {
+    callbacks.current = { onDismiss, onClosed }
+  })
 
   // Confetti is random once per takeover.
   const [confetti] = useState(() =>
@@ -71,8 +73,7 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
       cancelAnimationFrame(r2)
       clearTimeout(t)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per takeover
-  }, [])
+  }, []) // once per takeover
 
   return createPortal(
     <div

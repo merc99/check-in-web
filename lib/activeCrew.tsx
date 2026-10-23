@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { useAuth } from '@/lib/auth'
 import { getMyGroups, useQuery, type GroupSummary } from '@/lib/data'
 import { SIMULATE_LIVE, useLiveSimulation } from '@/lib/mock/simulation'
@@ -24,15 +24,15 @@ export function ActiveCrewProvider({ children }: { children: ReactNode }) {
   const { status, userId } = useAuth()
   const signedIn = status === 'signedIn' && !!userId
   const groups = useQuery(() => (signedIn ? getMyGroups() : Promise.resolve([])), [signedIn, userId], ['groups', 'group_members', 'check_ins'])
-  const [stored, setStored] = useState<string | null>(null)
-
-  useEffect(() => {
+  // Read once on the client. Nothing renders from it until the crews load, so the server's null is fine.
+  const [stored, setStored] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
     try {
-      setStored(localStorage.getItem(STORAGE_KEY))
+      return localStorage.getItem(STORAGE_KEY)
     } catch {
-      // Private mode or blocked storage: the first crew is fine.
+      return null // Private mode or blocked storage: the first crew is fine.
     }
-  }, [])
+  })
 
   const setActiveId = useCallback((id: string) => {
     setStored(id)

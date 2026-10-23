@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { CrewBlock } from '@/components/ui/CrewBlock'
@@ -23,9 +23,7 @@ export function CrewDetailSheet({
 }) {
   // Keep the last crew on screen while the sheet slides away.
   const [shownId, setShownId] = useState(crewId)
-  useEffect(() => {
-    if (crewId) setShownId(crewId)
-  }, [crewId])
+  if (crewId && crewId !== shownId) setShownId(crewId)
 
   const detail = useQuery(
     () => (shownId ? getExploreDetails(shownId) : Promise.resolve(null)),
