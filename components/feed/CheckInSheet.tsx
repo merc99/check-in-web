@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
+import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { Button } from '@/components/checkin/Button'
 import { AddChip, TagChip, ToggleChip } from '@/components/checkin/Chip'
 import { FormField, Textarea } from '@/components/checkin/FormField'
@@ -82,8 +82,8 @@ export function CheckInSheet({
   }
 
   return (
-    // One resting height: the note, tags and button need most of the screen, so a half-height peek would hide the button.
-    <BottomSheet
+    // Phones: one resting height, since a half-height peek would hide the button. Desktop: a centered dialog.
+    <ResponsiveSheet
       open={open}
       onOpenChange={(next) => {
         if (!next) onClose()
@@ -92,7 +92,7 @@ export function CheckInSheet({
       detents={[0.9]}
     >
       <div className="flex flex-col gap-4">
-        {/* Arc's title is text only, so the crew chip leads the content instead of sitting beside the title. */}
+        {/* The sheet title is text only, so the crew chip leads the content instead of sitting beside the title. */}
         <div>
           <TagChip name={group.name} color={group.color} size="m" />
         </div>
@@ -151,6 +151,6 @@ export function CheckInSheet({
           </Button>
         </div>
       </div>
-    </BottomSheet>
+    </ResponsiveSheet>
   )
 }

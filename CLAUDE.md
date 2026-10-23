@@ -66,7 +66,11 @@ plus a few Check-in extras, so registry components inherit the theme.
   `rounded-full` (buttons, chips, avatars).
 - **Type:** `font-display` (Bricolage Grotesque 600–800) for titles, crew names, big numbers, with `tracking-tighter`
   (titles) or `tracking-tightest` (numbers 40px+). `font-sans` (Geist) for everything else. Changing numbers get `tnum`.
-- **Layout:** one centered column, `max-w-app` (640px). Bottom tab bar: Explore · Feed · You.
+- **Layout:** phones get one centered column, `max-w-app` (640px), with the bottom tab bar: Explore · Feed · You.
+  Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB. Pages stay one
+  centered column unless their `<main>` sets `data-layout="wide"` (the feed: posts + a sticky right rail with check-in,
+  `CrewHero` and your week). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
+  Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; default follows the system; `ThemeToggle` on the You tab. Check every screen in both.
 
 ### shadcn primitive specs (apply after `shadcn add`)

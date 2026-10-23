@@ -80,7 +80,8 @@ export function TabBarDock() {
       ref={dock}
       aria-hidden={!match}
       className={cn(
-        'pointer-events-none fixed inset-x-0 bottom-0 z-24 mx-auto max-w-app px-4 pb-[calc(14px+env(safe-area-inset-bottom))]',
+        // Phones only: desktop navigates from the sidebar.
+        'pointer-events-none fixed inset-x-0 bottom-0 z-24 mx-auto max-w-app px-4 pb-[calc(14px+env(safe-area-inset-bottom))] lg:hidden',
         'transition-transform duration-200 ease-out',
         match ? 'translate-y-0' : 'translate-y-[130%]',
       )}

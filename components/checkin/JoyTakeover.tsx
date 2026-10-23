@@ -80,7 +80,7 @@ export function JoyTakeover({ origin, count, sub, onDismiss, onClosed }: JoyTake
       ref={root}
       role="status"
       onClick={close}
-      className="fixed inset-0 z-70 mx-auto grid max-w-app cursor-pointer place-items-center overflow-hidden bg-primary text-primary-foreground transition-[clip-path] duration-700 ease-out"
+      className="fixed inset-0 z-70 mx-auto grid max-w-app cursor-pointer lg:max-w-none place-items-center overflow-hidden bg-primary text-primary-foreground transition-[clip-path] duration-700 ease-out"
       style={{ clipPath: `circle(${open ? '150%' : '0px'} at ${at.x}px ${at.y}px)` }}
     >
       <div className="relative z-2 p-6 text-center">

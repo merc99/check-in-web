@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CheckInSheet, type CheckInDraft } from '@/components/feed/CheckInSheet'
 import { CrewSwitcherSheet } from '@/components/feed/CrewSwitcherSheet'
 import { Fab } from '@/components/feed/Fab'
@@ -11,8 +11,10 @@ import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { Avatar } from '@/components/checkin/Avatar'
 import { BrandMark } from '@/components/checkin/BrandMark'
 import { Button } from '@/components/checkin/Button'
+import { Card } from '@/components/checkin/Card'
 import { CrewHero } from '@/components/checkin/CrewHero'
-import { PinIcon } from '@/components/checkin/icons'
+import { HeatmapGrid, weekDays } from '@/components/checkin/HeatmapGrid'
+import { CheckIcon, PinIcon } from '@/components/checkin/icons'
 import { JoyTakeover } from '@/components/checkin/JoyTakeover'
 import { useLive } from '@/components/checkin/LivePill'
 import { PostCard } from '@/components/checkin/PostCard'
@@ -33,8 +35,9 @@ import {
   useQuery,
   type FeedItem,
 } from '@/lib/data'
-import { dayLabel } from '@/lib/dates'
+import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
+import { useDesktop } from '@/lib/viewport'
 
 const ARRIVAL_MS = 900
 
@@ -59,12 +62,19 @@ export default function FeedPage() {
   const [joy, setJoy] = useState<Joy | null>(null)
   const joyOpen = useRef(false)
   const fab = useRef<HTMLButtonElement>(null)
+  const railButton = useRef<HTMLButtonElement>(null)
+  const desktop = useDesktop()
 
   const group = useQuery(() => (activeId ? getGroup(activeId) : Promise.resolve(null)), [activeId], ['groups', 'group_members', 'check_ins', 'tags', 'profiles'])
   const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([])), [activeId], ['check_ins', 'reactions', 'tags', 'profiles'])
   const requests = useQuery(() => (activeId ? getJoinRequests(activeId) : Promise.resolve([])), [activeId], ['join_requests', 'group_members'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const me = useQuery(getMe, [], ['profiles'])
+
+  const week = useMemo(() => {
+    const days = new Set(stats.data?.days)
+    return weekDays((d) => days.has(localDate(d)))
+  }, [stats.data])
 
   /** Drop-in animation for a card, and the sticker pop for its author. */
   const arrive = useCallback((item: FeedItem) => {
@@ -125,7 +135,9 @@ export default function FeedPage() {
       const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags })
       const after = await getMyStats()
       setCheckInOpen(false)
-      const r = fab.current?.getBoundingClientRect()
+      // The joy circle grows from whichever check-in button is on screen (FAB on phones, rail button on desktop).
+      const trigger = [fab.current, railButton.current].find((el) => el && el.getClientRects().length > 0)
+      const r = trigger?.getBoundingClientRect()
       joyOpen.current = true
       setJoy({
         origin: r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 },
@@ -195,8 +207,16 @@ export default function FeedPage() {
   const items = feed.data ?? []
   let lastDay = ''
 
+  const hero = <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} />
+
   return (
-    <main className="px-5 pb-[150px]">
+    // Phones: one column (hero above the posts, FAB for check-in).
+    // Desktop: the posts on the left, a sticky rail on the right with check-in, the crew's day and your week.
+    <main
+      data-layout="wide"
+      className="px-5 pb-[150px] lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 lg:px-8 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-10"
+    >
+      <div className="min-w-0">
       <FeedHeader group={g} onSwitch={() => setSwitcherOpen(true)} />
 
       {requests.data?.map((r) => (
@@ -209,7 +229,7 @@ export default function FeedPage() {
         />
       ))}
 
-      <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} />
+      {!desktop && hero}
 
       {g.pinnedMessage && (
         <div className="mt-4 flex items-start gap-[10px] rounded-md border border-dashed border-border-strong px-[14px] py-3 text-sm text-muted-foreground">
@@ -246,6 +266,26 @@ export default function FeedPage() {
             </Fragment>
           )
         })
+      )}
+      </div>
+
+      {desktop && (
+        <aside aria-label="Today" className="sticky top-0 flex flex-col gap-4 self-start pt-[62px]">
+          <Button ref={railButton} variant={meIn ? 'secondary' : 'primary'} block onClick={openCheckIn}>
+            <CheckIcon size={18} /> {meIn ? 'You’re in for today' : 'Check in'}
+          </Button>
+          {hero}
+          <Card>
+            <div className="mb-[14px] flex items-baseline justify-between gap-3">
+              <h2 className="font-display text-[17px] leading-none">Your week</h2>
+              {stats.data && <small className="tnum text-[13px] text-muted-foreground">{stats.data.total} all time</small>}
+            </div>
+            <HeatmapGrid days={week} />
+            {!!stats.data?.streak && (
+              <p className="tnum mt-3 text-[13px] text-muted-foreground">{stats.data.streak}-day streak, best {stats.data.best}</p>
+            )}
+          </Card>
+        </aside>
       )}
 
       <Fab ref={fab} done={meIn} onClick={openCheckIn} />

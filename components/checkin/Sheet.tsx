@@ -124,7 +124,8 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
   if (!mounted) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-40 mx-auto max-w-app overflow-hidden">
+    // Phones: a bottom sheet in the app column. Desktop (lg): a centered dialog card, no drag handle.
+    <div className="fixed inset-0 z-40 mx-auto max-w-app overflow-hidden lg:grid lg:max-w-none lg:place-items-center lg:p-6">
       <div
         aria-hidden="true"
         onClick={onClose}
@@ -140,8 +141,9 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
         className={cn(
           'absolute inset-x-0 bottom-0 max-h-[90%] overflow-y-auto overscroll-contain rounded-t-lg border-t border-border bg-background',
           'px-5 pb-[calc(24px+env(safe-area-inset-bottom))] pt-1 outline-hidden',
-          'transition-transform duration-200 ease-out',
-          shown ? 'translate-y-0' : 'translate-y-[105%]',
+          'transition-[transform,opacity] duration-200 ease-out',
+          'lg:relative lg:inset-auto lg:max-h-[85dvh] lg:w-full lg:max-w-[480px] lg:rounded-xl lg:border lg:bg-popover lg:p-6 lg:shadow-overlay',
+          shown ? 'translate-y-0 lg:scale-100 lg:opacity-100' : 'translate-y-[105%] lg:translate-y-0 lg:scale-95 lg:opacity-0',
         )}
       >
         <div
@@ -150,7 +152,7 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
           onPointerMove={onPointerMove}
           onPointerUp={onPointerEnd}
           onPointerCancel={onPointerEnd}
-          className="-mx-5 grid h-7 cursor-grab touch-none place-items-center active:cursor-grabbing"
+          className="-mx-5 grid h-7 cursor-grab touch-none place-items-center active:cursor-grabbing lg:hidden"
         >
           <span className="h-[5px] w-11 rounded-full bg-border-strong" />
         </div>
