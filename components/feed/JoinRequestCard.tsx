@@ -1,6 +1,6 @@
-import { Avatar } from '@/components/ui/Avatar'
-import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
+import { Avatar } from '@/components/checkin/Avatar'
+import { Button } from '@/components/checkin/Button'
+import { Card } from '@/components/checkin/Card'
 import type { JoinRequestItem } from '@/lib/data'
 
 /** Shown at the top of the feed, to the person who started the crew. */

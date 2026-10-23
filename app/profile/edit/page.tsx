@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import { ProfileForm } from '@/components/you/ProfileForm'
-import { BackLink } from '@/components/ui/TextButton'
-import { useToast } from '@/components/ui/Toast'
+import { BackLink } from '@/components/checkin/TextButton'
+import { useToast } from '@/components/checkin/Toast'
 
 export default function EditProfilePage() {
   const router = useRouter()

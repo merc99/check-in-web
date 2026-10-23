@@ -1,6 +1,6 @@
 'use client'
 
-import { StatCard } from '@/components/ui/StatCard'
+import { StatCard } from '@/components/checkin/StatCard'
 import type { MyStats } from '@/lib/data'
 import { useCountUp } from '@/lib/motion'
 

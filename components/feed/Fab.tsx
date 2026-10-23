@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef } from 'react'
-import { CheckIcon, PlusIcon } from '@/components/ui/icons'
+import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
 import { cn } from '@/lib/cn'
 
 /** Floating check-in button above the tab bar. Turns into a calm "done" state once you're in. */

@@ -2,9 +2,9 @@
 
 import { useState, use } from 'react';
 import { TagAccordion } from '@/components/crew/TagAccordion'
-import { List } from '@/components/ui/List'
-import { PageHead } from '@/components/ui/SectionTitle'
-import { BackLink } from '@/components/ui/TextButton'
+import { List } from '@/components/checkin/List'
+import { PageHead } from '@/components/checkin/SectionTitle'
+import { BackLink } from '@/components/checkin/TextButton'
 import { useActiveCrew } from '@/lib/activeCrew'
 
 export default function ManageTagsPage(props: { params: Promise<{ groupId: string }> }) {

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Bowlby_One, Inter, Geist } from 'next/font/google'
-import { TabBarDock } from '@/components/ui/TabBar'
+import { TabBarDock } from '@/components/checkin/TabBar'
 import { Providers } from './providers'
 import './globals.css'
 import { cn } from "@/lib/utils";

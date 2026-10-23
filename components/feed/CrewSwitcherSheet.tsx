@@ -1,11 +1,11 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { CrewBlock } from '@/components/ui/CrewBlock'
-import { CheckIcon, PlusIcon } from '@/components/ui/icons'
-import { List, listRow } from '@/components/ui/List'
-import { Sheet } from '@/components/ui/Sheet'
+import { Button } from '@/components/checkin/Button'
+import { CrewBlock } from '@/components/checkin/CrewBlock'
+import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
+import { List, listRow } from '@/components/checkin/List'
+import { Sheet } from '@/components/checkin/Sheet'
 import { cn } from '@/lib/cn'
 import type { GroupSummary } from '@/lib/data'
 

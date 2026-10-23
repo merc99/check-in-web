@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Avatar } from '@/components/ui/Avatar'
-import { Sheet } from '@/components/ui/Sheet'
-import { StatCard } from '@/components/ui/StatCard'
+import { Avatar } from '@/components/checkin/Avatar'
+import { Sheet } from '@/components/checkin/Sheet'
+import { StatCard } from '@/components/checkin/StatCard'
 import { getUserProfile, useQuery } from '@/lib/data'
 import { monthYear } from '@/lib/dates'
 

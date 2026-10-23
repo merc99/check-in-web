@@ -1,8 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { LiveProvider } from '@/components/ui/LivePill'
-import { ToastProvider } from '@/components/ui/Toast'
+import { LiveProvider } from '@/components/checkin/LivePill'
+import { ToastProvider } from '@/components/checkin/Toast'
 import { ActiveCrewProvider } from '@/lib/activeCrew'
 import { AuthGate, AuthProvider } from '@/lib/auth'
 

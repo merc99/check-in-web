@@ -1,7 +1,7 @@
-import { Avatar } from '@/components/ui/Avatar'
-import { Card } from '@/components/ui/Card'
-import { HeatmapGrid, type HeatDay } from '@/components/ui/HeatmapGrid'
-import { PostCard } from '@/components/ui/PostCard'
+import { Avatar } from '@/components/checkin/Avatar'
+import { Card } from '@/components/checkin/Card'
+import { HeatmapGrid, type HeatDay } from '@/components/checkin/HeatmapGrid'
+import { PostCard } from '@/components/checkin/PostCard'
 import type { BrandColor } from '@/lib/colors'
 import type { FeedItem } from '@/lib/data'
 

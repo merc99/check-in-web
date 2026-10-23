@@ -1,5 +1,5 @@
-import { Avatar } from '@/components/ui/Avatar'
-import { CrewBlock } from '@/components/ui/CrewBlock'
+import { Avatar } from '@/components/checkin/Avatar'
+import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { cn } from '@/lib/cn'
 import type { ExploreGroup, MembershipStatus } from '@/lib/data'
 

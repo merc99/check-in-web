@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
-import { Button } from '@/components/ui/Button'
-import { TagChip, ToggleChip } from '@/components/ui/Chip'
-import { CrewBlock } from '@/components/ui/CrewBlock'
-import { Input } from '@/components/ui/FormField'
-import { ChevronIcon } from '@/components/ui/icons'
-import { useToast } from '@/components/ui/Toast'
+import { Button } from '@/components/checkin/Button'
+import { TagChip, ToggleChip } from '@/components/checkin/Chip'
+import { CrewBlock } from '@/components/checkin/CrewBlock'
+import { Input } from '@/components/checkin/FormField'
+import { ChevronIcon } from '@/components/checkin/icons'
+import { useToast } from '@/components/checkin/Toast'
 import { cn } from '@/lib/cn'
 import { addTag, deleteTags, getTags, useQuery, type GroupSummary } from '@/lib/data'
 

@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
-import { BrandMark } from '@/components/ui/BrandMark'
-import { Button } from '@/components/ui/Button'
-import { TextButton } from '@/components/ui/TextButton'
+import { BrandMark } from '@/components/checkin/BrandMark'
+import { Button } from '@/components/checkin/Button'
+import { TextButton } from '@/components/checkin/TextButton'
 import { cn } from '@/lib/cn'
 import { CheckInArt, OrbitArt, StreakArt } from './IntroArt'
 

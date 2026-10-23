@@ -1,8 +1,8 @@
 'use client'
 
-import { CrewDot } from '@/components/ui/CrewBlock'
-import { IconLink } from '@/components/ui/IconButton'
-import { ChevronIcon, GearIcon } from '@/components/ui/icons'
+import { CrewDot } from '@/components/checkin/CrewBlock'
+import { IconLink } from '@/components/checkin/IconButton'
+import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
 import { cn } from '@/lib/cn'
 import type { BrandColor } from '@/lib/colors'
 import { useScrolledPast } from '@/lib/motion'

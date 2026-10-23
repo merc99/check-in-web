@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { ConfirmSheet } from '@/components/ui/ConfirmSheet'
-import { Input } from '@/components/ui/FormField'
-import { useToast } from '@/components/ui/Toast'
+import { ConfirmSheet } from '@/components/checkin/ConfirmSheet'
+import { Input } from '@/components/checkin/FormField'
+import { useToast } from '@/components/checkin/Toast'
 import { useAuth } from '@/lib/auth'
 import { deleteAccount } from '@/lib/data'
 
