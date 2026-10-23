@@ -14,6 +14,7 @@ import { Sheet } from '@/components/ui/Sheet'
 import { TabBar, type TabKey } from '@/components/ui/TabBar'
 import { useToast } from '@/components/ui/Toast'
 import { AVATAR_COLORS } from '@/lib/colors'
+import { DataCheck } from './DataCheck'
 
 const VARIANTS = ['primary', 'dark', 'secondary', 'danger'] as const
 const TAGS = ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push', 'gouache', 'ink']
@@ -213,6 +214,10 @@ export default function KitchenSink() {
             Live pill
           </Button>
         </div>
+      </Section>
+
+      <Section title="Mock data" note="lib/data">
+        <DataCheck />
       </Section>
 
       <Sheet

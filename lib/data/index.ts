@@ -1,0 +1,35 @@
+// The one door components use for data. Today it's the in-memory mock; in Phase 6
+// this file points at the Supabase implementation instead, with the same exports.
+export * from './types'
+export {
+  acceptJoinRequest,
+  addTag,
+  checkIn,
+  createGroup,
+  declineJoinRequest,
+  deleteGroup,
+  deleteTags,
+  getAchievements,
+  getExploreDetails,
+  getExploreGroups,
+  getFeed,
+  getGroup,
+  getGroupPreview,
+  getJoinRequests,
+  getMe,
+  getMyGroups,
+  getMyRecentCheckIns,
+  getMyStats,
+  getTags,
+  getUserProfile,
+  joinGroupBySlug,
+  leaveGroup,
+  onCheckIn,
+  removeMember,
+  requestToJoin,
+  subscribe,
+  toggleHeart,
+  updateGroup,
+  updateProfile,
+} from '@/lib/mock/api'
+export { useQuery } from './useQuery'

@@ -1,0 +1,638 @@
+import { AVATAR_COLORS, getTagColor, type BrandColor } from '@/lib/colors'
+import type {
+  Achievement,
+  Change,
+  CheckIn,
+  CheckInInput,
+  ExploreDetail,
+  ExploreGroup,
+  FeedItem,
+  Group,
+  GroupDetail,
+  GroupMember,
+  GroupPatch,
+  GroupPreview,
+  GroupSummary,
+  JoinRequestItem,
+  Me,
+  MembershipStatus,
+  MyStats,
+  NewGroupInput,
+  Person,
+  Profile,
+  ProfilePatch,
+  PublicProfile,
+  RecentCheckIn,
+  Tag,
+  UUID,
+} from '@/lib/data/types'
+import { bestStreak, currentStreak, localDate, type LocalDate } from '@/lib/dates'
+import { db, emit, newId, nowIso, onChange } from './db'
+import { ME_ID } from './seed'
+
+// Mock implementation of the data API. Every function is async and returns view
+// models, so Phase 6 can swap these bodies for Supabase queries/RPCs without
+// touching a component. Errors mirror the RPCs' `raise exception` messages.
+
+const LATENCY_MS = 0
+const settle = () => new Promise<void>((r) => setTimeout(r, LATENCY_MS))
+
+// ─── Row helpers ───
+
+const alive = <T extends { deleted_at: string | null }>(rows: T[]) => rows.filter((r) => !r.deleted_at)
+const today = () => localDate(new Date())
+
+function profile(id: UUID): Profile {
+  const p = db().profiles.find((x) => x.id === id)
+  if (!p) throw new Error('Profile not found')
+  return p
+}
+
+export function toPerson(p: Profile): Person {
+  return { id: p.id, name: p.name?.trim() || 'Member', color: p.avatar_color ?? 'mint', photoUrl: p.avatar_url }
+}
+const personOf = (id: UUID) => toPerson(profile(id))
+
+function group(id: UUID): Group {
+  const g = db().groups.find((x) => x.id === id && !x.deleted_at)
+  if (!g) throw new Error('Group not found')
+  return g
+}
+
+const membersOf = (groupId: UUID): GroupMember[] =>
+  alive(db().group_members)
+    .filter((m) => m.group_id === groupId)
+    .sort((a, b) => a.joined_at.localeCompare(b.joined_at))
+
+const isMember = (userId: UUID, groupId: UUID) => membersOf(groupId).some((m) => m.user_id === userId)
+
+function requireMember(groupId: UUID) {
+  if (!isMember(ME_ID, groupId)) throw new Error('not authorized')
+}
+function requireOwner(groupId: UUID): Group {
+  const g = group(groupId)
+  if (g.created_by !== ME_ID) throw new Error('not authorized')
+  return g
+}
+
+const checkInsOf = (filter: (c: CheckIn) => boolean) => alive(db().check_ins).filter(filter)
+
+function daysOf(userId: UUID, groupId?: UUID): Set<LocalDate> {
+  return new Set(checkInsOf((c) => c.user_id === userId && (!groupId || c.group_id === groupId)).map((c) => c.local_date))
+}
+
+const inToday = (userId: UUID, groupId: UUID) =>
+  checkInsOf((c) => c.user_id === userId && c.group_id === groupId && c.local_date === today()).length > 0
+
+/** Consecutive days with at least one member check-in (get_group_streak). */
+function groupStreak(groupId: UUID): number {
+  return currentStreak(new Set(checkInsOf((c) => c.group_id === groupId).map((c) => c.local_date)))
+}
+
+function tagsFor(checkInId: UUID) {
+  const ids = new Set(db().check_in_tags.filter((ct) => ct.check_in_id === checkInId).map((ct) => ct.tag_id))
+  return alive(db().tags)
+    .filter((t) => ids.has(t.id))
+    .map((t) => ({ id: t.id, name: t.name }))
+}
+
+function status(groupId: UUID): MembershipStatus {
+  if (isMember(ME_ID, groupId)) return 'member'
+  if (db().join_requests.some((r) => r.group_id === groupId && r.user_id === ME_ID && r.status === 'pending')) return 'pending'
+  if (membersOf(groupId).length >= group(groupId).max_members) return 'full'
+  return null
+}
+
+function summary(g: Group): GroupSummary {
+  const members = membersOf(g.id)
+  return {
+    id: g.id,
+    name: g.name,
+    color: g.color,
+    memberCount: members.length,
+    maxMembers: g.max_members,
+    inToday: members.filter((m) => inToday(m.user_id, g.id)).length,
+    isOwner: g.created_by === ME_ID,
+  }
+}
+
+function toFeedItem(c: CheckIn): FeedItem {
+  const reactions = db()
+    .reactions.filter((r) => r.check_in_id === c.id)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+  return {
+    id: c.id,
+    groupId: c.group_id,
+    user: personOf(c.user_id),
+    isMine: c.user_id === ME_ID,
+    note: c.note,
+    tags: tagsFor(c.id),
+    createdAt: c.created_at,
+    localDate: c.local_date,
+    hearts: {
+      count: reactions.length,
+      byMe: reactions.some((r) => r.user_id === ME_ID),
+      people: reactions.filter((r) => r.user_id !== ME_ID).slice(0, 3).map((r) => personOf(r.user_id)),
+    },
+  }
+}
+
+function addMembership(userId: UUID, groupId: UUID) {
+  const g = group(groupId)
+  if (membersOf(groupId).length >= g.max_members) throw new Error('Group is full')
+  const existing = db().group_members.find((m) => m.user_id === userId && m.group_id === groupId)
+  if (existing) {
+    existing.deleted_at = null
+    existing.joined_at = nowIso()
+    emit({ table: 'group_members', type: 'UPDATE', row: existing })
+    return
+  }
+  const row: GroupMember = {
+    id: newId(),
+    user_id: userId,
+    group_id: groupId,
+    role: 'member',
+    joined_at: nowIso(),
+    streak_freeze_count: 0,
+    deleted_at: null,
+  }
+  db().group_members.push(row)
+  emit({ table: 'group_members', type: 'INSERT', row })
+}
+
+function findOrCreateTag(groupId: UUID, raw: string): Tag | null {
+  const name = raw.trim().toLowerCase().slice(0, 24)
+  if (!name) return null
+  const existing = alive(db().tags).find((t) => t.group_id === groupId && t.name === name)
+  if (existing) return existing
+  const row: Tag = {
+    id: newId(),
+    group_id: groupId,
+    name,
+    color: getTagColor(name),
+    usage_count: 0,
+    created_at: nowIso(),
+    deleted_at: null,
+  }
+  db().tags.push(row)
+  emit({ table: 'tags', type: 'INSERT', row })
+  return row
+}
+
+const SLUG_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+function uniqueSlug(): string {
+  for (;;) {
+    const slug = Array.from({ length: 6 }, () => SLUG_CHARS[Math.floor(Math.random() * SLUG_CHARS.length)]).join('')
+    if (!db().groups.some((g) => g.invite_slug === slug)) return slug
+  }
+}
+
+// ─── Realtime ───
+
+/** Every row change (INSERT / UPDATE / DELETE). Supabase: a realtime channel on these tables. */
+export function subscribe(listener: (change: Change) => void): () => void {
+  return onChange(listener)
+}
+
+/** New check-ins in one crew, as they arrive. Drives the live arrival animation. */
+export function onCheckIn(groupId: UUID, listener: (item: FeedItem) => void): () => void {
+  return onChange((c) => {
+    if (c.table !== 'check_ins' || c.type !== 'INSERT') return
+    const row = c.row as CheckIn
+    if (row.group_id === groupId) listener(toFeedItem(row))
+  })
+}
+
+// ─── You ───
+
+export async function getMe(): Promise<Me> {
+  await settle()
+  const p = profile(ME_ID)
+  return { profile: { ...p }, person: toPerson(p) }
+}
+
+export async function updateProfile(patch: ProfilePatch): Promise<Me> {
+  await settle()
+  const p = profile(ME_ID)
+  if (patch.name !== undefined) {
+    const name = patch.name.trim().slice(0, 40)
+    if (!name) throw new Error('Name is required')
+    p.name = name
+  }
+  if (patch.handle !== undefined) {
+    const handle = patch.handle?.trim().replace(/^@/, '').slice(0, 24) || null
+    if (handle && db().profiles.some((x) => x.id !== ME_ID && x.handle?.toLowerCase() === handle.toLowerCase())) {
+      throw new Error('That handle is taken')
+    }
+    p.handle = handle
+  }
+  if (patch.bio !== undefined) p.bio = patch.bio?.trim().slice(0, 140) || null
+  if (patch.avatar_color !== undefined) {
+    if (!AVATAR_COLORS.includes(patch.avatar_color)) throw new Error('Unknown avatar color')
+    p.avatar_color = patch.avatar_color
+  }
+  if (patch.avatar_url !== undefined) p.avatar_url = patch.avatar_url
+  emit({ table: 'profiles', type: 'UPDATE', row: p })
+  return { profile: { ...p }, person: toPerson(p) }
+}
+
+export async function getMyStats(): Promise<MyStats> {
+  await settle()
+  const days = daysOf(ME_ID)
+  return {
+    total: checkInsOf((c) => c.user_id === ME_ID).length,
+    streak: currentStreak(days),
+    best: bestStreak(days),
+    checkedInToday: days.has(today()),
+    days: Array.from(days).sort(),
+  }
+}
+
+export async function getMyRecentCheckIns(limit = 3): Promise<RecentCheckIn[]> {
+  await settle()
+  return checkInsOf((c) => c.user_id === ME_ID)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, limit)
+    .map((c) => {
+      const g = db().groups.find((x) => x.id === c.group_id)
+      return {
+        id: c.id,
+        group: { id: c.group_id, name: g?.name ?? '', color: g?.color ?? 'mint' },
+        note: c.note,
+        tags: tagsFor(c.id),
+        createdAt: c.created_at,
+      }
+    })
+}
+
+export async function getAchievements(): Promise<Achievement[]> {
+  await settle()
+  const days = daysOf(ME_ID)
+  const total = checkInsOf((c) => c.user_id === ME_ID).length
+  const best = bestStreak(days)
+  const myGroups = alive(db().group_members).filter((m) => m.user_id === ME_ID).map((m) => m.group_id)
+  const perfectDay = myGroups.some((gid) => {
+    const members = new Set(membersOf(gid).map((m) => m.user_id))
+    const byDay = new Map<string, Set<string>>()
+    for (const c of checkInsOf((c) => c.group_id === gid && members.has(c.user_id))) {
+      if (!byDay.has(c.local_date)) byDay.set(c.local_date, new Set())
+      byDay.get(c.local_date)!.add(c.user_id)
+    }
+    return Array.from(byDay.values()).some((s) => s.size >= members.size)
+  })
+  const a = (key: string, title: string, subtitle: string, glyph: string, color: BrandColor, unlocked: boolean) => ({
+    key,
+    title,
+    subtitle,
+    glyph,
+    color,
+    unlocked,
+  })
+  return [
+    a('first', 'First check-in', 'You showed up', '1', 'mint', total >= 1),
+    a('starter', 'Crew starter', 'Started a crew', 'C', 'sky', alive(db().groups).some((g) => g.created_by === ME_ID)),
+    a('forty', 'Forty deep', '40 check-ins', '40', 'lemon', total >= 40),
+    a('week', 'Week one', '7 days in a row', '7', 'coral', best >= 7),
+    a('fifty', 'Half century', '50 check-ins', '50', 'grape', total >= 50),
+    a('perfect', 'Perfect day', 'Whole crew in, same day', '★', 'leaf', perfectDay),
+  ]
+}
+
+export async function getUserProfile(userId: UUID): Promise<PublicProfile> {
+  await settle()
+  const p = profile(userId)
+  const shared = alive(db().group_members)
+    .filter((m) => m.user_id === userId && isMember(ME_ID, m.group_id))
+    .map((m) => group(m.group_id))
+  return {
+    person: toPerson(p),
+    memberSince: p.created_at,
+    total: checkInsOf((c) => c.user_id === userId).length,
+    streak: currentStreak(daysOf(userId)),
+    sharedGroups: shared.map((g) => ({ id: g.id, name: g.name, color: g.color, streak: currentStreak(daysOf(userId, g.id)) })),
+  }
+}
+
+// ─── Crews ───
+
+export async function getMyGroups(): Promise<GroupSummary[]> {
+  await settle()
+  return alive(db().group_members)
+    .filter((m) => m.user_id === ME_ID)
+    .sort((a, b) => a.joined_at.localeCompare(b.joined_at))
+    .map((m) => db().groups.find((g) => g.id === m.group_id && !g.deleted_at))
+    .filter((g): g is Group => !!g)
+    .map(summary)
+}
+
+export async function getGroup(groupId: UUID): Promise<GroupDetail> {
+  await settle()
+  requireMember(groupId)
+  const g = group(groupId)
+  const members = membersOf(groupId)
+    .map((m) => ({
+      person: personOf(m.user_id),
+      isMe: m.user_id === ME_ID,
+      isCreator: g.created_by === m.user_id,
+      streak: currentStreak(daysOf(m.user_id, groupId)),
+      inToday: inToday(m.user_id, groupId),
+    }))
+    .sort((a, b) => Number(b.isMe) - Number(a.isMe))
+  return {
+    ...summary(g),
+    slug: g.invite_slug,
+    description: g.description,
+    pinnedMessage: g.pinned_message,
+    members,
+    tags: alive(db().tags)
+      .filter((t) => t.group_id === groupId)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+  }
+}
+
+export async function createGroup(input: NewGroupInput): Promise<UUID> {
+  await settle()
+  const name = input.name.trim().slice(0, 32)
+  if (!name) throw new Error('Name is required')
+  const row: Group = {
+    id: newId(),
+    name,
+    description: null,
+    color: input.color,
+    invite_slug: uniqueSlug(),
+    created_by: ME_ID,
+    max_members: input.maxMembers,
+    pinned_message: null,
+    created_at: nowIso(),
+    deleted_at: null,
+  }
+  db().groups.push(row)
+  emit({ table: 'groups', type: 'INSERT', row })
+  addMembership(ME_ID, row.id)
+  return row.id
+}
+
+/**
+ * Join by invite code. Prototype behaviour: a code that matches no crew joins the
+ * first open public crew instead, so anyone trying the demo gets somewhere.
+ */
+export async function joinGroupBySlug(slug: string): Promise<UUID> {
+  await settle()
+  const code = slug.trim().toUpperCase()
+  const match = alive(db().groups).find((g) => g.invite_slug === code)
+  const target =
+    match ?? alive(db().groups).find((g) => !isMember(ME_ID, g.id) && membersOf(g.id).length < g.max_members)
+  if (!target) throw new Error('Group not found')
+  if (!isMember(ME_ID, target.id)) addMembership(ME_ID, target.id)
+  return target.id
+}
+
+export async function updateGroup(groupId: UUID, patch: GroupPatch): Promise<void> {
+  await settle()
+  const g = requireOwner(groupId)
+  if (patch.name !== undefined) {
+    const name = patch.name.trim().slice(0, 32)
+    if (!name) throw new Error('Name is required')
+    g.name = name
+  }
+  if (patch.color !== undefined) g.color = patch.color
+  if (patch.pinned_message !== undefined) g.pinned_message = patch.pinned_message?.trim() || null
+  emit({ table: 'groups', type: 'UPDATE', row: g })
+}
+
+export async function leaveGroup(groupId: UUID): Promise<void> {
+  await settle()
+  const m = membersOf(groupId).find((x) => x.user_id === ME_ID)
+  if (!m) return
+  m.deleted_at = nowIso()
+  emit({ table: 'group_members', type: 'UPDATE', row: m })
+}
+
+/** remove_group_member RPC. */
+export async function removeMember(groupId: UUID, userId: UUID): Promise<void> {
+  await settle()
+  requireOwner(groupId)
+  const m = membersOf(groupId).find((x) => x.user_id === userId)
+  if (!m) return
+  m.deleted_at = nowIso()
+  emit({ table: 'group_members', type: 'UPDATE', row: m })
+}
+
+/** delete_my_group RPC: soft-deletes the crew and every membership. */
+export async function deleteGroup(groupId: UUID): Promise<void> {
+  await settle()
+  const g = requireOwner(groupId)
+  const at = nowIso()
+  for (const m of membersOf(groupId)) {
+    m.deleted_at = at
+    emit({ table: 'group_members', type: 'UPDATE', row: m })
+  }
+  g.deleted_at = at
+  emit({ table: 'groups', type: 'UPDATE', row: g })
+}
+
+// ─── Tags ───
+
+export async function getTags(groupId: UUID): Promise<Tag[]> {
+  await settle()
+  requireMember(groupId)
+  return alive(db().tags)
+    .filter((t) => t.group_id === groupId)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+}
+
+export async function addTag(groupId: UUID, name: string): Promise<Tag> {
+  await settle()
+  requireMember(groupId)
+  const clean = name.trim().toLowerCase()
+  if (alive(db().tags).some((t) => t.group_id === groupId && t.name === clean)) throw new Error('That tag already exists')
+  const tag = findOrCreateTag(groupId, clean)
+  if (!tag) throw new Error('Tag name is required')
+  return tag
+}
+
+/** Soft delete. Past check-ins keep their tag rows; feeds stop showing deleted tags. */
+export async function deleteTags(groupId: UUID, tagIds: UUID[]): Promise<void> {
+  await settle()
+  requireMember(groupId)
+  const at = nowIso()
+  for (const t of alive(db().tags)) {
+    if (t.group_id === groupId && tagIds.includes(t.id)) {
+      t.deleted_at = at
+      emit({ table: 'tags', type: 'UPDATE', row: t })
+    }
+  }
+}
+
+// ─── Feed ───
+
+export async function getFeed(groupId: UUID, { limit = 40 }: { limit?: number } = {}): Promise<FeedItem[]> {
+  await settle()
+  requireMember(groupId)
+  return checkInsOf((c) => c.group_id === groupId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, limit)
+    .map(toFeedItem)
+}
+
+/** Also used by the live simulation to post as other crew members. */
+export function insertCheckIn(userId: UUID, input: CheckInInput): FeedItem {
+  if (!isMember(userId, input.groupId)) throw new Error('not authorized')
+  if (inToday(userId, input.groupId)) throw new Error('You’re in for today')
+  const row: CheckIn = {
+    id: newId(),
+    user_id: userId,
+    group_id: input.groupId,
+    local_date: today(),
+    note: input.note?.trim().slice(0, 280) || null,
+    created_at: nowIso(),
+    deleted_at: null,
+  }
+  const names = Array.from(new Set((input.tags ?? []).map((t) => t.trim().toLowerCase()).filter(Boolean)))
+  for (const name of names) {
+    const tag = findOrCreateTag(input.groupId, name)
+    if (!tag) continue
+    db().check_in_tags.push({ check_in_id: row.id, tag_id: tag.id })
+    tag.usage_count++
+  }
+  db().check_ins.push(row)
+  emit({ table: 'check_ins', type: 'INSERT', row })
+  return toFeedItem(row)
+}
+
+export async function checkIn(input: CheckInInput): Promise<FeedItem> {
+  await settle()
+  return insertCheckIn(ME_ID, input)
+}
+
+/** Also used by the live simulation. Returns whether `userId` now hearts it. */
+export function setHeart(userId: UUID, checkInId: UUID, on: boolean): boolean {
+  const c = alive(db().check_ins).find((x) => x.id === checkInId)
+  if (!c || !isMember(userId, c.group_id)) throw new Error('not authorized')
+  const rows = db().reactions
+  const i = rows.findIndex((r) => r.check_in_id === checkInId && r.user_id === userId)
+  if (on && i < 0) {
+    const row = { id: newId(), check_in_id: checkInId, user_id: userId, created_at: nowIso() }
+    rows.push(row)
+    emit({ table: 'reactions', type: 'INSERT', row })
+  } else if (!on && i >= 0) {
+    // The reactions table has no deleted_at; unhearting deletes the row (see Phase 6 notes).
+    const [row] = rows.splice(i, 1)
+    emit({ table: 'reactions', type: 'DELETE', row })
+  }
+  return on
+}
+
+export async function toggleHeart(checkInId: UUID): Promise<boolean> {
+  await settle()
+  const on = !db().reactions.some((r) => r.check_in_id === checkInId && r.user_id === ME_ID)
+  return setHeart(ME_ID, checkInId, on)
+}
+
+// ─── Join requests ───
+
+/** Pending requests for a crew you started. Empty for everyone else. */
+export async function getJoinRequests(groupId: UUID): Promise<JoinRequestItem[]> {
+  await settle()
+  if (group(groupId).created_by !== ME_ID) return []
+  return db()
+    .join_requests.filter((r) => r.group_id === groupId && r.status === 'pending')
+    .map((r) => ({
+      id: r.id,
+      groupId,
+      person: personOf(r.user_id),
+      totalCheckIns: checkInsOf((c) => c.user_id === r.user_id).length,
+    }))
+}
+
+export async function acceptJoinRequest(requestId: UUID): Promise<void> {
+  await settle()
+  const r = db().join_requests.find((x) => x.id === requestId && x.status === 'pending')
+  if (!r) throw new Error('not authorized or request not found')
+  requireOwner(r.group_id)
+  addMembership(r.user_id, r.group_id)
+  r.status = 'accepted'
+  emit({ table: 'join_requests', type: 'UPDATE', row: r })
+}
+
+export async function declineJoinRequest(requestId: UUID): Promise<void> {
+  await settle()
+  const r = db().join_requests.find((x) => x.id === requestId && x.status === 'pending')
+  if (!r) return
+  requireOwner(r.group_id)
+  r.status = 'declined'
+  emit({ table: 'join_requests', type: 'UPDATE', row: r })
+}
+
+export async function requestToJoin(groupId: UUID): Promise<void> {
+  await settle()
+  const s = status(groupId)
+  if (s === 'member' || s === 'pending') return
+  if (s === 'full') throw new Error('Group is full')
+  const existing = db().join_requests.find((r) => r.group_id === groupId && r.user_id === ME_ID)
+  if (existing) {
+    existing.status = 'pending'
+    existing.created_at = nowIso()
+    emit({ table: 'join_requests', type: 'UPDATE', row: existing })
+    return
+  }
+  const row = { id: newId(), group_id: groupId, user_id: ME_ID, status: 'pending' as const, created_at: nowIso() }
+  db().join_requests.push(row)
+  emit({ table: 'join_requests', type: 'INSERT', row })
+}
+
+// ─── Explore & invites ───
+
+function exploreGroup(g: Group): ExploreGroup {
+  const members = membersOf(g.id)
+  return {
+    id: g.id,
+    name: g.name,
+    color: g.color,
+    description: g.description,
+    memberCount: members.length,
+    maxMembers: g.max_members,
+    streak: groupStreak(g.id),
+    preview: members.slice(0, 4).map((m) => personOf(m.user_id)),
+    status: status(g.id),
+  }
+}
+
+/** get_explore_groups RPC: every live crew, biggest first. */
+export async function getExploreGroups(query = ''): Promise<ExploreGroup[]> {
+  await settle()
+  const q = query.trim().toLowerCase()
+  return alive(db().groups)
+    .filter((g) => !q || `${g.name} ${g.description ?? ''}`.toLowerCase().includes(q))
+    .map(exploreGroup)
+    .sort((a, b) => b.memberCount - a.memberCount)
+}
+
+/** get_group_explore_details RPC. */
+export async function getExploreDetails(groupId: UUID): Promise<ExploreDetail> {
+  await settle()
+  const g = group(groupId)
+  return {
+    ...exploreGroup(g),
+    members: membersOf(groupId)
+      .map((m) => ({ person: personOf(m.user_id), isMe: m.user_id === ME_ID, streak: currentStreak(daysOf(m.user_id, groupId)) }))
+      .sort((a, b) => b.streak - a.streak),
+  }
+}
+
+/** get_group_preview RPC, for /invite/[slug]. Works signed out. */
+export async function getGroupPreview(slug: string): Promise<GroupPreview | null> {
+  await settle()
+  const g = alive(db().groups).find((x) => x.invite_slug === slug.trim().toUpperCase())
+  if (!g) return null
+  const members = membersOf(g.id)
+  return {
+    id: g.id,
+    name: g.name,
+    color: g.color,
+    memberCount: members.length,
+    maxMembers: g.max_members,
+    preview: members.slice(0, 5).map((m) => personOf(m.user_id)),
+    status: status(g.id),
+  }
+}
