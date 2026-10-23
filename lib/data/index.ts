@@ -25,6 +25,7 @@ export {
   joinGroupBySlug,
   leaveGroup,
   onCheckIn,
+  onHeart,
   removeMember,
   requestToJoin,
   subscribe,

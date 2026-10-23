@@ -17,15 +17,17 @@ export interface AvatarProps {
   size?: Size
   /** The signed-in user: gets the mint ring. */
   you?: boolean
+  /** Not here yet (crew hero): white, dashed and faded instead of filled. */
+  pending?: boolean
   className?: string
 }
 
-export function Avatar({ name, color = 'mint', photoUrl, size = 'md', you, className }: AvatarProps) {
+export function Avatar({ name, color = 'mint', photoUrl, size = 'md', you, pending, className }: AvatarProps) {
   return (
     <span
       className={cn(
-        'relative grid flex-none place-items-center overflow-hidden rounded-full border border-ink font-display leading-none text-ink',
-        COLOR_CLASS[color].bg,
+        'relative grid flex-none place-items-center overflow-hidden rounded-full border border-ink font-display leading-none text-ink transition-opacity duration-300',
+        pending ? 'border-dashed bg-card opacity-55' : COLOR_CLASS[color].bg,
         SIZE[size],
         you && 'shadow-you',
         className,

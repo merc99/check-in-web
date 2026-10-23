@@ -59,7 +59,7 @@ const GROUPS: GroupSeed[] = [
   { id: 'g2', name: 'Sketchbook Daily', color: 'grape', slug: 'SKTCH7', max: 10, createdBy: 'u3', description: 'Draw something. Anything. Every day.', members: [ME_ID, 'u3', 'u5', 'u6'], tags: ['sketch', 'gouache', 'ink', 'study'] },
   { id: 'e1', name: 'Morning Pages', color: 'lemon', slug: 'PAGES3', max: 10, createdBy: 'u8', description: 'Three pages, longhand, before anything else.', members: ['u8', 'u10', 'u12', 'u14'], tags: ['pages', 'longhand'] },
   { id: 'e2', name: 'Couch to 5K', color: 'leaf', slug: 'RUN5KC', max: 8, createdBy: 'u9', description: 'Slow runs count. Walking breaks count.', members: ['u9', 'u11', 'u13', 'u15', 'u10', 'u8', 'u12', 'u14'], tags: ['run', 'walk-run', 'rest day'] },
-  { id: 'e3', name: 'Hydration Station', color: 'sky', slug: 'WATER8', max: 15, createdBy: 'u10', description: 'Eight glasses. We remind each other.', members: ['u10', 'u13', 'u6'], tags: ['water'] },
+  { id: 'e3', name: 'Hydration Station', color: 'sky', slug: 'WATER8', max: 15, createdBy: 'u10', description: 'Eight glasses. We remind each other.', members: ['u10', 'u13', 'u6', 'u7'], tags: ['water'] },
   { id: 'e4', name: 'No Phone Before 9', color: 'indigo', slug: 'NOFON9', max: 10, createdBy: 'u11', description: 'Mornings belong to you, not the feed.', members: ['u11', 'u12', 'u9', 'u15', 'u14'], tags: ['no phone', 'reading'] },
   { id: 'e5', name: 'Guitar, 20 Minutes', color: 'clay', slug: 'GTR20M', max: 5, createdBy: 'u15', description: 'Scales, songs, noodling. It all counts.', members: ['u15', 'u9'], tags: ['scales', 'songs'] },
 ]

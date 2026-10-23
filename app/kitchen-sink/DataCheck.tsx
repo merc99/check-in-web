@@ -10,7 +10,7 @@ import { useLive } from '@/components/ui/LivePill'
 import { useToast } from '@/components/ui/Toast'
 import { checkIn, getFeed, getMyGroups, getMyStats, onCheckIn, toggleHeart, useQuery } from '@/lib/data'
 import { timeAgo } from '@/lib/dates'
-import { simulateArrival, SIMULATE_LIVE, useLiveSimulation } from '@/lib/mock/simulation'
+import { simulateArrival, SIMULATE_LIVE } from '@/lib/mock/simulation'
 
 /** Dev check for the mock data layer: reads, a write, realtime arrivals and the simulation. */
 export function DataCheck() {
@@ -20,8 +20,6 @@ export function DataCheck() {
   const groups = useQuery(getMyGroups, [], ['groups', 'group_members', 'check_ins'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const feed = useQuery(() => getFeed(groupId, { limit: 4 }), [groupId], ['check_ins', 'reactions', 'tags'])
-
-  useLiveSimulation(groupId)
 
   useEffect(
     () =>

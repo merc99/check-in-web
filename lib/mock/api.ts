@@ -194,12 +194,26 @@ export function subscribe(listener: (change: Change) => void): () => void {
   return onChange(listener)
 }
 
-/** New check-ins in one crew, as they arrive. Drives the live arrival animation. */
-export function onCheckIn(groupId: UUID, listener: (item: FeedItem) => void): () => void {
+/**
+ * New check-ins as they arrive, in one crew or (with `null`) any crew you're in.
+ * Drives the live arrival animation and the live pill.
+ */
+export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => void): () => void {
   return onChange((c) => {
     if (c.table !== 'check_ins' || c.type !== 'INSERT') return
     const row = c.row as CheckIn
-    if (row.group_id === groupId) listener(toFeedItem(row))
+    if (groupId ? row.group_id === groupId : isMember(ME_ID, row.group_id)) listener(toFeedItem(row))
+  })
+}
+
+/** Someone else hearted one of your check-ins. */
+export function onHeart(listener: (heart: { checkInId: UUID; groupId: UUID; person: Person }) => void): () => void {
+  return onChange((c) => {
+    if (c.table !== 'reactions' || c.type !== 'INSERT') return
+    const row = c.row as { check_in_id: UUID; user_id: UUID }
+    const target = db().check_ins.find((x) => x.id === row.check_in_id)
+    if (!target || target.user_id !== ME_ID || row.user_id === ME_ID) return
+    listener({ checkInId: target.id, groupId: target.group_id, person: personOf(row.user_id) })
   })
 }
 

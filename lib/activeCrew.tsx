@@ -1,0 +1,52 @@
+'use client'
+
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { getMyGroups, useQuery, type GroupSummary } from '@/lib/data'
+import { useLiveSimulation } from '@/lib/mock/simulation'
+
+const STORAGE_KEY = 'checkin.activeCrew'
+
+interface ActiveCrew {
+  /** The crew on screen. Null when you're in no crews (or before they load). */
+  activeId: string | null
+  setActiveId: (id: string) => void
+  groups: GroupSummary[] | undefined
+  loading: boolean
+}
+
+const Ctx = createContext<ActiveCrew>({ activeId: null, setActiveId: () => {}, groups: undefined, loading: true })
+
+export const useActiveCrew = () => useContext(Ctx)
+
+/** Which crew the feed shows. Remembered per browser; falls back to your first crew. */
+export function ActiveCrewProvider({ children }: { children: ReactNode }) {
+  const groups = useQuery(getMyGroups, [], ['groups', 'group_members', 'check_ins'])
+  const [stored, setStored] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      setStored(localStorage.getItem(STORAGE_KEY))
+    } catch {
+      // Private mode or blocked storage: the first crew is fine.
+    }
+  }, [])
+
+  const setActiveId = useCallback((id: string) => {
+    setStored(id)
+    try {
+      localStorage.setItem(STORAGE_KEY, id)
+    } catch {
+      // Not remembered across reloads; still works for this visit.
+    }
+  }, [])
+
+  const list = groups.data
+  const activeId = list ? (list.find((g) => g.id === stored)?.id ?? list[0]?.id ?? null) : null
+
+  // Fake crew activity (dev, or when NEXT_PUBLIC_SIMULATE_LIVE=true). Mostly lands in the crew on screen.
+  useLiveSimulation(activeId)
+
+  return (
+    <Ctx.Provider value={{ activeId, setActiveId, groups: list, loading: groups.loading && !list }}>{children}</Ctx.Provider>
+  )
+}
