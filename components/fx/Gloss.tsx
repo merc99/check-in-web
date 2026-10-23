@@ -1,20 +1,17 @@
 'use client'
 
 // Glossy crew-hue panels, pills and sparklines (pattern: mmo nodes stats panels, adapted). Static
-// surfaces that answer a mouse: a soft light follows it (fx/shine), and the sparkline can be scrubbed.
+// surfaces; the sparkline can be scrubbed.
 import { useId, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import styles from './Gloss.module.css'
-import { shineClass, useShine } from './shine'
 
 /** A glossy panel in a crew hue. Text inside is the dark on-color ink. */
 export function Gloss({ hue, className, style, children, ...rest }: HTMLAttributes<HTMLDivElement> & { hue: Hue | 'primary' }) {
-  const ref = useRef<HTMLDivElement>(null)
-  useShine(ref)
   const vars = { '--hue': hue === 'primary' ? 'var(--primary)' : HUE_CLASS[hue].cssVar, ...style } as CSSProperties
   return (
-    <div ref={ref} className={cn(styles.gloss, shineClass, className)} style={vars} {...rest}>
+    <div className={cn(styles.gloss, className)} style={vars} {...rest}>
       {children}
     </div>
   )

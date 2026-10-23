@@ -48,10 +48,3 @@
   box-shadow: var(--elev-raised);
 }
 
-.sheen {
-  position: absolute;
-  inset: 0;
-  display: block;
-  border-radius: inherit;
-  pointer-events: none;
-}

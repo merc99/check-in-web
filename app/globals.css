@@ -16,25 +16,25 @@
   color-scheme: light;
   --radius: 16px;
 
-  --background: #FAF9F6;          /* warm off-white canvas */
+  --background: #F1ECE2;          /* warm paper canvas: cards and buttons sit up off it */
   --foreground: #1C1B19;
-  --card: #FFFFFF;
+  --card: #FFFDF8;                /* warm white */
   --card-foreground: #1C1B19;
-  --popover: #FFFFFF;
+  --popover: #FFFDF8;
   --popover-foreground: #1C1B19;
 
   --primary: #34D399;             /* mint: the one interactive accent */
   --primary-foreground: #052E1C;
-  --secondary: #F4F3EF;
+  --secondary: #EBE5D9;
   --secondary-foreground: #1C1B19;
-  --muted: #F4F3EF;               /* raised surfaces: inputs, tracks, hover */
-  --muted-foreground: #6B6A65;
-  --accent: #F4F3EF;              /* shadcn meaning: subtle hover fill. NOT the brand accent. */
+  --muted: #EBE5D9;               /* raised surfaces: inputs, tracks, hover */
+  --muted-foreground: #625E55;
+  --accent: #EBE5D9;              /* shadcn meaning: subtle hover fill. NOT the brand accent. */
   --accent-foreground: #1C1B19;
   --destructive: #EF4444;
 
-  --border: rgb(28 27 25 / 0.08);
-  --input: rgb(28 27 25 / 0.14);
+  --border: rgb(70 52 25 / 0.11);
+  --input: rgb(70 52 25 / 0.2);
   --ring: #34D399;
 
   --chart-1: #34D399;
@@ -44,8 +44,8 @@
   --chart-5: #F472B6;
 
   /* Check-in extras */
-  --border-strong: rgb(28 27 25 / 0.14);
-  --subtle-foreground: #A3A29C;
+  --border-strong: rgb(70 52 25 / 0.2);
+  --subtle-foreground: #9A9387;
   --on-color: #1C1B19;            /* text on solid crew hues, both modes */
   --primary-ink: #047857;         /* mint as readable text / links */
   --primary-soft: rgb(52 211 153 / 0.16);
@@ -207,7 +207,6 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-pixel: var(--font-pixelify), ui-monospace, monospace; /* the logo wordmark only */
   --tracking-tighter: -0.02em;
   --tracking-tightest: -0.035em;
   --container-app: 640px;         /* max-w-app */

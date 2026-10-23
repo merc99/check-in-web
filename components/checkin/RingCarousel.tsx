@@ -14,7 +14,7 @@
 // written by two authors means one of them loses.
 //
 // Check-in changes: no idle drift (motion answers what people do), so there's no floater layer
-// and no redraw-after-drift fix; sizes re-measured for portrait crew cards; React props for the
+// and no redraw-after-drift fix; no dark dent or rim shading under the pointer (the tilt says it); sizes re-measured for portrait crew cards; React props for the
 // knobs; a live region names the card at the front.
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -90,7 +90,6 @@ export function RingCarousel({
   const track = useRef<HTMLDivElement>(null)
   const slots = useRef<(HTMLDivElement | null)[]>([])
   const cards = useRef<(HTMLDivElement | null)[]>([])
-  const sheens = useRef<(HTMLSpanElement | null)[]>([])
   const [front, setFront] = useState(opensOn)
   const callbacks = useRef({ onFront, onTap })
   useEffect(() => {
@@ -125,7 +124,7 @@ export function RingCarousel({
     let prevT = 0
     let held = false
     let downSlot = -1
-    let drag: { x0: number; t0: number; last: number; t: number; vx: number; moved: boolean } | null = null
+    let drag: { x0: number; y0: number; t0: number; last: number; t: number; vx: number; moved: boolean } | null = null
     const frontIndex = () => mod(Math.round(turn), N)
 
     // No opacity is written: size, lean and paint order say which is in front.
@@ -151,18 +150,6 @@ export function RingCarousel({
       card.style.transform = atRest
         ? 'none'
         : `translateZ(${(-10 * SINK * lit).toFixed(2)}px) rotateX(${(-c.sy.cur * max).toFixed(2)}deg) rotateY(${(c.sx.cur * max).toFixed(2)}deg)`
-      const sheen = sheens.current[i]
-      if (sheen) {
-        // The pointer as a percentage, so the gradient lands in the same place at any scale.
-        // Dent and rim are shade and light, not palette colors.
-        const px = ((c.sx.cur + 1) / 2) * 100
-        const py = ((c.sy.cur + 1) / 2) * 100
-        const dark = SINK * 0.35 * lit
-        const rim = SINK * 0.16 * lit
-        sheen.style.backgroundImage =
-          `radial-gradient(44% 36% at ${px.toFixed(1)}% ${py.toFixed(1)}%, rgb(0 0 0 / ${dark.toFixed(3)}) 0%, transparent 100%), ` +
-          `radial-gradient(54% 44% at ${(100 - px).toFixed(1)}% ${(100 - py).toFixed(1)}%, rgb(255 255 255 / ${rim.toFixed(3)}) 0%, transparent 100%)`
-      }
     }
 
     // One loop for every card's springs; it parks itself once everything has settled.
@@ -274,7 +261,7 @@ export function RingCarousel({
       cancelAnimationFrame(raf)
       const slot = (e.target as Element | null)?.closest?.('[data-slot]')
       downSlot = slot ? Number(slot.getAttribute('data-slot')) : -1
-      drag = { x0: e.clientX, t0: turn, last: e.clientX, t: e.timeStamp, vx: 0, moved: false }
+      drag = { x0: e.clientX, y0: e.clientY, t0: turn, last: e.clientX, t: e.timeStamp, vx: 0, moved: false }
       held = true
       tr.setAttribute('data-held', 'true')
       wake()
@@ -288,7 +275,8 @@ export function RingCarousel({
       const g = drag
       if (!g) return
       const dx = e.clientX - g.x0
-      if (!g.moved && Math.abs(dx) > 3) g.moved = true
+      // Any real movement, sideways (turning) or up and down (scrolling the page), means it isn't a tap.
+      if (!g.moved && (Math.abs(dx) > 3 || Math.abs(e.clientY - g.y0) > 6)) g.moved = true
       // px per ms, smoothed against the previous reading so one jittery frame can't fake a flick,
       // and measured from the LAST position: the speed at release says how far it meant to go.
       const dt = Math.max(1, e.timeStamp - g.t)
@@ -297,6 +285,12 @@ export function RingCarousel({
       g.t = e.timeStamp
       turn = g.t0 - dx / PULL // no rubber band, because there is no end
       paint()
+    }
+    // The browser took the touch to scroll the page: settle, and never treat it as a tap.
+    const onCancel = () => {
+      if (!drag) return
+      drag.moved = true
+      onUp()
     }
     const onUp = () => {
       const g = drag
@@ -331,7 +325,7 @@ export function RingCarousel({
     tr.addEventListener('pointerdown', onDown)
     tr.addEventListener('pointermove', onMove)
     tr.addEventListener('pointerup', onUp)
-    tr.addEventListener('pointercancel', onUp)
+    tr.addEventListener('pointercancel', onCancel)
     tr.addEventListener('keydown', onKey)
 
     // ── fitting the stage to the column ──
@@ -364,7 +358,7 @@ export function RingCarousel({
       tr.removeEventListener('pointerdown', onDown)
       tr.removeEventListener('pointermove', onMove)
       tr.removeEventListener('pointerup', onUp)
-      tr.removeEventListener('pointercancel', onUp)
+      tr.removeEventListener('pointercancel', onCancel)
       tr.removeEventListener('keydown', onKey)
       cleanups.forEach((f) => f())
       ro.disconnect()
@@ -405,13 +399,6 @@ export function RingCarousel({
                 className={styles.card}
               >
                 {item.content}
-                <span
-                  ref={(el) => {
-                    sheens.current[i] = el
-                  }}
-                  aria-hidden="true"
-                  className={styles.sheen}
-                />
               </div>
             </div>
           ))}

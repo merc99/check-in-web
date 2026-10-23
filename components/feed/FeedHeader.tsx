@@ -1,11 +1,11 @@
 'use client'
 
 import { Flame, Users } from 'lucide-react'
-import { useRef, type CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
+import Link from 'next/link'
 import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
-import { shineClass, useShine } from '@/components/fx/shine'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { useScrolledPast } from '@/lib/motion'
@@ -21,14 +21,12 @@ export interface FeedHeaderCrew {
 }
 
 /**
- * The crew you're looking at, as a banner in the crew's color: its block, the date, the big name
+ * The crew you're looking at, as a flat banner in the crew's color: its block, the date, the big name
  * (tap to switch crews) and a line of facts. Past 70px of scroll it collapses into a tinted sticky
  * bar with the crew's dot and name. Both open the crew switcher; the gear opens crew settings.
  */
 export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitch: () => void }) {
   const collapsed = useScrolledPast(70)
-  const banner = useRef<HTMLDivElement>(null)
-  useShine(banner)
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
   const hue = HUE_CLASS[group.color]
 
@@ -66,15 +64,12 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
         )}
       </header>
 
-      <div
-        ref={banner}
-        className={cn('mb-5 mt-5 overflow-hidden rounded-xl border border-border p-5 shadow-card', shineClass, hue.soft)}
-        style={{ backgroundImage: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${hue.cssVar} 38%, transparent), transparent 60%)` }}
-      >
+      {/* The banner is the crew's own color, flat: dark ink on the hue, light pills, no glow. */}
+      <div className={cn('mb-5 mt-5 overflow-hidden rounded-xl p-5 text-on-color shadow-card', hue.solid)}>
         <div className="flex items-start gap-4">
-          <CrewBlock name={group.name} color={group.color} size="lg" className="max-sm:hidden" />
+          <CrewBlock name={group.name} color={group.color} size="lg" white className="border-white/50 bg-white/80 text-on-color max-sm:hidden" />
           <div className="min-w-0 flex-1">
-            <p className={cn('text-[13px] font-semibold', hue.ink)}>{date}</p>
+            <p className="text-[13px] font-semibold opacity-75">{date}</p>
             <h1 className="mt-1">
               <button
                 type="button"
@@ -84,23 +79,28 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
               >
                 {/* The chevron rides on the last word, so a long name never strands it on its own line. */}
                 <span className="break-words">{group.name}</span>
-                <span className="ml-2 inline-grid size-7 translate-y-[-3px] place-items-center rounded-full bg-card/70 align-middle shadow-xs transition-transform duration-150 ease-out group-hover:translate-y-[-1px] sm:size-8">
+                <span className="ml-2 inline-grid size-7 translate-y-[-3px] place-items-center rounded-full bg-white/45 align-middle transition-transform duration-150 ease-out group-hover:translate-y-[-1px] sm:size-8">
                   <ChevronIcon size={18} />
                 </span>
               </button>
             </h1>
           </div>
-          <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
+          {/* Light on the hue in both themes (a card-colored button would go black in dark mode). */}
+          <Link
+            href={`/group-settings/${group.id}`}
+            aria-label="Crew settings"
+            className="grid size-11 flex-none place-items-center rounded-full bg-white/45 transition-colors duration-150 ease-out hover:bg-white/70"
+          >
             <GearIcon size={19} />
-          </IconLink>
+          </Link>
         </div>
         <ul className="mt-4 flex flex-wrap gap-2 text-[12.5px] font-bold">
-          <li className="inline-flex items-center gap-[6px] rounded-full bg-card/70 px-3 py-[6px] shadow-xs">
+          <li className="inline-flex items-center gap-[6px] rounded-full bg-white/45 px-3 py-[6px]">
             <Users size={14} strokeWidth={2} aria-hidden="true" />
             <span className="tnum">{group.memberCount}</span> members
           </li>
           {group.streak > 1 && (
-            <li className="inline-flex items-center gap-[6px] rounded-full bg-foreground px-3 py-[6px] text-background shadow-xs">
+            <li className="inline-flex items-center gap-[6px] rounded-full bg-on-color px-3 py-[6px] text-white">
               <Flame size={14} strokeWidth={2.25} aria-hidden="true" />
               <span>
                 <span className="tnum">{group.streak}</span>-day crew streak

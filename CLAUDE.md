@@ -67,7 +67,7 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Type:** `font-display` (Bricolage Grotesque 600–800) for titles, crew names, big numbers, with `tracking-tighter`
   (titles) or `tracking-tightest` (numbers 40px+). `font-sans` (Geist) for everything else. Changing numbers get `tnum`.
 - **Logo:** `BrandMark` / `LogoMark` (components/checkin/BrandMark.tsx): the red → yellow → green gauge with a check, and
-  the lowercase pixel wordmark (`font-pixel`, Pixelify Sans) "check-in". `size="lg"` adds "stay consistent with
+  the wordmark "check-in" in the display face, lowercase, extra bold (the pixel face was too hard to read). `size="lg"` adds "stay consistent with
   people." (the signed-out welcome screen at `/`). Don't redraw it elsewhere.
 - **Layout:** phones get one centered column, `max-w-app` (640px), with the bottom tab bar: Explore · Feed · You.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
@@ -121,18 +121,18 @@ Loops are scoped to exactly one place each. Nothing else idles. Never add a seco
 | `HoldButton` (hold to confirm, no sheet) | calm | Destructive actions only: delete a crew or your account, leave a crew, remove a member |
 | Toast stack (frosted, batched) | calm | Confirmations and live news; up to three, 4.2s, tap to dismiss |
 | Frosted glass (`--fx-glass` + blur, opaque fallback) | calm | The tab dock and toasts |
-| `Gloss` + `GlossPill` + `GlassInset` (glossy hue panel, mmo-style) | calm (static) | `CrewHero`, the You stat cards and the crew leaderboard |
+| `Gloss` + `GlossPill` + `GlassInset` (glossy hue panel, mmo-style) | calm (static) | `CrewHero`, the You stat cards, the crew leaderboard, the Explore ring's cards (each in its crew's color) |
 | `Sparkline` (draws in once) | calm | Inside a `Gloss`: the crew's last 14 days, your last 12 weeks |
 | `SheenOnce` (one holo pass) | calm | A feed post as it arrives (yours or a crewmate's) |
 | Arrival burst (`burstFrom`, small) | live activity | A crewmate's sticker in the hero when they check in |
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
-| Pointer light (`useShine` + `shineClass`) | calm | Every `Gloss` and the feed's crew banner: a soft light follows a mouse |
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
 | Hover lift / press | calm | Post cards, Explore crew cards, leaderboard rows, ring chart legend, heatmap and streak squares |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
-**Not used** (judged on `/fx-preview`): metallic text and metal buttons, rarity tiles, parallax art, liquid glass
+**Not used** (judged on `/fx-preview` and the live demo): white pointer lights and glows on colored surfaces,
+dark press shading on cards, metallic text and metal buttons, rarity tiles, parallax art, liquid glass
 refraction, light rings as default borders, the full-screen joy takeover.
 
 ## Product components (`components/checkin/`)
@@ -150,8 +150,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
   `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
-- **FeedHeader:** a banner in the crew's tint (block, date in the crew ink, name + switch chevron, gear, members and
-  crew-streak pills, pointer light); scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
+- **FeedHeader:** a flat banner in the crew's solid color with dark ink (light block, date, name + switch chevron, gear,
+  members and crew-streak pills). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).
