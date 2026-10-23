@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "arc": {
+      "type": "http",
+      "url": "https://uiarc.dev/api/mcp"
+    },
+    "tailgrids": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@tailgrids/mcp@latest"
+      ],
+      "env": {}
+    }
+  }
+}
