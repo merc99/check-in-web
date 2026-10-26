@@ -3,32 +3,34 @@
 import { RotateCw, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { streamRecap } from '@/lib/ai/client'
-import type { AiSource } from '@/lib/ai/schema'
+import { streamRecap } from '@/lib/ai/demo'
 import { getCrewWeek } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import styles from './RecapCard.module.css'
 
-type State = { step: 'idle' } | { step: 'writing'; text: string } | { step: 'done'; text: string; source: AiSource }
+type State = { step: 'idle' } | { step: 'writing'; text: string } | { step: 'done'; text: string }
 
 /**
- * "Your crew's week": a short AI recap of the last seven days, written on request (never on load,
- * so visitors don't spend a model call by scrolling past). Streams in; says who wrote it.
+ * "Your crew's week": a short recap of the last seven days by the demo AI (lib/ai, in the browser;
+ * no model). Written on request, streams in, and each "Rewrite" takes a different angle.
  */
 export function RecapCard({ groupId, crewName }: { groupId: string; crewName: string }) {
   const [state, setState] = useState<State>({ step: 'idle' })
   const abort = useRef<AbortController | null>(null)
+  /** Which phrasing to use next; picked at random on the first tap, then the next one on each rewrite. */
+  const variant = useRef(-1)
   useEffect(() => () => abort.current?.abort(), [])
 
   const write = async () => {
     abort.current?.abort()
     const ctrl = new AbortController()
     abort.current = ctrl
+    if (variant.current < 0) variant.current = Math.floor(Math.random() * 6)
     setState({ step: 'writing', text: '' })
     try {
       const week = await getCrewWeek(groupId)
-      const source = await streamRecap(week, (text) => setState({ step: 'writing', text }), ctrl.signal)
-      setState((s) => ({ step: 'done', text: s.step === 'idle' ? '' : s.text, source }))
+      await streamRecap(week, (text) => setState({ step: 'writing', text }), variant.current++, ctrl.signal)
+      setState((s) => ({ step: 'done', text: s.step === 'idle' ? '' : s.text }))
     } catch {
       // Aborted (the crew changed or the card left): nothing to show.
     }
@@ -52,7 +54,7 @@ export function RecapCard({ groupId, crewName }: { groupId: string; crewName: st
           </Button>
         )}
       </div>
-      {state.step === 'idle' && <p className="mt-2 text-[13px] text-muted-foreground">A short recap of {crewName}’s last seven days, written by AI.</p>}
+      {state.step === 'idle' && <p className="mt-2 text-[13px] text-muted-foreground">A short recap of {crewName}’s last seven days, written by a demo AI.</p>}
 
       {state.step !== 'idle' && (
         <div className="mt-3" aria-live="polite" aria-busy={state.step === 'writing'}>
@@ -64,7 +66,7 @@ export function RecapCard({ groupId, crewName }: { groupId: string; crewName: st
           {state.step === 'done' && (
             <div className="mt-3 flex items-center justify-between gap-3 border-t pt-3">
               <span className="text-[12px] text-muted-foreground">
-                {state.source === 'claude' ? 'Written by Claude from this week’s check-ins' : 'A quick summary while AI is off'}
+                Demo AI, written on your device from this week’s check-ins
               </span>
               <Button size="sm" variant="ghost" onClick={write}>
                 <RotateCw size={14} /> Rewrite
