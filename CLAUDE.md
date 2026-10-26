@@ -14,7 +14,7 @@ When this file and the prototype disagree, this file wins.
 - Next.js (latest stable, App Router), React 19, TypeScript, `@/*` alias
 - Tailwind CSS v4, configured CSS-first in `app/globals.css` (there is no `tailwind.config.ts`)
 - shadcn/ui CLI (`components.json`), `tw-animate-css`, `clsx` + `tailwind-merge` (`cn` in `lib/utils.ts`)
-- `next-themes` (light / dark / system), `lucide-react` icons, fonts via `next/font/google` (Geist, Bricolage Grotesque)
+- `next-themes` (light / dark / system), `lucide-react` icons, fonts via `next/font/google` (Geist, Bricolage Grotesque) and `next/font/local` (Satoshi Black, the wordmark only)
 - Data: an in-memory demo (`lib/mock/`), shaped like the Supabase schema. No backend on `master`.
 
 ## Skills and references (read these)
@@ -67,7 +67,7 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Type:** `font-display` (Bricolage Grotesque 600–800) for titles, crew names, big numbers, with `tracking-tighter`
   (titles) or `tracking-tightest` (numbers 40px+). `font-sans` (Geist) for everything else. Changing numbers get `tnum`.
 - **Logo:** `BrandMark` / `LogoMark` (components/checkin/BrandMark.tsx): the red → yellow → green gauge with a check, and
-  the wordmark "check-in" in the display face, lowercase, extra bold (the pixel face was too hard to read). `size="lg"` adds "stay consistent with
+  the wordmark "check-in" in Satoshi Black (`font-wordmark`, `app/fonts/`), lowercase. Only the wordmark uses it. `size="lg"` adds "stay consistent with
   people." (the signed-out welcome screen at `/`). Don't redraw it elsewhere.
 - **Layout:** phones get one centered column, `max-w-app` (640px), with the bottom tab bar: Explore · Feed · You.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to

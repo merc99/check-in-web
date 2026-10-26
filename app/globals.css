@@ -210,6 +210,7 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-wordmark: var(--font-satoshi), var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --tracking-tighter: -0.02em;
   --tracking-tightest: -0.035em;
   --container-app: 640px;         /* max-w-app */
