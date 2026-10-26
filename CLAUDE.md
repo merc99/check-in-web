@@ -95,8 +95,8 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Chrome** (buttons, sheets, tabs, toasts, lists, page transitions): 150–200ms, `ease-out` on enter, `ease-in` on
   exit, transform and opacity only. Entrances `animate-rise`. Press `active:scale-[.97]`.
 - **Delight moments** (springs allowed, `ease-spring` / `--fx-spring`): check-in stamp, avatar check-badge pop, heart
-  burst, chip selection, rolling digits, and emoji reactions (picker rise, the flying landing and squash, each emoji's
-  own arrival). The list is closed.
+  burst, chip selection, rolling digits, emoji reactions (picker rise, the flying landing and squash, each emoji's
+  own arrival), and the 👋 on a crewmate you waved at. The list is closed.
 - **Effects** are the `components/fx` system (below). Use one of them before writing a new effect.
 - transitions.dev recipes are the default source for chrome motion; keep our durations and easing when adopting them.
 - Always respect `prefers-reduced-motion` (globals.css zeroes animations; every fx piece has a reduced-motion branch).
@@ -126,6 +126,9 @@ Loops are scoped to exactly one place each (three: the ticket sheen, the aurora 
 | `Sparkline` (draws in once) | calm | Inside a `Gloss`: the crew's last 14 days, your last 12 weeks |
 | `SheenOnce` (one holo pass) | calm | A feed post as it arrives (yours or a crewmate's) |
 | Arrival burst (`burstFrom`, small) | live activity | A crewmate's sticker in the hero when they check in |
+| Whole-crew burst (`burstFrom`, once) + "all in" pop | moment | Phones: the TodayStrip, when the last member checks in while you watch (not on load or a crew switch) |
+| `animate-handwave` (👋 pops and wiggles) | delight | A crewmate's sticker after you wave at them |
+| Banner swipe (follows the finger, slides out/in 150/200ms) | calm | Phones: the feed banner, to move between your crews |
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
 | Hover lift / press | calm | Post cards, Explore crew cards, leaderboard rows, ring chart legend, heatmap and streak squares |
@@ -166,6 +169,13 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).
+- **MemberSticker:** a crewmate in "who's in today" (CrewHero, TodayStrip). In: their color + mint check. Not in yet:
+  faded and dashed; a tap **waves** at them (`waveAt`, once per person per crew per day, toast "You waved at Sam. No
+  pressure."), then a 👋 sits on their sticker. The demo answers about two waves in three with a check-in.
+- **Reactions:** hold a chip (touch), right-click it, rest the mouse on it or press the menu key to see who left it
+  (a small popover). The hold never also toggles the reaction.
+- **Banner swipe** (phones): swipe the feed banner sideways to move to your next or previous crew; dots in the facts
+  line show which crew you're on.
 - **Behavior to keep** from the current build when these are rebuilt: sheets close on Escape, on a drag past ~110px or a
   fast flick, and trap focus; toasts batch, stack up to three and hide after ~4.2s (hover pauses); tapping the LivePill
   scrolls the feed to the top (or switches crew for an arrival elsewhere); a tap on a `HoldButton` explains the hold.

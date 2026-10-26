@@ -35,6 +35,7 @@ import {
   onHeart,
   react,
   useQuery,
+  waveAt,
   type Achievement,
   type FeedItem,
 } from '@/lib/data'
@@ -64,6 +65,8 @@ export default function FeedPage() {
   const [entering, setEntering] = useState<ReadonlySet<string>>(() => new Set())
   const [arrivedId, setArrivedId] = useState<string | null>(null)
   const [milestone, setMilestone] = useState<Achievement | null>(null)
+  /** Crewmates you've waved at today, as `crewId:userId`. */
+  const [waved, setWaved] = useState<ReadonlySet<string>>(() => new Set())
   const fab = useRef<HTMLButtonElement>(null)
   const railButton = useRef<HTMLButtonElement>(null)
   const desktop = useDesktop()
@@ -133,6 +136,29 @@ export default function FeedPage() {
   // While switching crews, keep the previous crew on screen until the new one loads.
   const g = activeId ? (group.data ?? null) : null
   const meIn = !!g?.members.find((m) => m.isMe)?.inToday
+
+  // Wave at a crewmate who isn't in yet: once a day, no pressure (the live demo sometimes answers).
+  const wave = (id: string) => {
+    if (!g) return
+    const name = g.members.find((m) => m.person.id === id)?.person.name ?? 'them'
+    const key = `${g.id}:${id}`
+    waveAt(g.id, id).then(
+      (r) => {
+        setWaved((s) => new Set(s).add(key))
+        toast(r === 'sent' ? `You waved at ${name}. No pressure.` : `You already waved at ${name} today.`)
+      },
+      (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
+    )
+  }
+  const isWaved = (id: string) => !!g && waved.has(`${g.id}:${id}`)
+
+  // Phones: a swipe on the banner moves along your crews (wrapping round).
+  const crewIndex = groups?.findIndex((x) => x.id === g?.id) ?? -1
+  const swipeCrew = (dir: 1 | -1) => {
+    if (!groups?.length || crewIndex < 0) return
+    setActiveId(groups[(crewIndex + dir + groups.length) % groups.length].id)
+    window.scrollTo({ top: 0 })
+  }
 
   const openCheckIn = () => {
     if (meIn) toast('You’re in for today')
@@ -223,7 +249,9 @@ export default function FeedPage() {
 
   const items = feed.data ?? []
 
-  const hero = <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} recent={g.recent} />
+  const hero = (
+    <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} onWave={wave} waved={isWaved} recent={g.recent} />
+  )
 
   return (
     // Phones: one column (hero above the posts, FAB for check-in).
@@ -236,7 +264,22 @@ export default function FeedPage() {
       <FeedHeader
         group={g}
         onSwitch={() => setSwitcherOpen(true)}
-        today={!desktop && <TodayStrip key={g.id} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} recent={g.recent} />}
+        today={
+          !desktop && (
+            <TodayStrip
+              key={g.id}
+              color={g.color}
+              members={g.members}
+              arrivedId={arrivedId}
+              onPersonTap={setProfileId}
+              onWave={wave}
+              waved={isWaved}
+              recent={g.recent}
+            />
+          )
+        }
+        onSwipe={!desktop && (groups?.length ?? 0) > 1 ? swipeCrew : undefined}
+        position={groups && crewIndex >= 0 ? { index: crewIndex, count: groups.length } : undefined}
       />
 
       {requests.data?.map((r) => (

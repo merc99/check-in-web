@@ -67,7 +67,7 @@ export default function FxPreview() {
   const react = (emoji: string, on: boolean) =>
     setChips(() => {
       const had = shownChips.find((c) => c.emoji === emoji)
-      if (on) return had ? shownChips.map((c) => (c.emoji === emoji ? { ...c, count: c.count + 1, mine: true } : c)) : [...shownChips, { emoji, count: 1, mine: true }]
+      if (on) return had ? shownChips.map((c) => (c.emoji === emoji ? { ...c, count: c.count + 1, mine: true } : c)) : [...shownChips, { emoji, count: 1, mine: true, people: [] }]
       return shownChips.map((c) => (c.emoji === emoji ? { ...c, count: c.count - 1, mine: false } : c)).filter((c) => c.count > 0)
     })
   const hue: Hue = g?.color ?? 'sky'

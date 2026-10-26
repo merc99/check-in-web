@@ -28,6 +28,8 @@ export {
   joinGroupBySlug,
   leaveGroup,
   onCheckIn,
+  onWave,
+  waveAt,
   onHeart,
   react,
   removeMember,

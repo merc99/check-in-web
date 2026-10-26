@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { CheckIn } from '@/lib/data/types'
 import { localDate } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
-import { insertCheckIn, setReaction } from './api'
+import { insertCheckIn, onWave, setReaction } from './api'
 import { db, onChange } from './db'
 import { ME_ID, NOTES } from './seed'
 
@@ -36,6 +36,17 @@ export function simulateArrival(activeGroupId?: string | null): boolean {
   const [note, tags] = pick(NOTES[groupId] ?? NOTES._)
   const crewTags = new Set(t.tags.filter((x) => x.group_id === groupId && !x.deleted_at).map((x) => x.name))
   insertCheckIn(pick(waiting), { groupId, note, tags: tags.filter((name) => crewTags.has(name)) })
+  return true
+}
+
+/** A specific crewmate checks in (answering a wave). False if they're already in. */
+export function simulateArrivalOf(userId: string, groupId: string): boolean {
+  const t = db()
+  const inAlready = t.check_ins.some((c) => c.user_id === userId && c.group_id === groupId && !c.deleted_at && c.local_date === today())
+  if (inAlready) return false
+  const [note, tags] = pick(NOTES[groupId] ?? NOTES._)
+  const crewTags = new Set(t.tags.filter((x) => x.group_id === groupId && !x.deleted_at).map((x) => x.name))
+  insertCheckIn(userId, { groupId, note, tags: tags.filter((name) => crewTags.has(name)) })
   return true
 }
 
@@ -84,10 +95,21 @@ export function useLiveSimulation(activeGroupId: string | null = null, enabled =
       timers.add(t)
     })
 
+    // About two waves in three get answered a few seconds later (they saw it and showed up).
+    const stopWaves = onWave(({ groupId, userId }) => {
+      if (Math.random() > 0.65) return
+      const t = setTimeout(() => {
+        timers.delete(t)
+        simulateArrivalOf(userId, groupId)
+      }, 3500 + Math.random() * 3500)
+      timers.add(t)
+    })
+
     return () => {
       clearTimeout(timer)
       timers.forEach(clearTimeout)
       stop()
+      stopWaves()
     }
   }, [enabled])
 }

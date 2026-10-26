@@ -13,6 +13,7 @@ import { useLive } from '@/components/checkin/LivePill'
 import { SectionTitle } from '@/components/checkin/SectionTitle'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
+import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
 import { cn } from '@/lib/utils'
@@ -148,6 +149,15 @@ export default function KitchenSink() {
           <CrewBlock name="Sketch" color="grape" emoji="🎨" />
           <CrewBlock name="Letter" color="lemon" />
         </div>
+      </Section>
+
+      <Section title="Member stickers" note="in · not yet (tap waves) · waved">
+        <ul className="flex gap-3">
+          <MemberSticker person={{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }} inToday isMe={false} />
+          <MemberSticker person={{ id: 'k2', name: 'Sam', color: 'lemon', photoUrl: null }} inToday={false} isMe={false} onWave={() => {}} />
+          <MemberSticker person={{ id: 'k3', name: 'Dre', color: 'sky', photoUrl: null }} inToday={false} isMe={false} waved />
+          <MemberSticker person={{ id: 'k4', name: 'Theo', color: 'leaf', photoUrl: null }} inToday={false} isMe={false} waved size="sm" />
+        </ul>
       </Section>
 
       <Section title="Cards" note="md · lg">

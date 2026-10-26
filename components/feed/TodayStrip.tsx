@@ -1,7 +1,9 @@
 'use client'
 
-import { useId, useState } from 'react'
-import { Avatar } from '@/components/checkin/Avatar'
+import { useEffect, useId, useRef, useState } from 'react'
+import { burstFrom } from '@/components/fx/burst'
+import type { Hue } from '@/lib/colors'
+import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { CheckIcon, ChevronIcon } from '@/components/checkin/icons'
 import { heroLine, type HeroMember } from '@/components/checkin/CrewHero'
 import { Sparkline } from '@/components/fx/Gloss'
@@ -17,45 +19,61 @@ const SHOWN = 6
  * Closed: a sticker per member and "n/total". Open: the brand line, the last 14 days and the bar.
  */
 export function TodayStrip({
-  members, arrivedId, onPersonTap, recent,
-}: { members: HeroMember[]; arrivedId?: string | null; onPersonTap?: (id: string) => void; recent?: number[] }) {
+  color, members, arrivedId, onPersonTap, onWave, waved, recent,
+}: {
+  color: Hue
+  members: HeroMember[]
+  arrivedId?: string | null
+  onPersonTap?: (id: string) => void
+  onWave?: (id: string) => void
+  waved?: (id: string) => boolean
+  recent?: number[]
+}) {
   const [open, setOpen] = useState(false)
   const panel = useId()
   const n = members.filter((m) => m.inToday).length
   const total = members.length
   const shown = members.slice(0, SHOWN)
   const extra = total - shown.length
+  const allIn = total > 1 && n === total
+
+  // The whole-crew moment (phones): when the last person checks in while you're watching, the
+  // "all in" pops and a small burst rises from the strip, once. Not on load, not on a crew switch.
+  const strip = useRef<HTMLDivElement>(null)
+  const label = useRef<HTMLSpanElement>(null)
+  const was = useRef<boolean | null>(null)
+  useEffect(() => {
+    const before = was.current
+    was.current = allIn
+    if (before !== false || !allIn) return
+    const t = window.setTimeout(() => {
+      if (strip.current) burstFrom(strip.current, [`--${color}`, '--primary', '--lemon', 'white'], 34)
+      label.current?.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }],
+        { duration: 450, easing: 'cubic-bezier(0.34, 1.45, 0.64, 1)' },
+      )
+    }, 700) // after the last sticker's own pop
+    return () => window.clearTimeout(t)
+  }, [allIn, color])
 
   return (
-    <div role="region" aria-label="Who’s in today" className="relative mt-3 rounded-lg bg-black/10 p-2 shadow-[inset_0_1px_0_rgb(255_255_255/.18)]">
+    <div ref={strip} role="region" aria-label="Who’s in today" className="relative mt-3 rounded-lg bg-black/10 p-2 shadow-[inset_0_1px_0_rgb(255_255_255/.18)]">
       <div className="flex items-center gap-2">
         <ul className="flex min-w-0 items-center pl-1">
-          {shown.map(({ person, inToday, isMe }, i) => {
-            const arrived = arrivedId === person.id
-            const avatar = <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="sm" pending={!inToday} className={cn(!inToday && 'opacity-80')} />
-            return (
-              <li key={person.id} data-person={person.id} className={cn('relative', i > 0 && '-ml-[6px]', arrived && 'animate-stickpop')}>
-                {onPersonTap && !isMe ? (
-                  <button type="button" onClick={() => onPersonTap(person.id)} aria-label={`View ${person.name}`} className="block rounded-full transition-transform duration-150 ease-out hover:-translate-y-0.5">
-                    {avatar}
-                  </button>
-                ) : (
-                  avatar
-                )}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute -bottom-[3px] -right-[3px] grid size-[15px] place-items-center rounded-full bg-on-color text-primary transition-transform duration-350 ease-spring',
-                    inToday ? 'scale-100' : 'scale-0',
-                    arrived && 'animate-tickpop',
-                  )}
-                >
-                  <CheckIcon size={9} />
-                </span>
-                <span className="sr-only">{`${isMe ? 'You' : person.name}: ${inToday ? 'in today' : 'not yet'}`}</span>
-              </li>
-            )
-          })}
+          {shown.map(({ person, inToday, isMe }, i) => (
+            <MemberSticker
+              key={person.id}
+              person={person}
+              inToday={inToday}
+              isMe={isMe}
+              size="sm"
+              arrived={arrivedId === person.id}
+              waved={waved?.(person.id)}
+              onTap={onPersonTap}
+              onWave={onWave}
+              className={i > 0 ? '-ml-[6px]' : undefined}
+            />
+          ))}
           {extra > 0 && <li className="tnum -ml-[6px] grid size-8 place-items-center rounded-full bg-on-color text-[12px] font-bold text-white">+{extra}</li>}
         </ul>
         <span className="flex-1" />
@@ -71,8 +89,8 @@ export function TodayStrip({
             <span aria-hidden="true" className="text-[14px] opacity-60">/{total}</span>
           </span>
           {/* The whole crew in is the moment the app is for: say it, in the crew's ink with a check. */}
-          {total > 1 && n === total ? (
-            <span className="inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-bold">
+          {allIn ? (
+            <span ref={label} className="inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-bold">
               <CheckIcon size={12} /> all in
             </span>
           ) : (

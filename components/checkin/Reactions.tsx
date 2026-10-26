@@ -18,6 +18,7 @@
 import { SmilePlus } from 'lucide-react'
 import {
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -27,6 +28,7 @@ import {
   type PointerEvent,
 } from 'react'
 import type { ReactionCount } from '@/lib/data'
+import { Avatar } from './Avatar'
 import { flyArc, squash } from '@/components/fx/fly'
 import { RollingCount } from '@/components/fx/RollingCount'
 import { sfx } from '@/components/fx/sound'
@@ -93,6 +95,9 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
   const keyboardOpen = useRef(false)
   /** Counts openings, so a close that lands after a reopen leaves the new pill alone. */
   const opens = useRef(0)
+  /** Who left a reaction: open for one chip's emoji (long-press, right-click, hover or the menu key). */
+  const [who, setWho] = useState<{ e: string; left: number; hover: boolean } | null>(null)
+  const longPress = useRef({ timer: 0, fired: false, x: 0, y: 0 })
 
   const chipEmoji = (e: string) => row.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(e)}"] [data-emoji]`) ?? null
 
@@ -234,6 +239,63 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
     onReact(c.emoji, !c.mine)
   }
 
+  // ── who left it: hold a chip (touch), right-click it, rest the mouse on it, or the menu key ──
+  const showWho = (el: HTMLElement, e: string, hover = false) => {
+    const max = (row.current?.clientWidth ?? 260) - 200
+    setWho({ e, left: Math.max(0, Math.min(el.offsetLeft, max)), hover })
+  }
+  const chipDown = (ev: PointerEvent<HTMLButtonElement>, e: string) => {
+    window.clearTimeout(longPress.current.timer)
+    longPress.current = { timer: 0, fired: false, x: ev.clientX, y: ev.clientY }
+    if (ev.pointerType === 'mouse') return
+    const el = ev.currentTarget
+    longPress.current.timer = window.setTimeout(() => {
+      longPress.current.fired = true
+      try {
+        navigator.vibrate?.(10)
+      } catch {
+        // Not everywhere.
+      }
+      showWho(el, e)
+    }, 450)
+  }
+  const chipMove = (ev: PointerEvent<HTMLButtonElement>) => {
+    const lp = longPress.current
+    if (Math.abs(ev.clientX - lp.x) > 8 || Math.abs(ev.clientY - lp.y) > 8) window.clearTimeout(lp.timer)
+  }
+  const chipEnd = () => window.clearTimeout(longPress.current.timer)
+  const chipEnter = (ev: PointerEvent<HTMLButtonElement>, e: string) => {
+    if (ev.pointerType !== 'mouse') return
+    const el = ev.currentTarget
+    window.clearTimeout(longPress.current.timer)
+    longPress.current.timer = window.setTimeout(() => showWho(el, e, true), 500)
+  }
+  const chipLeave = (ev: PointerEvent<HTMLButtonElement>) => {
+    window.clearTimeout(longPress.current.timer)
+    if (ev.pointerType === 'mouse') setWho((w) => (w?.hover ? null : w))
+  }
+
+  // Close it on any press elsewhere, Escape or a scroll.
+  useEffect(() => {
+    if (!who) return
+    const down = (ev: globalThis.PointerEvent) => {
+      if (!(ev.target as Element | null)?.closest?.('[data-who]')) setWho(null)
+    }
+    const key = (ev: globalThis.KeyboardEvent) => ev.key === 'Escape' && setWho(null)
+    const scroll = () => setWho(null)
+    document.addEventListener('pointerdown', down, true)
+    document.addEventListener('keydown', key)
+    window.addEventListener('scroll', scroll, { passive: true })
+    return () => {
+      document.removeEventListener('pointerdown', down, true)
+      document.removeEventListener('keydown', key)
+      window.removeEventListener('scroll', scroll)
+    }
+  }, [who])
+
+  const whoChip = who && chips.find((c) => c.emoji === who.e)
+  const whoId = useId()
+
   // ── the button: a mouse clicks, a finger holds and slides ──
   const addDown = (e: PointerEvent<HTMLButtonElement>) => {
     hold.current.touch = e.pointerType === 'touch' || e.pointerType === 'pen'
@@ -303,7 +365,31 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
               className={styles.chip}
               aria-pressed={c.mine}
               aria-label={`${labelOf(c.emoji)}, ${shown}${c.mine ? ', including you' : ''}`}
-              onClick={() => press(c)}
+              aria-describedby={whoChip?.emoji === c.emoji ? whoId : undefined}
+              onPointerDown={(ev) => chipDown(ev, c.emoji)}
+              onPointerMove={chipMove}
+              onPointerUp={chipEnd}
+              onPointerCancel={chipEnd}
+              onPointerEnter={(ev) => chipEnter(ev, c.emoji)}
+              onPointerLeave={chipLeave}
+              onContextMenu={(ev) => {
+                ev.preventDefault()
+                showWho(ev.currentTarget, c.emoji)
+              }}
+              onKeyDown={(ev) => {
+                if (ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) {
+                  ev.preventDefault()
+                  showWho(ev.currentTarget, c.emoji)
+                }
+              }}
+              onClick={() => {
+                // The hold that opened "who" isn't also a tap.
+                if (longPress.current.fired) {
+                  longPress.current.fired = false
+                  return
+                }
+                press(c)
+              }}
             >
               <span data-emoji="" className={styles.chipEmoji} data-landing={flying === c.emoji ? '' : undefined}>
                 <i className={styles.p} data-k={kindOf(c.emoji)}>
@@ -332,6 +418,30 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
           <SmilePlus size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </div>
+
+      {whoChip && (
+        <div
+          id={whoId}
+          data-who=""
+          role="tooltip"
+          className="absolute bottom-full z-30 mb-2 w-[200px] animate-rise rounded-lg border bg-popover p-3 text-popover-foreground shadow-overlay"
+          style={{ left: who.left }}
+        >
+          <p className="flex items-center gap-2 text-[13px] font-semibold">
+            <span className="text-[16px] leading-none">{whoChip.emoji}</span>
+            {labelOf(whoChip.emoji)}
+          </p>
+          <ul className="mt-2 flex flex-col gap-[6px]">
+            {whoChip.people.slice(0, 6).map((p) => (
+              <li key={p.id} className="flex items-center gap-2 text-[13px]">
+                <Avatar name={p.name} color={p.color} photoUrl={p.photoUrl} size="xs" you={p.isMe} />
+                <span className={cn('truncate', p.isMe && 'font-semibold')}>{p.isMe ? 'You' : p.name}</span>
+              </li>
+            ))}
+          </ul>
+          {whoChip.people.length > 6 && <p className="mt-2 text-xs text-muted-foreground">and {whoChip.people.length - 6} more</p>}
+        </div>
+      )}
 
       {open && (
         <div

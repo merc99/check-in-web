@@ -189,6 +189,8 @@ export interface ReactionCount {
   count: number
   /** You're one of the people who left it. */
   mine: boolean
+  /** Everyone who left it, in the order they did (you included, marked isMe). */
+  people: (Person & { isMe: boolean })[]
 }
 
 export interface JoinRequestItem {

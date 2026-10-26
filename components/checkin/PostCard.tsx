@@ -67,7 +67,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
     <article
       onPointerUp={onPointerUp}
       className={cn(
-        'relative touch-manipulation select-none overflow-hidden rounded-lg border border-border bg-card p-4 shadow-card lg:p-5',
+        'relative touch-manipulation select-none rounded-lg border border-border bg-card p-4 shadow-card lg:p-5',
         // Yours carry a faint mint wash, so your own posts are easy to spot in the scroll.
         item.isMine && 'border-primary/30 bg-[linear-gradient(135deg,var(--primary-soft),var(--card)_55%)]',
         // A mouse over a post lifts it a little (the interactive-card spec); touch has no hover.

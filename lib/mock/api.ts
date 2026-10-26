@@ -132,7 +132,8 @@ function toFeedItem(c: CheckIn): FeedItem {
     if (chip) {
       chip.count++
       chip.mine ||= r.user_id === ME_ID
-    } else chips.push({ emoji: r.emoji, count: 1, mine: r.user_id === ME_ID })
+      chip.people.push({ ...personOf(r.user_id), isMe: r.user_id === ME_ID })
+    } else chips.push({ emoji: r.emoji, count: 1, mine: r.user_id === ME_ID, people: [{ ...personOf(r.user_id), isMe: r.user_id === ME_ID }] })
   }
   return {
     id: c.id,
@@ -219,6 +220,30 @@ export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => vo
     const row = c.row as CheckIn
     if (groupId ? row.group_id === groupId : isMember(ME_ID, row.group_id)) listener(toFeedItem(row))
   })
+}
+
+// ─── Waves ───
+// A wave is a gentle "thinking of you" to a crewmate who isn't in yet: one per person per crew per
+// day. Demo: kept in memory (a backend would store it and send a push). No pressure, no streak talk.
+const waves = new Set<string>()
+const waveListeners = new Set<(w: { groupId: UUID; userId: UUID }) => void>()
+const waveKey = (groupId: UUID, userId: UUID) => `${localDate(new Date())}:${groupId}:${userId}`
+
+/** Wave at a crewmate. Resolves 'already' if you waved at them in this crew today. */
+export async function waveAt(groupId: UUID, userId: UUID): Promise<'sent' | 'already'> {
+  requireMember(groupId)
+  if (userId === ME_ID || !isMember(userId, groupId)) throw new Error('They aren’t in this crew.')
+  const key = waveKey(groupId, userId)
+  if (waves.has(key)) return 'already'
+  waves.add(key)
+  waveListeners.forEach((l) => l({ groupId, userId }))
+  return 'sent'
+}
+
+/** A wave was sent (the live simulation answers some of them). */
+export function onWave(listener: (w: { groupId: UUID; userId: UUID }) => void): () => void {
+  waveListeners.add(listener)
+  return () => waveListeners.delete(listener)
 }
 
 /** Someone else reacted to one of your check-ins (a heart or any other emoji). */

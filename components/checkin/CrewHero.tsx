@@ -8,8 +8,7 @@ import { addDays } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 import type { Hue } from '@/lib/colors'
 import type { Person } from '@/lib/data'
-import { Avatar } from './Avatar'
-import { CheckIcon } from './icons'
+import { MemberSticker } from './MemberSticker'
 
 export interface HeroMember {
   person: Person
@@ -23,6 +22,10 @@ export interface CrewHeroProps {
   /** The person who just arrived: their sticker pops and their check badge spins in. */
   arrivedId?: string | null
   onPersonTap?: (id: string) => void
+  /** Wave at a crewmate who isn't in yet. */
+  onWave?: (id: string) => void
+  /** Whether you've waved at this crewmate today. */
+  waved?: (id: string) => boolean
   /** Consecutive days with at least one member in (shown as a pill when > 1). */
   streak?: number
   /** Members in on each of the last 14 days, oldest first (shown as a sparkline). */
@@ -40,7 +43,7 @@ export function heroLine(n: number, total: number, meIn: boolean) {
  * streak, the last two weeks as a sparkline, a sticker per member and a segmented bar. The aurora
  * frame turns on only while the whole crew is in (fx/AuroraFrame).
  */
-export function CrewHero({ color, members, arrivedId, onPersonTap, streak, recent }: CrewHeroProps) {
+export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved, streak, recent }: CrewHeroProps) {
   const n = members.filter((m) => m.inToday).length
   const total = members.length
   const everyone = total > 1 && n === total
@@ -89,37 +92,18 @@ export function CrewHero({ color, members, arrivedId, onPersonTap, streak, recen
         )}
 
         <ul className="mt-4 flex flex-wrap gap-2">
-          {members.map(({ person, inToday, isMe }) => {
-            const arrived = arrivedId === person.id
-            const avatar = <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} pending={!inToday} />
-            return (
-              <li key={person.id} data-person={person.id} className={cn('relative inline-block transition-transform duration-300 ease-spring', arrived && 'animate-stickpop')}>
-                {onPersonTap && !isMe ? (
-                  <button
-                    type="button"
-                    onClick={() => onPersonTap(person.id)}
-                    aria-label={`View ${person.name}`}
-                    className="block rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
-                  >
-                    {avatar}
-                  </button>
-                ) : (
-                  avatar
-                )}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-on-color/20 bg-on-color text-primary transition-transform duration-350 ease-spring',
-                    inToday ? 'scale-100' : 'scale-0',
-                    arrived && 'animate-tickpop',
-                  )}
-                >
-                  <CheckIcon size={11} />
-                </span>
-                <span className="sr-only">{`${isMe ? 'You' : person.name}: ${inToday ? 'in today' : 'not yet'}`}</span>
-              </li>
-            )
-          })}
+          {members.map(({ person, inToday, isMe }) => (
+            <MemberSticker
+              key={person.id}
+              person={person}
+              inToday={inToday}
+              isMe={isMe}
+              arrived={arrivedId === person.id}
+              waved={waved?.(person.id)}
+              onTap={onPersonTap}
+              onWave={onWave}
+            />
+          ))}
         </ul>
 
         <div aria-hidden="true" className="mt-5 flex gap-[6px]">
