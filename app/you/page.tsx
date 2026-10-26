@@ -23,6 +23,7 @@ import { ThemeToggle } from '@/components/checkin/theme-toggle'
 import { useToast } from '@/components/checkin/Toast'
 import { HoldButton } from '@/components/fx/HoldButton'
 import { useSound } from '@/components/fx/sound'
+import { CrewRecap } from '@/components/you/CrewRecap'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
 import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
@@ -32,7 +33,7 @@ import { useDragScroll } from '@/lib/useDragScroll'
 export default function YouPage() {
   const router = useRouter()
   const auth = useAuth()
-  const { groups } = useActiveCrew()
+  const { groups, activeId } = useActiveCrew()
   const toast = useToast()
   const { soundOn, setSoundOn } = useSound()
   const me = useQuery(getMe, [], ['profiles'])
@@ -89,6 +90,14 @@ export default function YouPage() {
           {stats.data.checkedInToday ? 'You’re in for today.' : 'Today’s still open. No rush.'}
         </p>
       </Card>
+
+      {/* Optional extra, kept off the feed: a demo-AI recap of one crew's week (lib/ai). */}
+      {groups && groups.length > 0 && (
+        <>
+          <SectionTitle title="Your crew’s week" note="demo AI" />
+          <CrewRecap crews={groups} initialId={activeId} />
+        </>
+      )}
 
       {achievements.data && (
         <>

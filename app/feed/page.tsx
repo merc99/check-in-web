@@ -7,7 +7,6 @@ import { CrewSwitcherSheet } from '@/components/feed/CrewSwitcherSheet'
 import { Fab } from '@/components/feed/Fab'
 import { FeedHeader } from '@/components/feed/FeedHeader'
 import { TodayStrip } from '@/components/feed/TodayStrip'
-import { RecapCard } from '@/components/feed/RecapCard'
 import { JoinRequestCard } from '@/components/feed/JoinRequestCard'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { Avatar } from '@/components/checkin/Avatar'
@@ -300,9 +299,6 @@ export default function FeedPage() {
           <p>{g.pinnedMessage}</p>
         </div>
       )}
-
-      {/* The AI weekly recap (lib/ai): written on request, keyed so a crew switch starts fresh. */}
-      <RecapCard key={`recap-${g.id}`} groupId={g.id} crewName={g.name} />
 
       {items.length === 0 ? (
         <div className="px-2 py-10 text-center">

@@ -73,7 +73,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
   1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
-  crews in two columns) and You (glossy stat cards, then two columns: week, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
+  crews in two columns) and You (glossy stat cards, then two columns: week, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
@@ -198,9 +198,10 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 ## Demo AI (`lib/ai`)
 A demo only: **no model, no API key, no server calls.** `lib/ai/writer.ts` writes from the crew's own data in the
 brand voice; `lib/ai/demo.ts` delivers it like a model would (a short "reading" pause, then word-by-word streaming).
-- **Weekly recap** (`components/feed/RecapCard.tsx`): "Your crew's week" on the feed, written when someone taps "Write
-  recap"; a shimmer "reading" line, then the text streams in with a caret. Each "Rewrite" uses different phrasing and
-  quotes different notes. Labeled "Demo AI, written on your device from this week's check-ins". Data: `getCrewWeek`.
+- **Weekly recap** (`components/you/CrewRecap.tsx`): "Your crew's week" on the **You tab** (under "This week"), not the
+  feed: the feed stays minimal and extras are optional, on You. Crew chips pick which crew; "Write recap" shows a
+  shimmer "reading" line, then the text streams in with a caret. Each "Rewrite" uses different phrasing and quotes
+  different notes. Labeled "Demo AI, written on your device from this week's check-ins". Data: `getCrewWeek`.
 - **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" suggests a tidier note and up to three
   tags from the crew's own list; "Use this" / "Keep mine".
 - Ben chose to keep it a demo (Oct 2026). If a real model is ever wanted, replace the two functions in `demo.ts`
