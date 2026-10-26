@@ -27,7 +27,7 @@ export function TodayStrip({
   const extra = total - shown.length
 
   return (
-    <div role="region" aria-label="Who’s in today" className="relative mt-5 rounded-lg bg-black/10 p-[10px] shadow-[inset_0_1px_0_rgb(255_255_255/.18)]">
+    <div role="region" aria-label="Who’s in today" className="relative mt-3 rounded-lg bg-black/10 p-2 shadow-[inset_0_1px_0_rgb(255_255_255/.18)]">
       <div className="flex items-center gap-2">
         <ul className="flex min-w-0 items-center pl-1">
           {shown.map(({ person, inToday, isMe }, i) => {

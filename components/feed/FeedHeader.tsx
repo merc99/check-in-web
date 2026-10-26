@@ -33,7 +33,7 @@ export interface FeedHeaderCrew {
  */
 export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; onSwitch: () => void; today?: ReactNode }) {
   const collapsed = useScrolledPast(70)
-  const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+  const date = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
   const hue = HUE_CLASS[group.color]
 
   return (
@@ -70,48 +70,38 @@ export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; 
         )}
       </header>
 
-      {/* The banner: the crew's own surface with a slow holographic gradient, the name large and the
-          facts as plain text. */}
-      <CrewSurface hue={group.color} className="mb-5 mt-5 rounded-xl p-5 sm:p-6">
+      {/* The banner, kept compact so the feed leads: the crew's own surface with a slow holographic
+          gradient, the name (tap to switch crews), one line of facts and the gear. */}
+      <CrewSurface hue={group.color} className="mb-4 mt-4 rounded-xl px-4 py-[14px] sm:px-5 sm:py-4">
         {/* A slow holographic gradient in the crew's hue (fx/HoloBanner, the banner's one loop). */}
         <HoloBanner />
-        <div className="relative flex items-center justify-between gap-3">
-          <p className="text-[13px] font-semibold opacity-70">{date}</p>
-          <Link
-            href={`/group-settings/${group.id}`}
-            aria-label="Crew settings"
-            className="-my-1 grid size-10 flex-none place-items-center rounded-full bg-black/10 transition-colors duration-150 ease-out hover:bg-black/20"
-          >
-            <GearIcon size={18} />
-          </Link>
-        </div>
-        <div className="relative mt-2 flex items-end gap-4">
+        <div className="relative flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <h1>
               <button
                 type="button"
                 onClick={onSwitch}
                 aria-haspopup="dialog"
-                className="group text-left font-display text-[40px] font-extrabold leading-[.92] tracking-tighter sm:text-[54px]"
+                className="group inline-flex max-w-full items-center gap-1 text-left font-display text-[24px] font-extrabold leading-[1.1] tracking-tighter sm:text-[28px]"
               >
-                {/* The chevron rides on the last word, so a long name never strands it on its own line. */}
-                <span className="break-words">{group.name}</span>
+                <span className="truncate">{group.name}</span>
                 <ChevronIcon
-                  size={22}
-                  className="ml-1 inline-block translate-y-[-4px] opacity-55 transition-[transform,opacity] duration-150 ease-out group-hover:translate-y-[-2px] group-hover:opacity-90"
+                  size={18}
+                  className="flex-none opacity-55 transition-[transform,opacity] duration-150 ease-out group-hover:translate-y-px group-hover:opacity-90"
                 />
               </button>
             </h1>
-            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13.5px] font-semibold">
-              <span className="inline-flex items-center gap-[6px] opacity-75">
-                <Users size={15} strokeWidth={2} aria-hidden="true" />
+            <p className="mt-[2px] flex flex-wrap items-center gap-x-3 gap-y-[2px] text-[12.5px] font-semibold">
+              <span className="opacity-70">{date}</span>
+              <span className="inline-flex items-center gap-[5px] opacity-75">
+                <Users size={14} strokeWidth={2} aria-hidden="true" />
                 <span>
                   <span className="tnum">{group.memberCount}</span> members
                 </span>
               </span>
               {group.streak > 1 && (
-                <span className="inline-flex items-center gap-[6px]">
-                  <Flame size={15} strokeWidth={2.25} aria-hidden="true" />
+                <span className="inline-flex items-center gap-[5px]">
+                  <Flame size={14} strokeWidth={2.25} aria-hidden="true" />
                   <span>
                     <span className="tnum">{group.streak}</span>-day crew streak
                   </span>
@@ -119,6 +109,13 @@ export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; 
               )}
             </p>
           </div>
+          <Link
+            href={`/group-settings/${group.id}`}
+            aria-label="Crew settings"
+            className="grid size-10 flex-none place-items-center rounded-full bg-black/10 transition-colors duration-150 ease-out hover:bg-black/20"
+          >
+            <GearIcon size={18} />
+          </Link>
         </div>
         {today}
       </CrewSurface>

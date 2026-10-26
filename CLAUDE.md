@@ -160,8 +160,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
   (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Used by the feed banner,
   Explore card covers and the crew-look preview.
-- **FeedHeader:** the crew banner on a `CrewSurface` with `HoloBanner`: date + gear, the name large (display, extra
-  bold), members and crew streak as plain text (no pills), the TodayStrip on phones. No pattern and no emoji on the
+- **FeedHeader:** a compact crew banner (the feed leads) on a `CrewSurface` with `HoloBanner`: the name (display, extra
+  bold, 24/28px), one line of date, members and crew streak as plain text, the gear, the TodayStrip on phones. No pattern and no emoji on the
   banner (Ben: the stripes and the emoji badge looked cheap). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
