@@ -39,10 +39,15 @@ export function SheenOnce() {
 }
 
 /**
- * A soft band of light that glides across its parent every few seconds (a `relative` element with
- * rounded corners). Motion budget: the feed's crew banner only.
+ * A slow holographic gradient over its parent (a `relative` element with rounded corners that sets
+ * `--hue`, like CrewSurface): tones of the crew's hue drift underneath, and a rose, sky and lemon foil
+ * sheen shifts across on top. Motion budget: the feed's crew banner only.
  */
-export function LightSweep() {
+export function HoloBanner() {
   usePauseWhenHidden()
-  return <span aria-hidden="true" className={styles.sweep} />
+  return (
+    <span aria-hidden="true" className={styles.holo}>
+      <span className={styles.holoFoil} />
+    </span>
+  )
 }

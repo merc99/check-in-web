@@ -4,11 +4,10 @@ import { Flame, Users } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
 import { CrewDot } from '@/components/checkin/CrewBlock'
-import { CrewCover } from '@/components/checkin/CrewCover'
-import { CrewMedal, CrewSurface } from '@/components/checkin/CrewSurface'
+import { CrewSurface } from '@/components/checkin/CrewSurface'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
-import { LightSweep } from '@/components/fx/loops'
+import { HoloBanner } from '@/components/fx/loops'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
@@ -71,12 +70,11 @@ export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; 
         )}
       </header>
 
-      {/* The banner: the crew's own surface (hue with depth and grain), a faint cover pattern, the name
-          large, the facts as plain text, and the crew's emoji as an enamel badge. */}
+      {/* The banner: the crew's own surface with a slow holographic gradient, the name large and the
+          facts as plain text. */}
       <CrewSurface hue={group.color} className="mb-5 mt-5 rounded-xl p-5 sm:p-6">
-        <CrewCover pattern={group.pattern} className="text-on-color opacity-[.07]" />
-        {/* A glint of light crosses the banner every few seconds (fx/LightSweep, the banner's one loop). */}
-        <LightSweep />
+        {/* A slow holographic gradient in the crew's hue (fx/HoloBanner, the banner's one loop). */}
+        <HoloBanner />
         <div className="relative flex items-center justify-between gap-3">
           <p className="text-[13px] font-semibold opacity-70">{date}</p>
           <Link
@@ -121,7 +119,6 @@ export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; 
               )}
             </p>
           </div>
-          <CrewMedal name={group.name} emoji={group.emoji} className="size-[60px] text-[28px] sm:size-[76px] sm:text-[36px]" />
         </div>
         {today}
       </CrewSurface>

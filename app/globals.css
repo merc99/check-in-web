@@ -94,7 +94,9 @@
   --fx-sheen-strength: 0.35;        /* SheenLoop: how strong the rainbow is */
   --fx-aurora-speed: 5s;            /* AuroraFrame: one turn of the crew-complete frame */
   --fx-aurora-glow: 6px;            /* AuroraFrame: glow radius (the one glow allowed) */
-  --fx-banner-sweep: 7s;            /* LightSweep: one glint across the crew banner, then rest */
+  --fx-holo-drift: 16s;             /* HoloBanner: how slowly the hue tones drift on the crew banner */
+  --fx-holo-speed: 9s;              /* HoloBanner: one pass of the foil sheen */
+  --fx-holo-strength: .85;          /* HoloBanner: foil intensity (soft-light) */
   --fx-spring: cubic-bezier(0.24, 1.34, 0.38, 1); /* overshoot for landings and pops */
   --fx-glass: color-mix(in srgb, var(--card) 75%, transparent); /* frosted surfaces: tab dock, toasts */
 }

@@ -107,14 +107,14 @@ are the `--fx-*` tokens in `app/globals.css`; JS timings are `components/fx/conf
 changing any of them, in light and dark, on a phone and desktop.
 
 **Budget.** Everyday screens stay calm: an effect answers a touch, then rests. Bold effects are for real moments only.
-Loops are scoped to exactly one place each (three: the ticket sheen, the aurora frame, the banner glint). Nothing else idles. Never add a second effect to a surface that has one.
+Loops are scoped to exactly one place each (three: the ticket sheen, the aurora frame, the banner's holo gradient). Nothing else idles. Never add a second effect to a surface that has one.
 
 | Effect | Tier | Allowed only on |
 |---|---|---|
 | `Foil` + `FoilLight` (tilt, white sheen; one sweep on tap) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
 | `SheenLoop` (holo sheen, loops) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
 | `AuroraFrame` (turning multicolor edge, soft glow) | scoped loop | `CrewHero`, only while the whole crew is in today |
-| `LightSweep` (a soft glint every ~7s) | scoped loop | The feed's crew banner only |
+| `HoloBanner` (slow drifting hue tones + a rose/sky/lemon foil sheen) | scoped loop | The feed's crew banner only |
 | `burstFrom` (canvas particles, crew hue + mint) | moment | After a check-in, from the button used (FAB or rail button) |
 | `flyArc` + `squash` (arc, tilt, land) | moment / calm | The day's first check-in (+1 to the streak: rail on desktop, You tab on phones); reactions landing on their chip |
 | `RevealCard` (shake, beam, hue flood, burst) | moment | When a check-in unlocks an achievement. Nowhere else |
@@ -160,8 +160,9 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
   (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Used by the feed banner,
   Explore card covers and the crew-look preview.
-- **FeedHeader:** the crew banner on a `CrewSurface` with a faint cover pattern: date + gear, the name large
-  (display, extra bold), members and crew streak as plain text (no pills), the `CrewMedal`, the TodayStrip on phones. No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
+- **FeedHeader:** the crew banner on a `CrewSurface` with `HoloBanner`: date + gear, the name large (display, extra
+  bold), members and crew streak as plain text (no pills), the TodayStrip on phones. No pattern and no emoji on the
+  banner (Ben: the stripes and the emoji badge looked cheap). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).
