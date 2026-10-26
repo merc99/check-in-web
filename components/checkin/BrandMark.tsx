@@ -1,7 +1,7 @@
 'use client'
 
 // The Check-in logo: the gauge (red → yellow → green, like a day going from "not yet" to "in"),
-// the check, and the wordmark in the display face (lowercase, extra bold). A holographic band sweeps the gauge when the logo first appears
+// the check, and the wordmark in Satoshi Black (lowercase). A holographic band sweeps the gauge when the logo first appears
 // and on hover; it never loops (motion budget, CLAUDE.md "Effects").
 import { useEffect, useId, useRef } from 'react'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -80,7 +80,7 @@ export function BrandMark({ className, size = 'sm' }: { className?: string; size
     return (
       <div className={cn('flex flex-col items-center text-center', className)} aria-label="Check-in. Stay consistent with people." role="img">
         <LogoMark size={96} />
-        <span className="mt-2 font-display text-[46px] font-extrabold leading-none tracking-tighter">check-in</span>
+        <span className="mt-2 font-wordmark text-[46px] font-black leading-none tracking-tighter">check-in</span>
         <span className="mt-3 text-[17px] font-medium text-muted-foreground">stay consistent with people.</span>
       </div>
     )
@@ -88,7 +88,7 @@ export function BrandMark({ className, size = 'sm' }: { className?: string; size
   return (
     <div className={cn('flex items-center gap-[6px]', className)} aria-label="Check-in" role="img">
       <LogoMark size={34} />
-      <span className="font-display text-[22px] font-extrabold leading-none tracking-tighter">check-in</span>
+      <span className="font-wordmark text-[22px] font-black leading-none tracking-tighter">check-in</span>
     </div>
   )
 }
