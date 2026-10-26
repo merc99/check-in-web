@@ -1,4 +1,5 @@
 import type { Hue } from '@/lib/colors'
+import type { CrewPattern } from '@/lib/crewStyle'
 import type { LocalDate } from '@/lib/dates'
 
 // ─── Rows: shaped exactly like the Supabase tables (snake_case, nullable where the column is) ───
@@ -24,6 +25,10 @@ export interface Group {
   name: string
   description: string | null
   color: Hue
+  /** Shown on the crew's block instead of its first letter. */
+  emoji: string | null
+  /** The texture on the crew's banner and cards. */
+  pattern: CrewPattern
   invite_slug: string
   created_by: UUID | null
   max_members: number
@@ -127,6 +132,8 @@ export interface GroupSummary {
   id: UUID
   name: string
   color: Hue
+  emoji: string | null
+  pattern: CrewPattern
   memberCount: number
   maxMembers: number
   inToday: number
@@ -195,6 +202,8 @@ export interface ExploreGroup {
   id: UUID
   name: string
   color: Hue
+  emoji: string | null
+  pattern: CrewPattern
   description: string | null
   memberCount: number
   maxMembers: number
@@ -213,6 +222,8 @@ export interface GroupPreview {
   id: UUID
   name: string
   color: Hue
+  emoji: string | null
+  pattern: CrewPattern
   memberCount: number
   maxMembers: number
   preview: Person[]
@@ -278,6 +289,8 @@ export interface ProfilePatch {
 export interface GroupPatch {
   name?: string
   color?: Hue
+  emoji?: string | null
+  pattern?: CrewPattern
   pinned_message?: string | null
   is_public?: boolean
 }

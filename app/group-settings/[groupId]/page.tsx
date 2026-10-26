@@ -12,14 +12,13 @@ import { HoldButton } from '@/components/fx/HoldButton'
 import { CheckIcon, ShareIcon, XIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
 import { PageHead, SectionTitle } from '@/components/checkin/SectionTitle'
-import { Swatches } from '@/components/checkin/Swatches'
+import { CrewLook } from '@/components/crew/CrewLook'
 import { Switch } from '@/components/checkin/Switch'
 import { BackLink, TextButton } from '@/components/checkin/TextButton'
 import { CodeTiles, Ticket } from '@/components/checkin/Ticket'
 import { useToast } from '@/components/checkin/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { cn } from '@/lib/utils'
-import { CREW_HUES } from '@/lib/colors'
 import { deleteGroup, getGroup, leaveGroup, removeMember, updateGroup, useQuery, type MemberRow } from '@/lib/data'
 
 
@@ -135,8 +134,8 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
 
       {g.isOwner && (
         <>
-          <SectionTitle title="Theme color" />
-          <Swatches colors={CREW_HUES} value={g.color} onChange={(color) => updateGroup(g.id, { color }).catch(fail)} />
+          <SectionTitle title="Crew look" note="banner, cards and lists" />
+          <CrewLook name={g.name} value={{ color: g.color, emoji: g.emoji, pattern: g.pattern }} onChange={(patch) => updateGroup(g.id, patch).catch(fail)} />
 
           <SectionTitle title="Who can find it" />
           <Card className="flex items-center gap-4">

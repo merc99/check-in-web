@@ -113,6 +113,8 @@ function summary(g: Group): GroupSummary {
     id: g.id,
     name: g.name,
     color: g.color,
+    emoji: g.emoji,
+    pattern: g.pattern,
     memberCount: members.length,
     maxMembers: g.max_members,
     inToday: members.filter((m) => inToday(m.user_id, g.id)).length,
@@ -433,6 +435,8 @@ export async function createGroup(input: NewGroupInput): Promise<UUID> {
     name,
     description: null,
     color: input.color,
+    emoji: null,
+    pattern: 'dots',
     invite_slug: uniqueSlug(),
     created_by: ME_ID,
     max_members: input.maxMembers,
@@ -471,6 +475,8 @@ export async function updateGroup(groupId: UUID, patch: GroupPatch): Promise<voi
     g.name = name
   }
   if (patch.color !== undefined) g.color = patch.color
+  if (patch.emoji !== undefined) g.emoji = patch.emoji
+  if (patch.pattern !== undefined) g.pattern = patch.pattern
   if (patch.pinned_message !== undefined) g.pinned_message = patch.pinned_message?.trim() || null
   if (patch.is_public !== undefined) g.is_public = patch.is_public
   emit({ table: 'groups', type: 'UPDATE', row: g })
@@ -677,6 +683,8 @@ function exploreGroup(g: Group): ExploreGroup {
     id: g.id,
     name: g.name,
     color: g.color,
+    emoji: g.emoji,
+    pattern: g.pattern,
     description: g.description,
     memberCount: members.length,
     maxMembers: g.max_members,
@@ -720,6 +728,8 @@ export async function getGroupPreview(slug: string): Promise<GroupPreview | null
     id: g.id,
     name: g.name,
     color: g.color,
+    emoji: g.emoji,
+    pattern: g.pattern,
     memberCount: members.length,
     maxMembers: g.max_members,
     preview: members.slice(0, 5).map((m) => personOf(m.user_id)),

@@ -11,6 +11,11 @@ import { HeatmapGrid, weekDays } from '@/components/checkin/HeatmapGrid'
 import { CheckIcon, PlusIcon, ShareIcon } from '@/components/checkin/icons'
 import { useLive } from '@/components/checkin/LivePill'
 import { SectionTitle } from '@/components/checkin/SectionTitle'
+import { CrewBlock } from '@/components/checkin/CrewBlock'
+import { CrewCover } from '@/components/checkin/CrewCover'
+import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
+import { CREW_PATTERNS } from '@/lib/crewStyle'
+import { cn } from '@/lib/utils'
 import { Segmented } from '@/components/checkin/Segmented'
 import { Sheet } from '@/components/checkin/Sheet'
 import { TabBar, type TabKey } from '@/components/checkin/TabBar'
@@ -126,6 +131,22 @@ export default function KitchenSink() {
               <Avatar key={n} name={n} color={AVATAR_HUES[i]} size="xs" className={i ? '-ml-2' : undefined} />
             ))}
           </div>
+        </div>
+      </Section>
+
+      <Section title="Crew covers" note="CrewCover · CrewBlock emoji">
+        <div className="grid grid-cols-3 gap-2">
+          {CREW_PATTERNS.map((p, i) => (
+            <div key={p} className={cn('relative flex h-16 items-end rounded-lg p-2 text-on-color', HUE_CLASS[CREW_HUES[i % CREW_HUES.length]].solid)}>
+              <CrewCover pattern={p} className="text-on-color opacity-20" fade={false} />
+              <span className="relative text-xs font-bold">{p}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <CrewBlock name="Lifters" color="sky" emoji="💪" />
+          <CrewBlock name="Sketch" color="grape" emoji="🎨" />
+          <CrewBlock name="Letter" color="lemon" />
         </div>
       </Section>
 

@@ -69,7 +69,7 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
         aria-controls={panelId}
         className="flex w-full items-center gap-3 px-4 py-[14px] text-left font-bold"
       >
-        <CrewBlock name={group.name} color={group.color} size="sm" />
+        <CrewBlock name={group.name} color={group.color} emoji={group.emoji} size="sm" />
         <span className="min-w-0 truncate">{group.name}</span>
         <span className="tnum font-medium text-muted-foreground">{list.length}</span>
         <ChevronIcon size={18} className={cn('ml-auto flex-none transition-transform duration-200 ease-out', open && 'rotate-180')} />

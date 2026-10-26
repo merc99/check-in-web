@@ -1,4 +1,5 @@
 import { getTagHue, type Hue } from '@/lib/colors'
+import type { CrewPattern } from '@/lib/crewStyle'
 import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag } from '@/lib/data/types'
 import { addDays, DAY, HOUR, localDate, MINUTE, startOfDay } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
@@ -48,6 +49,8 @@ interface GroupSeed {
   id: string
   name: string
   color: Hue
+  emoji: string
+  pattern: CrewPattern
   slug: string
   max: number
   createdBy: string
@@ -58,13 +61,13 @@ interface GroupSeed {
 }
 
 const GROUPS: GroupSeed[] = [
-  { id: 'g1', name: '5am Lifters', color: 'sky', slug: 'LIFT05', max: 8, createdBy: ME_ID, pinned: 'Leg day is not optional. Love you all.', members: [ME_ID, 'u1', 'u2', 'u3', 'u4'], tags: ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push'] },
-  { id: 'g2', name: 'Sketchbook Daily', color: 'grape', slug: 'SKTCH7', max: 10, createdBy: 'u3', description: 'Draw something. Anything. Every day.', members: [ME_ID, 'u3', 'u5', 'u6'], tags: ['sketch', 'gouache', 'ink', 'study'] },
-  { id: 'e1', name: 'Morning Pages', color: 'lemon', slug: 'PAGES3', max: 10, createdBy: 'u8', description: 'Three pages, longhand, before anything else.', members: ['u8', 'u10', 'u12', 'u14'], tags: ['pages', 'longhand'] },
-  { id: 'e2', name: 'Couch to 5K', color: 'leaf', slug: 'RUN5KC', max: 8, createdBy: 'u9', description: 'Slow runs count. Walking breaks count.', members: ['u9', 'u11', 'u13', 'u15', 'u10', 'u8', 'u12', 'u14'], tags: ['run', 'walk-run', 'rest day'] },
-  { id: 'e3', name: 'Hydration Station', color: 'sky', slug: 'WATER8', max: 15, createdBy: 'u10', description: 'Eight glasses. We remind each other.', members: ['u10', 'u13', 'u6', 'u7'], tags: ['water'] },
-  { id: 'e4', name: 'No Phone Before 9', color: 'indigo', slug: 'NOFON9', max: 10, createdBy: 'u11', description: 'Mornings belong to you, not the feed.', members: ['u11', 'u12', 'u9', 'u15', 'u14'], tags: ['no phone', 'reading'] },
-  { id: 'e5', name: 'Guitar, 20 Minutes', color: 'clay', slug: 'GTR20M', max: 5, createdBy: 'u15', description: 'Scales, songs, noodling. It all counts.', members: ['u15', 'u9'], tags: ['scales', 'songs'] },
+  { id: 'g1', name: '5am Lifters', color: 'sky', emoji: '💪', pattern: 'stripes', slug: 'LIFT05', max: 8, createdBy: ME_ID, pinned: 'Leg day is not optional. Love you all.', members: [ME_ID, 'u1', 'u2', 'u3', 'u4'], tags: ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push'] },
+  { id: 'g2', name: 'Sketchbook Daily', color: 'grape', emoji: '🎨', pattern: 'confetti', slug: 'SKTCH7', max: 10, createdBy: 'u3', description: 'Draw something. Anything. Every day.', members: [ME_ID, 'u3', 'u5', 'u6'], tags: ['sketch', 'gouache', 'ink', 'study'] },
+  { id: 'e1', name: 'Morning Pages', color: 'lemon', emoji: '📝', pattern: 'grid', slug: 'PAGES3', max: 10, createdBy: 'u8', description: 'Three pages, longhand, before anything else.', members: ['u8', 'u10', 'u12', 'u14'], tags: ['pages', 'longhand'] },
+  { id: 'e2', name: 'Couch to 5K', color: 'leaf', emoji: '🏃', pattern: 'waves', slug: 'RUN5KC', max: 8, createdBy: 'u9', description: 'Slow runs count. Walking breaks count.', members: ['u9', 'u11', 'u13', 'u15', 'u10', 'u8', 'u12', 'u14'], tags: ['run', 'walk-run', 'rest day'] },
+  { id: 'e3', name: 'Hydration Station', color: 'sky', emoji: '💧', pattern: 'dots', slug: 'WATER8', max: 15, createdBy: 'u10', description: 'Eight glasses. We remind each other.', members: ['u10', 'u13', 'u6', 'u7'], tags: ['water'] },
+  { id: 'e4', name: 'No Phone Before 9', color: 'indigo', emoji: '📵', pattern: 'grid', slug: 'NOFON9', max: 10, createdBy: 'u11', description: 'Mornings belong to you, not the feed.', members: ['u11', 'u12', 'u9', 'u15', 'u14'], tags: ['no phone', 'reading'] },
+  { id: 'e5', name: 'Guitar, 20 Minutes', color: 'clay', emoji: '🎸', pattern: 'waves', slug: 'GTR20M', max: 5, createdBy: 'u15', description: 'Scales, songs, noodling. It all counts.', members: ['u15', 'u9'], tags: ['scales', 'songs'] },
 ]
 
 type NoteSeed = [note: string, tags: string[]]
@@ -131,6 +134,8 @@ export function createSeed(now: Date = new Date()): Tables {
     name: g.name,
     description: g.description ?? null,
     color: g.color,
+    emoji: g.emoji,
+    pattern: g.pattern,
     invite_slug: g.slug,
     created_by: g.createdBy,
     max_members: g.max,

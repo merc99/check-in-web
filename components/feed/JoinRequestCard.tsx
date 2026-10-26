@@ -14,7 +14,7 @@ export function JoinRequestCard({
 }) {
   const { person } = request
   return (
-    <Card className="mb-4 bg-card">
+    <Card className="mb-4 border-dashed border-primary/50 bg-primary-soft/40 shadow-none">
       <div className="flex items-center gap-3">
         <button
           type="button"

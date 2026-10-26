@@ -156,7 +156,7 @@ export default function YouPage() {
       <List>
         {groups?.map((g) => (
           <div key={g.id} className={listRow}>
-            <CrewBlock name={g.name} color={g.color} size="list" />
+            <CrewBlock name={g.name} color={g.color} emoji={g.emoji} size="list" />
             <span className="min-w-0 flex-1">
               <b>{g.name}</b>
               <br />

@@ -68,7 +68,7 @@ export function AppSidebar() {
                   current ? 'bg-muted' : 'hover:bg-muted',
                 )}
               >
-                <CrewBlock name={g.name} color={g.color} size="sm" />
+                <CrewBlock name={g.name} color={g.color} emoji={g.emoji} size="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] font-semibold">{g.name}</span>
                   <span className="tnum block text-[12.5px] text-muted-foreground">

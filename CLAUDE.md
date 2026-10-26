@@ -140,10 +140,15 @@ refraction, light rings as default borders, the full-screen joy takeover.
 Build these with the primitives and the sources in `ui-references/check-in-map.md`:
 - **GlassTabBar:** `bg-card/75 backdrop-blur-xl border shadow-raised rounded-full`, opaque fallback via
   `@supports not (backdrop-filter: blur(1px))`; active tab = `bg-foreground text-background` pill sliding (200ms).
-- **CrewHero** (signature): `rounded-xl` card, single-hue gradient (`{hue}-soft` → transparent) over `bg-card`,
+- **Crew look** (`lib/crewStyle.ts`): each crew has a color, an `emoji` (on its `CrewBlock`, else the first letter)
+  and a cover `pattern` (`CrewCover`: dots, stripes, waves, grid, confetti, plain). Owners pick all three in crew
+  settings (`components/crew/CrewLook.tsx`). Banners and Explore cards wear the cover, so no two crews look alike.
+- **TodayStrip** (phones): who's in today folded into the feed banner, one row of stickers + "n/total"; tapping it
+  opens the brand line, the 14-day sparkline and the bar. The full `CrewHero` shows only in the desktop rail.
+- **CrewHero** (signature, desktop rail): `rounded-xl` card, single-hue gradient (`{hue}-soft` → transparent) over `bg-card`,
   big `font-display` "n/total" in `RollingCount`, an `AuroraFrame` while the whole crew is in, "in today", brand-voice line, avatar row (faded + dashed ring until checked
   in, then a mint check badge pops on), segmented progress bar in the crew hue.
-- **PostCard:** L1 card; avatar, name + relative time (plain text), note, interactive `TagChip`s, `Reactions` (emoji
+- **PostCard:** L1 card with the author's color down the left edge (yours: mint edge + faint mint wash); avatar, name + relative time (plain text), note, interactive `TagChip`s, `Reactions` (emoji
   chips from `lib/reactions.ts`, ❤️ first; yours are mint; the smiley opens the picker); own card gets a mint
   "Just in" badge for an hour; double-tap = heart burst and adds your ❤️.
 - **AchievementCard:** unlocked ones are foil: filled with the achievement's hue, `text-on-color`, a dark enamel medal,
@@ -151,8 +156,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
   `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
-- **FeedHeader:** a flat banner in the crew's solid color with dark ink (light block, date, name + switch chevron, gear,
-  members and crew-streak pills). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
+- **FeedHeader:** a flat banner in the crew's solid color with dark ink and its cover pattern (emoji tile, date,
+  name + switch chevron, gear, members and crew-streak pills, the TodayStrip on phones). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).

@@ -6,6 +6,7 @@ import { CheckInSheet, type CheckInDraft } from '@/components/feed/CheckInSheet'
 import { CrewSwitcherSheet } from '@/components/feed/CrewSwitcherSheet'
 import { Fab } from '@/components/feed/Fab'
 import { FeedHeader } from '@/components/feed/FeedHeader'
+import { TodayStrip } from '@/components/feed/TodayStrip'
 import { JoinRequestCard } from '@/components/feed/JoinRequestCard'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { Avatar } from '@/components/checkin/Avatar'
@@ -42,6 +43,7 @@ import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
 import { useDesktop } from '@/lib/viewport'
 import { cn } from '@/lib/utils'
+import { HUE_CLASS } from '@/lib/colors'
 import { burstFrom } from '@/components/fx/burst'
 import { flyArc } from '@/components/fx/fly'
 import { RevealCard } from '@/components/fx/RevealCard'
@@ -231,7 +233,11 @@ export default function FeedPage() {
       className="px-5 pb-[150px] lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 lg:px-8 lg:pb-16 xl:grid-cols-[minmax(0,760px)_340px] xl:justify-center xl:gap-10 2xl:grid-cols-[minmax(0,760px)_360px]"
     >
       <div className="min-w-0">
-      <FeedHeader group={g} onSwitch={() => setSwitcherOpen(true)} />
+      <FeedHeader
+        group={g}
+        onSwitch={() => setSwitcherOpen(true)}
+        today={!desktop && <TodayStrip key={g.id} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} recent={g.recent} />}
+      />
 
       {requests.data?.map((r) => (
         <JoinRequestCard
@@ -243,11 +249,10 @@ export default function FeedPage() {
         />
       ))}
 
-      {!desktop && hero}
-
       {g.pinnedMessage && (
-        <div className="mt-4 flex items-start gap-[10px] rounded-md border border-dashed border-border-strong px-[14px] py-3 text-sm text-muted-foreground">
-          <PinIcon size={17} className="mt-px flex-none" />
+        // A note pinned to the crew, in the crew's tint: it reads as a note, not another post.
+        <div className={cn('mt-4 flex items-start gap-[10px] rounded-lg px-4 py-3 text-[14.5px] font-medium', HUE_CLASS[g.color].soft, HUE_CLASS[g.color].ink)}>
+          <PinIcon size={17} className="mt-[2px] flex-none rotate-[20deg]" />
           <p>{g.pinnedMessage}</p>
         </div>
       )}

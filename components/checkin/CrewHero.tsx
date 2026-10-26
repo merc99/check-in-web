@@ -29,8 +29,8 @@ export interface CrewHeroProps {
   recent?: number[]
 }
 
-function heroLine(n: number, total: number, meIn: boolean) {
-  if (n === total) return 'Whole crew showed up today. That’s the whole point.'
+export function heroLine(n: number, total: number, meIn: boolean) {
+  if (total > 1 && n === total) return 'Whole crew showed up today. That’s the whole point.'
   if (meIn) return 'You’re in. The rest will get there.'
   return 'Whenever you’re ready. No rush.'
 }

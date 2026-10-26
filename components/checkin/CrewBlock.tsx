@@ -10,10 +10,10 @@ const SIZE: Record<Size, string> = {
   xl: 'size-16 rounded-lg text-[28px]', // new crew preview
 }
 
-/** The tilted square with a crew's first letter. `white` for use on top of the crew color. */
+/** The tilted square with a crew's emoji (or its first letter). `white` for use on top of the crew color. */
 export function CrewBlock({
-  name, color, size = 'md', white, className,
-}: { name: string; color: Hue; size?: Size; white?: boolean; className?: string }) {
+  name, color, emoji, size = 'md', white, className,
+}: { name: string; color: Hue; emoji?: string | null; size?: Size; white?: boolean; className?: string }) {
   return (
     <span
       aria-hidden="true"
@@ -24,7 +24,7 @@ export function CrewBlock({
         className,
       )}
     >
-      {(name.trim()[0] ?? '?').toUpperCase()}
+      {emoji ? <span className="text-[.85em] leading-none">{emoji}</span> : (name.trim()[0] ?? '?').toUpperCase()}
     </span>
   )
 }

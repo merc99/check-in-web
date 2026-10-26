@@ -2,6 +2,7 @@
 
 import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
+import { HUE_CLASS } from '@/lib/colors'
 import type { FeedItem } from '@/lib/data'
 import { HOUR, timeAgo } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -66,13 +67,17 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
     <article
       onPointerUp={onPointerUp}
       className={cn(
-        'relative touch-manipulation select-none rounded-lg border border-border bg-card p-4 shadow-card lg:p-5',
+        'relative touch-manipulation select-none overflow-hidden rounded-lg border border-border bg-card p-4 shadow-card lg:p-5',
+        // Yours carry a faint mint wash, so your own posts are easy to spot in the scroll.
+        item.isMine && 'border-primary/30 bg-[linear-gradient(135deg,var(--primary-soft),var(--card)_55%)]',
         // A mouse over a post lifts it a little (the interactive-card spec); touch has no hover.
         'transition-[transform,box-shadow,border-color] duration-150 ease-out',
         '[@media(hover:hover)]:hover:-translate-y-px [@media(hover:hover)]:hover:border-border-strong [@media(hover:hover)]:hover:shadow-raised',
         entering && 'animate-enter',
       )}
     >
+      {/* The author's color down the left edge (mint for you), so a scroll of posts isn't one gray. */}
+      <span aria-hidden="true" className={cn('absolute bottom-4 left-0 top-4 w-[3px] rounded-r-full', item.isMine ? 'bg-primary' : HUE_CLASS[item.user.color].solid)} />
       <div className="flex items-center gap-3">
         {onPersonTap && !item.isMine ? (
           <button

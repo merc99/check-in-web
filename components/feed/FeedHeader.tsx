@@ -1,20 +1,24 @@
 'use client'
 
 import { Flame, Users } from 'lucide-react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
-import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
+import { CrewDot } from '@/components/checkin/CrewBlock'
+import { CrewCover } from '@/components/checkin/CrewCover'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
 import { LightSweep } from '@/components/fx/loops'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
+import type { CrewPattern } from '@/lib/crewStyle'
 import { useScrolledPast } from '@/lib/motion'
 
 export interface FeedHeaderCrew {
   id: string
   name: string
   color: Hue
+  emoji: string | null
+  pattern: CrewPattern
   memberCount: number
   inToday: number
   /** Crew streak: consecutive days with someone in. */
@@ -22,11 +26,12 @@ export interface FeedHeaderCrew {
 }
 
 /**
- * The crew you're looking at, as a flat banner in the crew's color: its block, the date, the big name
- * (tap to switch crews) and a line of facts. Past 70px of scroll it collapses into a tinted sticky
- * bar with the crew's dot and name. Both open the crew switcher; the gear opens crew settings.
+ * The crew you're looking at, as a banner in the crew's color with its own cover pattern: its emoji,
+ * the date, the big name (tap to switch crews), a line of facts and, on phones, who's in today
+ * (`today`, a TodayStrip). Past 70px of scroll it collapses into a tinted sticky bar with the crew's
+ * dot and name. Both open the crew switcher; the gear opens crew settings.
  */
-export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitch: () => void }) {
+export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; onSwitch: () => void; today?: ReactNode }) {
   const collapsed = useScrolledPast(70)
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
   const hue = HUE_CLASS[group.color]
@@ -65,25 +70,31 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
         )}
       </header>
 
-      {/* The banner is the crew's own color, flat: dark ink on the hue, light pills, no glow. */}
+      {/* The banner is the crew's own color, flat, with its cover pattern fading in from the right. */}
       <div className={cn('relative isolate mb-5 mt-5 overflow-hidden rounded-xl p-5 text-on-color shadow-card', hue.solid)}>
+        <CrewCover pattern={group.pattern} className="text-on-color opacity-[.13]" />
         {/* A glint of light crosses the banner every few seconds (fx/LightSweep, the banner's one loop). */}
         <LightSweep />
-        <div className="relative flex items-start gap-4">
-          <CrewBlock name={group.name} color={group.color} size="lg" white className="border-white/50 bg-white/80 text-on-color max-sm:hidden" />
+        <div className="relative flex items-center gap-[14px]">
+          <span
+            aria-hidden="true"
+            className="grid size-[52px] flex-none rotate-[-5deg] place-items-center rounded-[16px] bg-white/85 font-display text-[26px] leading-none shadow-[0_6px_14px_-6px_rgb(0_0_0/.35)] sm:size-16 sm:rounded-[20px] sm:text-[32px]"
+          >
+            {group.emoji ?? (group.name.trim()[0] ?? '?').toUpperCase()}
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-semibold opacity-75">{date}</p>
-            <h1 className="mt-1">
+            <p className="text-[12.5px] font-semibold opacity-75">{date}</p>
+            <h1 className="mt-[3px]">
               <button
                 type="button"
                 onClick={onSwitch}
                 aria-haspopup="dialog"
-                className="group text-left font-display text-[30px] leading-[1] sm:text-[38px] sm:leading-[.95]"
+                className="group text-left font-display text-[26px] leading-[1] tracking-tighter sm:text-[38px] sm:leading-[.95]"
               >
                 {/* The chevron rides on the last word, so a long name never strands it on its own line. */}
                 <span className="break-words">{group.name}</span>
-                <span className="ml-2 inline-grid size-7 translate-y-[-3px] place-items-center rounded-full bg-white/45 align-middle transition-transform duration-150 ease-out group-hover:translate-y-[-1px] sm:size-8">
-                  <ChevronIcon size={18} />
+                <span className="ml-[6px] inline-grid size-6 translate-y-[-3px] place-items-center rounded-full bg-white/45 align-middle transition-transform duration-150 ease-out group-hover:translate-y-[-1px] sm:size-8">
+                  <ChevronIcon size={16} />
                 </span>
               </button>
             </h1>
@@ -92,7 +103,7 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
           <Link
             href={`/group-settings/${group.id}`}
             aria-label="Crew settings"
-            className="grid size-11 flex-none place-items-center rounded-full bg-white/45 transition-colors duration-150 ease-out hover:bg-white/70"
+            className="grid size-11 flex-none place-items-center self-start rounded-full bg-white/45 transition-colors duration-150 ease-out hover:bg-white/70"
           >
             <GearIcon size={19} />
           </Link>
@@ -111,6 +122,7 @@ export function FeedHeader({ group, onSwitch }: { group: FeedHeaderCrew; onSwitc
             </li>
           )}
         </ul>
+        {today}
       </div>
     </>
   )

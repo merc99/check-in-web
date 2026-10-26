@@ -37,7 +37,7 @@ export function CrewDetailSheet({
       {d && (
         <>
           <div className={cn('-mx-5 mb-5 flex items-center gap-4 border-y border-border px-5 py-6', HUE_CLASS[d.color].soft)}>
-            <CrewBlock name={d.name} color={d.color} size="lg" white />
+            <CrewBlock name={d.name} color={d.color} emoji={d.emoji} size="lg" white />
             <div>
               <h2 className="font-display text-[30px] leading-[.95]">{d.name}</h2>
               {d.description && <p className="mt-[6px] font-medium">{d.description}</p>}

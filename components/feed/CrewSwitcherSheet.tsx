@@ -33,7 +33,7 @@ export function CrewSwitcherSheet({
                 aria-current={active ? 'true' : undefined}
                 className={cn(listRow, active && 'bg-muted')}
               >
-                <CrewBlock name={g.name} color={g.color} />
+                <CrewBlock name={g.name} color={g.color} emoji={g.emoji} />
                 <span className="min-w-0 flex-1">
                   <b>{g.name}</b>
                   <br />

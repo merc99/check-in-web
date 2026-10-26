@@ -29,7 +29,7 @@ export function FeaturedCrews({ crews, onOpen }: { crews: ExploreGroup[]; onOpen
           // Each card is its crew's color (fx/Gloss), so the ring reads as five crews at a glance.
           <Gloss hue={c.color} className="flex h-full flex-col rounded-[inherit] p-5">
             <div className="flex items-start justify-between gap-2">
-              <CrewBlock name={c.name} color={c.color} size="lg" white className="border-white/50 bg-white/80 text-on-color" />
+              <CrewBlock name={c.name} color={c.color} emoji={c.emoji} size="lg" white className="border-white/50 bg-white/80 text-on-color" />
               <StatusTag status={c.status} />
             </div>
             <p className="mt-4 font-display text-[22px] leading-[1.05] tracking-tighter">{c.name}</p>
