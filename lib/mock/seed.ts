@@ -136,6 +136,8 @@ export function createSeed(now: Date = new Date()): Tables {
     color: g.color,
     emoji: g.emoji,
     pattern: g.pattern,
+    // Placeholder covers made with Higgsfield (public/covers), for the public crews.
+    cover_url: ['e1', 'e2', 'e3', 'e4', 'e5', 'g2'].includes(g.id) ? `/covers/${g.id}.webp` : null,
     invite_slug: g.slug,
     created_by: g.createdBy,
     max_members: g.max,

@@ -29,6 +29,8 @@ export interface Group {
   emoji: string | null
   /** The texture on the crew's banner and cards. */
   pattern: CrewPattern
+  /** A cover photo for the crew's Explore card, if it has one. */
+  cover_url: string | null
   invite_slug: string
   created_by: UUID | null
   max_members: number
@@ -204,6 +206,7 @@ export interface ExploreGroup {
   color: Hue
   emoji: string | null
   pattern: CrewPattern
+  coverUrl: string | null
   description: string | null
   memberCount: number
   maxMembers: number
