@@ -1,6 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Sparkles } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
+import { Button as UiButton } from '@/components/ui/button'
+import { suggestCheckIn } from '@/lib/ai/client'
+import type { AssistSuggestion } from '@/lib/ai/schema'
 import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { Button } from '@/components/checkin/Button'
 import { AddChip, TagChip, ToggleChip } from '@/components/checkin/Chip'
@@ -37,6 +41,9 @@ export function CheckInSheet({
   const [added, setAdded] = useState<string[]>([])
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [stamping, setStamping] = useState(false)
+  // Smart check-in: a tidied note and matching tags from a few loose words (AI, on request).
+  const [tidy, setTidy] = useState<{ step: 'busy' } | { step: 'ready'; for: string; s: AssistSuggestion } | null>(null)
+  const tidyAbort = useRef<AbortController | null>(null)
 
   // Start fresh each time the sheet opens (adjusting state during render, not in an effect).
   const [wasOpen, setWasOpen] = useState(open)
@@ -48,8 +55,31 @@ export function CheckInSheet({
       setAdded([])
       setSelected(new Set())
       setStamping(false)
+      setTidy(null)
     }
   }
+
+  const words = note.trim().split(/\s+/).filter(Boolean).length
+  const askTidy = async () => {
+    tidyAbort.current?.abort()
+    const ctrl = new AbortController()
+    tidyAbort.current = ctrl
+    const asked = note
+    setTidy({ step: 'busy' })
+    try {
+      const s = await suggestCheckIn(asked, tags, ctrl.signal)
+      setTidy({ step: 'ready', for: asked, s })
+    } catch {
+      // Aborted.
+    }
+  }
+  const applyTidy = (s: AssistSuggestion) => {
+    setNote(s.note)
+    setSelected((prev) => new Set([...prev, ...s.tags]))
+    setTidy(null)
+  }
+  // A suggestion only stands for the words it was made from.
+  const suggestion = tidy?.step === 'ready' && tidy.for === note ? tidy.s : null
 
   const q = query.trim().toLowerCase()
   const all = useMemo(() => [...tags, ...added.filter((t) => !tags.includes(t))], [tags, added])
@@ -104,10 +134,43 @@ export function CheckInSheet({
             maxLength={NOTE_MAX}
             placeholder="How’d it go?"
           />
-          <span className="tnum mt-[6px] block text-right text-xs text-muted-foreground">
-            {note.length} / {NOTE_MAX}
-          </span>
+          <div className="mt-[6px] flex min-h-8 items-center justify-between gap-3">
+            {words >= 2 && !suggestion ? (
+              <UiButton size="sm" variant="ghost" className="-ml-3" disabled={tidy?.step === 'busy'} onClick={askTidy}>
+                <Sparkles size={15} strokeWidth={1.75} /> {tidy?.step === 'busy' ? 'Tidying…' : 'Tidy with AI'}
+              </UiButton>
+            ) : (
+              <span />
+            )}
+            <span className="tnum text-xs text-muted-foreground">
+              {note.length} / {NOTE_MAX}
+            </span>
+          </div>
         </FormField>
+
+        {suggestion && (
+          <div aria-live="polite" className="-mt-2 animate-rise rounded-md border border-primary/30 bg-primary-soft/40 p-3">
+            <p className="flex items-center gap-[6px] text-[12px] font-semibold text-primary-ink">
+              <Sparkles size={13} strokeWidth={1.75} aria-hidden="true" /> Suggestion
+            </p>
+            <p className="mt-1 text-[15px] leading-[1.45]">{suggestion.note}</p>
+            {suggestion.tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-[6px]">
+                {suggestion.tags.map((t) => (
+                  <TagChip key={t} name={t} />
+                ))}
+              </div>
+            )}
+            <div className="mt-3 flex gap-2">
+              <UiButton size="sm" onClick={() => applyTidy(suggestion)}>
+                Use this
+              </UiButton>
+              <UiButton size="sm" variant="ghost" onClick={() => setTidy(null)}>
+                Keep mine
+              </UiButton>
+            </div>
+          </div>
+        )}
 
         <FormField label="Tags" optional>
           <SearchInput

@@ -12,6 +12,7 @@ export {
   deleteGroup,
   deleteTags,
   getAchievements,
+  getCrewWeek,
   getExploreDetails,
   getExploreGroups,
   getFeed,

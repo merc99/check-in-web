@@ -1,0 +1,22 @@
+/* Pattern: transitions.dev / shimmer text + AI thinking state (adapted to Check-in tokens).
+   A light band passes over the "reading" line while the model starts; a caret follows the text as it streams. */
+.shimmer {
+  color: transparent;
+  background: linear-gradient(100deg, var(--muted-foreground) 35%, var(--foreground) 50%, var(--muted-foreground) 65%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -50% 0; } }
+
+.caret::after {
+  content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -2px;
+  background: var(--primary); border-radius: 1px; animation: blink 1s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer { animation: none; color: var(--muted-foreground); background: none; }
+  .caret::after { animation: none; }
+}

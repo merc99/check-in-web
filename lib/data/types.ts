@@ -300,6 +300,18 @@ export interface GroupPatch {
   is_public?: boolean
 }
 
+/** A crew's last seven days, for the AI weekly recap. Plain values only (it's sent to the server). */
+export interface CrewWeek {
+  crewName: string
+  memberCount: number
+  /** Consecutive days with someone in. */
+  streak: number
+  /** Check-ins per member over the week, most first (everyone in the crew, zeros included). */
+  perPerson: { name: string; isMe: boolean; count: number }[]
+  /** Every check-in this week, oldest first. `day` is a weekday name, or "today". */
+  checkIns: { name: string; isMe: boolean; day: string; note: string | null; tags: string[] }[]
+}
+
 /** The You dashboard. */
 export interface MyInsights {
   /** Your check-ins per week for the last 12 weeks, oldest first (this week last). */

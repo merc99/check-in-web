@@ -4,6 +4,7 @@ import type {
   Change,
   CheckIn,
   CheckInInput,
+  CrewWeek,
   ExploreDetail,
   ExploreGroup,
   FeedItem,
@@ -220,6 +221,37 @@ export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => vo
     const row = c.row as CheckIn
     if (groupId ? row.group_id === groupId : isMember(ME_ID, row.group_id)) listener(toFeedItem(row))
   })
+}
+
+// ─── AI recap input ───
+
+/** The last seven days in a crew, as plain data for the AI weekly recap (lib/ai). */
+export async function getCrewWeek(groupId: UUID): Promise<CrewWeek> {
+  await settle()
+  requireMember(groupId)
+  const g = group(groupId)
+  const now = new Date()
+  const days = Array.from({ length: 7 }, (_, i) => localDate(addDays(now, i - 6)))
+  const inWeek = new Set(days)
+  const rows = checkInsOf((c) => c.group_id === groupId && inWeek.has(c.local_date)).sort((a, b) => a.created_at.localeCompare(b.created_at))
+  const nameOf = (id: UUID) => (id === ME_ID ? 'You' : personOf(id).name)
+  const counts = new Map<UUID, number>()
+  for (const r of rows) counts.set(r.user_id, (counts.get(r.user_id) ?? 0) + 1)
+  return {
+    crewName: g.name,
+    memberCount: membersOf(groupId).length,
+    streak: groupStreak(groupId),
+    perPerson: membersOf(groupId)
+      .map((m) => ({ name: nameOf(m.user_id), isMe: m.user_id === ME_ID, count: counts.get(m.user_id) ?? 0 }))
+      .sort((a, b) => b.count - a.count),
+    checkIns: rows.map((r) => ({
+      name: nameOf(r.user_id),
+      isMe: r.user_id === ME_ID,
+      day: r.local_date === days[6] ? 'today' : new Date(`${r.local_date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long' }),
+      note: r.note,
+      tags: tagsFor(r.id).map((t) => t.name),
+    })),
+  }
 }
 
 // ─── Waves ───

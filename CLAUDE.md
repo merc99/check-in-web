@@ -195,6 +195,21 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   turns it off. Screens react through the same change events a real backend would send.
 - Demo-only shortcut: an invite code that matches no crew joins the first open public crew.
 
+## AI demo (`lib/ai`, `app/api/ai`)
+- **Weekly recap** (`components/feed/RecapCard.tsx`): "Your crew's week" on the feed. Written only when someone taps
+  "Write recap" (never on load), streamed in with a shimmer "reading" line and a caret, then labeled with who wrote it.
+  Data: `getCrewWeek(groupId)` (`@/lib/data`) → `POST /api/ai/recap` → streamed plain text.
+- **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" suggests a tidier note and up to three
+  tags from the crew's own list; "Use this" / "Keep mine". `POST /api/ai/checkin` → structured output (zod schema, tags
+  as an enum of the crew's tags).
+- **Model:** Claude Haiku 5.5 (`claude-haiku-5-5`, effort `low`) in `lib/ai/server.ts`; override with `CHECKIN_AI_MODEL`.
+  The key is `ANTHROPIC_API_KEY`, set in Vercel's environment variables only (server-side; `server-only` guards it).
+- **Always works:** no key, a visitor over the rate limit (8 per 10 min per IP, a daily cap per instance), a refusal or an
+  error all fall back to the template in `lib/ai/fallback.ts` (same data, same voice). The browser falls back too if
+  the route can't be reached. `CHECKIN_AI=off` forces the template.
+- **Prompts:** brand voice rules (no shame, no streak loss, no urgency) live in the route's system prompt. Crew content is
+  sent inside tags and treated as data, never instructions.
+
 ## Data
 - Components import data only from `@/lib/data`, which re-exports the async functions in `lib/mock/api.ts`.
   New features add their functions there. Keep them async and returning view models (types in `lib/data/types.ts`),
