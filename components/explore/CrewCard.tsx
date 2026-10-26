@@ -1,6 +1,7 @@
 import { Avatar } from '@/components/checkin/Avatar'
 import { Flame } from 'lucide-react'
 import { CrewCover } from '@/components/checkin/CrewCover'
+import { CrewSurface } from '@/components/checkin/CrewSurface'
 import { HUE_CLASS } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import type { ExploreGroup, MembershipStatus } from '@/lib/data'
@@ -26,7 +27,6 @@ export function StatusTag({ status, className }: { status: MembershipStatus; cla
  * list reads as different crews, not one card six times. Lifts on hover, presses down on tap.
  */
 export function CrewCard({ crew, onOpen }: { crew: ExploreGroup; onOpen: () => void }) {
-  const hue = HUE_CLASS[crew.color]
   const fill = Math.min(1, crew.memberCount / Math.max(1, crew.maxMembers))
   return (
     <button
@@ -38,18 +38,20 @@ export function CrewCard({ crew, onOpen }: { crew: ExploreGroup; onOpen: () => v
         '[@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:border-border-strong [@media(hover:hover)]:hover:shadow-raised',
       )}
     >
-      <div className={cn('relative flex h-[76px] items-start justify-end gap-2 p-3 text-on-color', hue.solid)}>
-        <CrewCover pattern={crew.pattern} className="text-on-color opacity-[.16]" fade={false} />
-        {crew.streak > 1 && (
-          <span className="relative inline-flex items-center gap-1 rounded-full bg-on-color px-[10px] py-1 text-xs font-bold text-white">
-            <Flame size={12} strokeWidth={2.25} aria-hidden="true" />
+      <CrewSurface hue={crew.color} className="flex h-[80px] items-start justify-between gap-2 p-3 shadow-none!">
+        <CrewCover pattern={crew.pattern} className="text-on-color opacity-[.11]" />
+        {crew.streak > 1 ? (
+          <span className="relative mt-[3px] inline-flex items-center gap-1 text-[12.5px] font-bold">
+            <Flame size={14} strokeWidth={2.25} aria-hidden="true" />
             <span>
               <span className="tnum">{crew.streak}</span>-day streak
             </span>
           </span>
+        ) : (
+          <span />
         )}
-        <StatusTag status={crew.status} className="relative border-transparent bg-white/85 text-on-color" />
-      </div>
+        <StatusTag status={crew.status} className="relative border-transparent bg-black/15 text-on-color" />
+      </CrewSurface>
       <div className="px-4 pb-4">
         <span
           aria-hidden="true"
@@ -67,7 +69,7 @@ export function CrewCard({ crew, onOpen }: { crew: ExploreGroup; onOpen: () => v
           </span>
           {/* How full the crew is, in its own color. */}
           <span aria-hidden="true" className="h-[6px] min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
-            <span className={cn('block h-full rounded-full', hue.solid)} style={{ width: `${fill * 100}%` }} />
+            <span className={cn('block h-full rounded-full', HUE_CLASS[crew.color].solid)} style={{ width: `${fill * 100}%` }} />
           </span>
           <span className="text-muted-foreground">
             <span className="tnum font-bold text-foreground">{crew.memberCount}</span> of <span className="tnum">{crew.maxMembers}</span>

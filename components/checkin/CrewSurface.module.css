@@ -1,0 +1,34 @@
+/* A crew's own surface (feed banner, Explore card covers, the crew-look preview): one hue with depth.
+   The hue deepens toward the bottom, a lighter tone of the same hue sits top right, fine grain makes
+   it read as a material, and a light top edge plus a hue-tinted shadow lift it. Overlays on it are
+   dark ink, not white, so it stays rich instead of washed out. */
+.surface {
+  --deep: color-mix(in srgb, var(--hue) 74%, black);
+  --lift: color-mix(in srgb, var(--hue) 82%, white);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--on-color);
+  background:
+    radial-gradient(85% 130% at 100% 0%, color-mix(in srgb, var(--lift) 80%, transparent), transparent 62%),
+    linear-gradient(165deg, var(--hue) 0%, var(--hue) 38%, var(--deep) 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 38%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, black 10%, transparent),
+    0 24px 40px -30px color-mix(in srgb, var(--deep) 45%, black),
+    var(--elev-card);
+}
+.surface::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .16; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* The crew's emoji as a dark enamel badge with a rim of light (like the achievement medals). */
+.medal {
+  display: grid; place-items: center; flex: none; border-radius: 9999px; line-height: 1;
+  background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--on-color) 70%, white) 0%, var(--on-color) 58%);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, white 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent),
+    0 10px 22px -10px color-mix(in srgb, var(--deep) 90%, black);
+}

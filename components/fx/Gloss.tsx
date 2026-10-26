@@ -8,10 +8,12 @@ import { HUE_CLASS, type Hue } from '@/lib/colors'
 import styles from './Gloss.module.css'
 
 /** A glossy panel in a crew hue. Text inside is the dark on-color ink. */
-export function Gloss({ hue, className, style, children, ...rest }: HTMLAttributes<HTMLDivElement> & { hue: Hue | 'primary' }) {
+export function Gloss({
+  hue, grain = true, className, style, children, ...rest
+}: HTMLAttributes<HTMLDivElement> & { hue: Hue | 'primary'; /** Film grain; off for cards that move every frame. */ grain?: boolean }) {
   const vars = { '--hue': hue === 'primary' ? 'var(--primary)' : HUE_CLASS[hue].cssVar, ...style } as CSSProperties
   return (
-    <div className={cn(styles.gloss, className)} style={vars} {...rest}>
+    <div className={cn(styles.gloss, !grain && styles.noGrain, className)} style={vars} {...rest}>
       {children}
     </div>
   )

@@ -27,7 +27,7 @@ export function TodayStrip({
   const extra = total - shown.length
 
   return (
-    <div role="region" aria-label="Who’s in today" className="relative mt-4 rounded-lg bg-white/40 p-[10px] shadow-[inset_0_0_0_1px_rgb(255_255_255/.45)]">
+    <div role="region" aria-label="Who’s in today" className="relative mt-5 rounded-lg bg-black/10 p-[10px] shadow-[inset_0_1px_0_rgb(255_255_255/.18)]">
       <div className="flex items-center gap-2">
         <ul className="flex min-w-0 items-center pl-1">
           {shown.map(({ person, inToday, isMe }, i) => {
@@ -64,14 +64,14 @@ export function TodayStrip({
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls={panel}
-          className="inline-flex items-center gap-2 rounded-full py-1 pl-2 pr-1 transition-colors duration-150 ease-out hover:bg-white/35"
+          className="inline-flex items-center gap-2 rounded-full py-1 pl-2 pr-1 transition-colors duration-150 ease-out hover:bg-black/10"
         >
           <span className="tnum inline-flex items-baseline whitespace-nowrap font-display text-[22px] leading-none">
             <RollingCount n={n} tight label={`${n} of ${total} in today`} />
             <span aria-hidden="true" className="text-[14px] opacity-60">/{total}</span>
           </span>
           <span className="whitespace-nowrap text-[12px] font-bold">in today</span>
-          <span className="grid size-7 place-items-center rounded-full bg-white/55">
+          <span className="grid size-7 place-items-center rounded-full bg-black/10">
             <ChevronIcon size={15} className={cn('transition-transform duration-200 ease-out', open && 'rotate-180')} />
           </span>
         </button>
@@ -82,7 +82,7 @@ export function TodayStrip({
         <div className="min-h-0 overflow-hidden">
           <p className="px-1 pt-3 text-[13px] font-semibold">{heroLine(n, total, members.some((m) => m.isMe && m.inToday))}</p>
           {recent && recent.length > 1 && (
-            <div className="mt-2 rounded-md bg-white/35 px-3 pb-2 pt-2">
+            <div className="mt-2 rounded-md bg-black/[.08] px-3 pb-2 pt-2">
               <div className="flex items-baseline justify-between text-[11.5px] font-bold">
                 <span>Last 14 days</span>
                 <span className="opacity-70">today</span>
@@ -104,7 +104,7 @@ export function TodayStrip({
           )}
           <div aria-hidden="true" className="mt-3 flex gap-[5px] px-1 pb-1">
             {members.map((m, i) => (
-              <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/45">
+              <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/10">
                 <span className={cn('absolute inset-0 origin-left bg-on-color transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />
               </span>
             ))}

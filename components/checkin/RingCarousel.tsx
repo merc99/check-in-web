@@ -119,6 +119,8 @@ export function RingCarousel({
     }
 
     let turn = opensOn
+    // The stage's scale on this column (below 1 on phones): a drag turns the ring by what the eye sees.
+    let scale = 1
     let raf = 0
     let springRaf = 0
     let prevT = 0
@@ -191,6 +193,9 @@ export function RingCarousel({
       cards.current.forEach((card, i) => {
         if (!card) return
         const move = (e: PointerEvent) => {
+          // The tilt follows a mouse only. On touch the finger is turning the ring, and measuring
+          // the card on every move would force a layout each frame.
+          if (e.pointerType !== 'mouse') return
           const b = card.getBoundingClientRect()
           state[i].pt = { x: clamp(((e.clientX - b.left) / b.width) * 2 - 1, -1, 1), y: clamp(((e.clientY - b.top) / b.height) * 2 - 1, -1, 1) }
           state[i].on = true
@@ -283,7 +288,7 @@ export function RingCarousel({
       g.vx = (g.vx + (e.clientX - g.last) / dt) / 2
       g.last = e.clientX
       g.t = e.timeStamp
-      turn = g.t0 - dx / PULL // no rubber band, because there is no end
+      turn = g.t0 - dx / (PULL * scale) // no rubber band, because there is no end
       paint()
     }
     // The browser took the touch to scroll the page: settle, and never treat it as a tap.
@@ -308,7 +313,7 @@ export function RingCarousel({
         else glide(Math.round(turn))
         return
       }
-      const carry = clamp((-g.vx * TOSS) / PULL, -MOST, MOST)
+      const carry = clamp((-g.vx * TOSS) / (PULL * scale), -MOST, MOST)
       glide(Math.round(turn + carry))
     }
     const onKey = (e: KeyboardEvent) => {
@@ -336,12 +341,11 @@ export function RingCarousel({
     const fit = () => {
       const w = root.clientWidth || stageWidth
       const s = w >= stageWidth ? 1 : Math.min(1, w / (cardWidth + 40))
+      scale = s
       const clipped = w < stageWidth
       root.style.overflow = clipped ? 'hidden' : 'visible'
-      // Where side cards run off the edge, they fade out instead of being cut.
-      const fade = clipped ? 'linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent)' : 'none'
-      root.style.maskImage = fade
-      root.style.setProperty('-webkit-mask-image', fade)
+      // Where side cards run off the edge, they fade into the page (CSS overlays, not a mask).
+      root.setAttribute('data-clipped', String(clipped))
       stage.style.transform = `translateX(-50%) scale(${s.toFixed(4)})`
       root.style.height = `${Math.round(stageHeight * s)}px`
     }

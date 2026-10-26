@@ -1,6 +1,7 @@
 'use client'
 
 import { CrewCover } from '@/components/checkin/CrewCover'
+import { CrewMedal, CrewSurface } from '@/components/checkin/CrewSurface'
 import { Swatches } from '@/components/checkin/Swatches'
 import { CREW_HUES, HUE_CLASS, type Hue } from '@/lib/colors'
 import { CREW_EMOJI, CREW_PATTERNS, PATTERN_LABEL, type CrewPattern } from '@/lib/crewStyle'
@@ -22,13 +23,11 @@ export function CrewLook({ name, value, onChange }: { name: string; value: CrewL
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
       {/* Preview: the banner as the feed shows it. */}
-      <div className={cn('relative flex items-center gap-3 p-4 text-on-color transition-colors duration-200 ease-out', hue.solid)} aria-hidden="true">
-        <CrewCover pattern={value.pattern} className="text-on-color opacity-[.14]" />
-        <span className="relative grid size-12 flex-none rotate-[-5deg] place-items-center rounded-[15px] bg-white/85 font-display text-[24px] leading-none shadow-[0_6px_14px_-6px_rgb(0_0_0/.35)]">
-          {value.emoji ?? letter}
-        </span>
-        <span className="relative truncate font-display text-[22px] leading-none tracking-tighter">{name}</span>
-      </div>
+      <CrewSurface hue={value.color} className="flex items-center gap-3 p-4 shadow-none!" aria-hidden="true">
+        <CrewCover pattern={value.pattern} className="text-on-color opacity-[.09]" />
+        <span className="relative min-w-0 flex-1 truncate font-display text-[26px] font-extrabold leading-none tracking-tighter">{name}</span>
+        <CrewMedal name={name} emoji={value.emoji} className="relative size-12 text-[22px]" />
+      </CrewSurface>
 
       <div className="flex flex-col gap-5 p-4">
         <fieldset>

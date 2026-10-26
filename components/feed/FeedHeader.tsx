@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
 import { CrewDot } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
+import { CrewMedal, CrewSurface } from '@/components/checkin/CrewSurface'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
 import { LightSweep } from '@/components/fx/loops'
@@ -70,60 +71,60 @@ export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; 
         )}
       </header>
 
-      {/* The banner is the crew's own color, flat, with its cover pattern fading in from the right. */}
-      <div className={cn('relative isolate mb-5 mt-5 overflow-hidden rounded-xl p-5 text-on-color shadow-card', hue.solid)}>
-        <CrewCover pattern={group.pattern} className="text-on-color opacity-[.13]" />
+      {/* The banner: the crew's own surface (hue with depth and grain), a faint cover pattern, the name
+          large, the facts as plain text, and the crew's emoji as an enamel badge. */}
+      <CrewSurface hue={group.color} className="mb-5 mt-5 rounded-xl p-5 sm:p-6">
+        <CrewCover pattern={group.pattern} className="text-on-color opacity-[.07]" />
         {/* A glint of light crosses the banner every few seconds (fx/LightSweep, the banner's one loop). */}
         <LightSweep />
-        <div className="relative flex items-center gap-[14px]">
-          <span
-            aria-hidden="true"
-            className="grid size-[52px] flex-none rotate-[-5deg] place-items-center rounded-[16px] bg-white/85 font-display text-[26px] leading-none shadow-[0_6px_14px_-6px_rgb(0_0_0/.35)] sm:size-16 sm:rounded-[20px] sm:text-[32px]"
+        <div className="relative flex items-center justify-between gap-3">
+          <p className="text-[13px] font-semibold opacity-70">{date}</p>
+          <Link
+            href={`/group-settings/${group.id}`}
+            aria-label="Crew settings"
+            className="-my-1 grid size-10 flex-none place-items-center rounded-full bg-black/10 transition-colors duration-150 ease-out hover:bg-black/20"
           >
-            {group.emoji ?? (group.name.trim()[0] ?? '?').toUpperCase()}
-          </span>
+            <GearIcon size={18} />
+          </Link>
+        </div>
+        <div className="relative mt-2 flex items-end gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-[12.5px] font-semibold opacity-75">{date}</p>
-            <h1 className="mt-[3px]">
+            <h1>
               <button
                 type="button"
                 onClick={onSwitch}
                 aria-haspopup="dialog"
-                className="group text-left font-display text-[26px] leading-[1] tracking-tighter sm:text-[38px] sm:leading-[.95]"
+                className="group text-left font-display text-[40px] font-extrabold leading-[.92] tracking-tighter sm:text-[54px]"
               >
                 {/* The chevron rides on the last word, so a long name never strands it on its own line. */}
                 <span className="break-words">{group.name}</span>
-                <span className="ml-[6px] inline-grid size-6 translate-y-[-3px] place-items-center rounded-full bg-white/45 align-middle transition-transform duration-150 ease-out group-hover:translate-y-[-1px] sm:size-8">
-                  <ChevronIcon size={16} />
-                </span>
+                <ChevronIcon
+                  size={22}
+                  className="ml-1 inline-block translate-y-[-4px] opacity-55 transition-[transform,opacity] duration-150 ease-out group-hover:translate-y-[-2px] group-hover:opacity-90"
+                />
               </button>
             </h1>
-          </div>
-          {/* Light on the hue in both themes (a card-colored button would go black in dark mode). */}
-          <Link
-            href={`/group-settings/${group.id}`}
-            aria-label="Crew settings"
-            className="grid size-11 flex-none place-items-center self-start rounded-full bg-white/45 transition-colors duration-150 ease-out hover:bg-white/70"
-          >
-            <GearIcon size={19} />
-          </Link>
-        </div>
-        <ul className="relative mt-4 flex flex-wrap gap-2 text-[12.5px] font-bold">
-          <li className="inline-flex items-center gap-[6px] rounded-full bg-white/45 px-3 py-[6px]">
-            <Users size={14} strokeWidth={2} aria-hidden="true" />
-            <span className="tnum">{group.memberCount}</span> members
-          </li>
-          {group.streak > 1 && (
-            <li className="inline-flex items-center gap-[6px] rounded-full bg-on-color px-3 py-[6px] text-white">
-              <Flame size={14} strokeWidth={2.25} aria-hidden="true" />
-              <span>
-                <span className="tnum">{group.streak}</span>-day crew streak
+            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13.5px] font-semibold">
+              <span className="inline-flex items-center gap-[6px] opacity-75">
+                <Users size={15} strokeWidth={2} aria-hidden="true" />
+                <span>
+                  <span className="tnum">{group.memberCount}</span> members
+                </span>
               </span>
-            </li>
-          )}
-        </ul>
+              {group.streak > 1 && (
+                <span className="inline-flex items-center gap-[6px]">
+                  <Flame size={15} strokeWidth={2.25} aria-hidden="true" />
+                  <span>
+                    <span className="tnum">{group.streak}</span>-day crew streak
+                  </span>
+                </span>
+              )}
+            </p>
+          </div>
+          <CrewMedal name={group.name} emoji={group.emoji} className="size-[60px] text-[28px] sm:size-[76px] sm:text-[36px]" />
+        </div>
         {today}
-      </div>
+      </CrewSurface>
     </>
   )
 }

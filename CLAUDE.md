@@ -156,8 +156,12 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
   `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
-- **FeedHeader:** a flat banner in the crew's solid color with dark ink and its cover pattern (emoji tile, date,
-  name + switch chevron, gear, members and crew-streak pills, the TodayStrip on phones). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
+- **CrewSurface** (`components/checkin/CrewSurface.tsx`): a crew's own surface, its hue with depth (deeper toward the
+  bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
+  (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Used by the feed banner,
+  Explore card covers and the crew-look preview.
+- **FeedHeader:** the crew banner on a `CrewSurface` with a faint cover pattern: date + gear, the name large
+  (display, extra bold), members and crew streak as plain text (no pills), the `CrewMedal`, the TodayStrip on phones. No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).

@@ -32,6 +32,10 @@
   top: 50%;
   transform-origin: center;
   perspective: 760px;
+  /* Its own GPU layer: turning the ring only re-composites (no repaint per frame, smooth on phones),
+     and the rounded corners are drawn unrotated inside the layer, so they stay smooth when it tilts. */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* A Check-in card. One shadow, and it does not move: the dent and the rim say the card went back.
@@ -41,10 +45,25 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--border);
   border-radius: 22px;
   background: var(--card);
   color: var(--card-foreground);
   box-shadow: var(--elev-raised);
+  /* A transparent outline keeps the layer's edge off the card's edge (no stair-steps). */
+  outline: 1px solid transparent;
 }
+/* The hairline sits on top as a soft light edge, not a hard 1px border. */
+.card::after {
+  content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 22%, transparent);
+}
+
+/* On a narrow column the side cards run off the edges; these fade them into the page. Painted once,
+   so the ring never repaints a mask while it turns. */
+.wrap[data-clipped="true"]::before,
+.wrap[data-clipped="true"]::after {
+  content: ""; position: absolute; top: 0; bottom: 0; z-index: 200; width: 9%; pointer-events: none;
+}
+.wrap[data-clipped="true"]::before { left: 0; background: linear-gradient(90deg, var(--background), transparent); }
+.wrap[data-clipped="true"]::after { right: 0; background: linear-gradient(-90deg, var(--background), transparent); }
 

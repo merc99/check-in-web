@@ -6,7 +6,7 @@ import { HEART } from '@/lib/reactions'
 
 const SEED_EMOJI = ['💪', '🔥', '👏', '🙌', '🙏', '😅']
 
-// Seeded like the prototype: the 5am Lifters and Sketchbook Daily crews you're in,
+// Seeded like the prototype: the DIALED and Sketchbook Daily crews you're in,
 // five public crews to explore, and months of history behind everyone's streaks.
 // Everything is relative to "now", so the feed always looks like today.
 
@@ -61,7 +61,7 @@ interface GroupSeed {
 }
 
 const GROUPS: GroupSeed[] = [
-  { id: 'g1', name: '5am Lifters', color: 'sky', emoji: '💪', pattern: 'stripes', slug: 'LIFT05', max: 8, createdBy: ME_ID, pinned: 'Leg day is not optional. Love you all.', members: [ME_ID, 'u1', 'u2', 'u3', 'u4'], tags: ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push'] },
+  { id: 'g1', name: 'DIALED', color: 'sky', emoji: '💪', pattern: 'stripes', slug: 'LIFT05', max: 8, createdBy: ME_ID, pinned: 'Leg day is not optional. Love you all.', members: [ME_ID, 'u1', 'u2', 'u3', 'u4'], tags: ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push'] },
   { id: 'g2', name: 'Sketchbook Daily', color: 'grape', emoji: '🎨', pattern: 'confetti', slug: 'SKTCH7', max: 10, createdBy: 'u3', description: 'Draw something. Anything. Every day.', members: [ME_ID, 'u3', 'u5', 'u6'], tags: ['sketch', 'gouache', 'ink', 'study'] },
   { id: 'e1', name: 'Morning Pages', color: 'lemon', emoji: '📝', pattern: 'grid', slug: 'PAGES3', max: 10, createdBy: 'u8', description: 'Three pages, longhand, before anything else.', members: ['u8', 'u10', 'u12', 'u14'], tags: ['pages', 'longhand'] },
   { id: 'e2', name: 'Couch to 5K', color: 'leaf', emoji: '🏃', pattern: 'waves', slug: 'RUN5KC', max: 8, createdBy: 'u9', description: 'Slow runs count. Walking breaks count.', members: ['u9', 'u11', 'u13', 'u15', 'u10', 'u8', 'u12', 'u14'], tags: ['run', 'walk-run', 'rest day'] },
@@ -140,7 +140,7 @@ export function createSeed(now: Date = new Date()): Tables {
     created_by: g.createdBy,
     max_members: g.max,
     pinned_message: g.pinned ?? null,
-    // Your own 5am Lifters stays private; the rest are listed in Explore.
+    // Your own DIALED crew stays private; the rest are listed in Explore.
     is_public: g.id !== 'g1',
     created_at: daysAgo(230),
     deleted_at: null,
