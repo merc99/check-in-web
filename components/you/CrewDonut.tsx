@@ -60,7 +60,7 @@ export function CrewDonut({ crews }: { crews: MyInsights['byCrew'] }) {
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
           <div>
             <div className="tnum font-display text-[32px] leading-none tracking-tighter">{focus ? focus.count : total}</div>
-            <div className="mt-1 max-w-[90px] truncate text-[11.5px] text-muted-foreground">{focus ? focus.name : 'check-ins'}</div>
+            <div className="mt-1 max-w-[90px] truncate text-[12px] text-muted-foreground">{focus ? focus.name : 'check-ins'}</div>
           </div>
         </div>
       </div>

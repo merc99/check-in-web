@@ -82,7 +82,7 @@ export function FeedHeader({ group, onSwitch, today }: { group: FeedHeaderCrew; 
                 type="button"
                 onClick={onSwitch}
                 aria-haspopup="dialog"
-                className="group inline-flex max-w-full items-center gap-1 text-left font-display text-[24px] font-extrabold leading-[1.1] tracking-tighter sm:text-[28px]"
+                className="group hit-44 inline-flex max-w-full items-center gap-1 text-left font-display text-[24px] font-extrabold leading-[1.1] tracking-tighter sm:text-[28px]"
               >
                 <span className="truncate">{group.name}</span>
                 <ChevronIcon

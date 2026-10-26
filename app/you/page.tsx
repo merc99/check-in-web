@@ -170,7 +170,7 @@ export default function YouPage() {
           </div>
         ))}
         <div className={listRow}>
-          <TextLink href="/new-group" className="py-1 pl-0">
+          <TextLink href="/new-group" className="hit-44 py-1 pl-0">
             <PlusIcon size={16} /> Start or join a crew
           </TextLink>
         </div>

@@ -96,8 +96,8 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
           <span className="ml-[6px] text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
         </p>
         {justIn && (
-          <span className="ml-auto rounded-full bg-primary-soft px-2 text-primary-ink py-[5px] text-[10.5px] font-bold leading-none tracking-[.08em] shadow-xs">
-            JUST IN
+          <span className="ml-auto rounded-full bg-primary-soft px-2 text-primary-ink py-[5px] text-[12px] font-bold leading-none shadow-xs">
+            Just in
           </span>
         )}
       </div>

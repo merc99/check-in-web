@@ -48,7 +48,7 @@ export function ToggleChip({
       aria-pressed={selected}
       onClick={onToggle}
       className={cn(
-        base, SIZE[size],
+        base, SIZE[size], 'hit-44',
         'transition-[transform,box-shadow,background-color] duration-200 ease-spring active:translate-y-px active:scale-[.96] active:shadow-none',
         selected ? cn(c.soft, c.ink, 'animate-bump') : 'bg-card text-foreground',
       )}

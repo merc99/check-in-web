@@ -109,7 +109,7 @@ export function Sparkline({
           />
           <span
             role="status"
-            className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-on-color px-2 py-1 text-[11.5px] font-bold text-white shadow-raised"
+            className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-on-color px-2 py-1 text-[12px] font-bold text-white shadow-raised"
             style={{ left: `clamp(48px, ${left(p[0])}, calc(100% - 48px))`, top: `calc(${top(p[1])} - 34px)` }}
           >
             {tip}

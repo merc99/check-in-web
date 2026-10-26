@@ -46,7 +46,7 @@ export function CrewCard({ crew, onOpen }: { crew: ExploreGroup; onOpen: () => v
             src={crew.coverUrl}
             alt=""
             loading="lazy"
-            className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:scale-[1.04]"
+            className="absolute inset-0 size-full object-cover transition-transform duration-300 ease-out [@media(hover:hover)]:group-hover:scale-[1.04]"
           />
           <span aria-hidden="true" className="absolute inset-x-0 top-0 h-16 bg-[linear-gradient(rgb(0_0_0/.55),transparent)]" />
           <div className="relative flex items-start justify-between gap-2 p-3 text-white">

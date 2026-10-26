@@ -23,7 +23,7 @@ export function ThemeToggle() {
         style={{ transform: `translateX(${idx * 100}%)` }} />
       {OPTIONS.map(o => (
         <button key={o.value} role="radio" aria-checked={mounted && theme === o.value} onClick={() => setTheme(o.value)}
-          className={cn('relative z-10 rounded-full text-[13px] font-medium transition-colors duration-150', mounted && theme === o.value ? 'text-foreground' : 'text-muted-foreground')}>
+          className={cn('hit-44 relative z-10 rounded-full text-[13px] font-medium transition-colors duration-150', mounted && theme === o.value ? 'text-foreground' : 'text-muted-foreground')}>
           {o.label}
         </button>
       ))}

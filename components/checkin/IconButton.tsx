@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 type Size = 'md' | 'sm'
 
 const base =
-  'grid flex-none place-items-center rounded-full border border-border bg-card shadow-xs transition-[transform,box-shadow] duration-120 ease-out active:translate-y-px active:shadow-none'
+  'grid flex-none place-items-center rounded-full border border-border bg-card shadow-xs transition-[transform,box-shadow] duration-150 ease-out active:translate-y-px active:shadow-none'
 const SIZE: Record<Size, string> = { md: 'size-[42px]', sm: 'size-[34px]' }
 
 export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

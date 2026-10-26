@@ -264,6 +264,15 @@
 }
 
 @utility tnum { font-variant-numeric: tabular-nums; }
+/* Grows a small control's tap area to at least 44x44 (the profile's floor) without changing its look. */
+@utility hit-44 {
+  position: relative;
+  &::before {
+    content: ""; position: absolute;
+    top: min(0px, calc((100% - 44px) / 2)); bottom: min(0px, calc((100% - 44px) / 2));
+    left: min(0px, calc((100% - 44px) / 2)); right: min(0px, calc((100% - 44px) / 2));
+  }
+}
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }

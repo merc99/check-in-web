@@ -46,7 +46,7 @@ export function AchievementCard({
         {a.unlocked ? a.glyph : '?'}
       </div>
       <div className="text-[13px] font-bold leading-[1.2]">{a.title}</div>
-      <div className={cn('mt-1 text-[11.5px]', foil ? 'font-medium' : 'text-muted-foreground')}>{a.subtitle}</div>
+      <div className={cn('mt-1 text-[12px]', foil ? 'font-medium' : 'text-muted-foreground')}>{a.subtitle}</div>
       <span className="sr-only">{a.unlocked ? 'Unlocked' : 'Locked'}</span>
       {foil && <FoilLight />}
     </div>

@@ -7,20 +7,22 @@ export interface FormFieldProps {
   label: ReactNode
   optional?: boolean
   hint?: ReactNode
+  /** Shown under the control instead of the hint, after a submit attempt. Clears when the value is fixed. */
+  error?: ReactNode
   /** 'group' for a set of controls (swatches, chips) instead of one input. */
   as?: 'label' | 'group'
   className?: string
   children: ReactNode
 }
 
-/** Tiny uppercase label, optional marker, the control, and a hint below. */
-export function FormField({ label, optional, hint, as = 'label', className, children }: FormFieldProps) {
+/** Sentence-case label, optional marker, the control, and a hint below. */
+export function FormField({ label, optional, hint, error, as = 'label', className, children }: FormFieldProps) {
   const id = useId()
   const body = (
     <>
       <span
         id={id}
-        className="mb-2 flex justify-between text-[11px] font-bold uppercase tracking-[.07em] text-muted-foreground"
+        className="mb-2 flex justify-between text-[13px] font-semibold text-foreground"
       >
         {label}
         {optional && (
@@ -28,7 +30,13 @@ export function FormField({ label, optional, hint, as = 'label', className, chil
         )}
       </span>
       {children}
-      {hint && <p className="mt-2 text-[12.5px] text-muted-foreground">{hint}</p>}
+      {error ? (
+        <p role="alert" className="mt-2 text-[13px] font-medium text-destructive-ink">
+          {error}
+        </p>
+      ) : (
+        hint && <p className="mt-2 text-[12.5px] text-muted-foreground">{hint}</p>
+      )}
     </>
   )
   return as === 'group' ? (

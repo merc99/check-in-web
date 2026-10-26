@@ -46,7 +46,7 @@ export function CrewLeaderboard({ rows, onPersonTap }: { rows: MyInsights['leade
               <Avatar name={r.person.name} color={r.person.color} photoUrl={r.person.photoUrl} size="sm" you={r.isMe} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-bold">{r.isMe ? 'You' : r.person.name}</span>
-                <span className="tnum block text-[11.5px] font-medium opacity-75">{r.total} all time</span>
+                <span className="tnum block text-[12px] font-medium opacity-75">{r.total} all time</span>
               </span>
               <span className="hidden h-[6px] w-20 overflow-hidden rounded-full bg-white/40 sm:block" aria-hidden="true">
                 <span className="block h-full rounded-full bg-on-color" style={{ width: `${(r.streak / max) * 100}%` }} />

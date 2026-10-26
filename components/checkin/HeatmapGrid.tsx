@@ -45,7 +45,7 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
               {DAY_NAMES[i] ?? d.label}: {d.done ? 'checked in' : d.future ? 'still to come' : 'open'}
             </span>
           </div>
-          <div aria-hidden="true" className="mt-2 text-center text-[11.5px] font-bold text-muted-foreground">
+          <div aria-hidden="true" className="mt-2 text-center text-[12px] font-bold text-muted-foreground">
             {d.label}
           </div>
         </div>

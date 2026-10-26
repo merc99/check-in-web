@@ -4,7 +4,7 @@ import { HUE_CLASS, type Hue } from '@/lib/colors'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 const SIZE: Record<Size, string> = {
-  xs: 'size-[22px] text-[10px]', sm: 'size-8 text-[13px]', md: 'size-10 text-[16px]',
+  xs: 'size-[22px] text-[12px]', sm: 'size-8 text-[13px]', md: 'size-10 text-[16px]',
   lg: 'size-14 text-[22px]', xl: 'size-24 text-[40px]',
 }
 

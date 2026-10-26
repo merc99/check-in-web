@@ -27,6 +27,8 @@
 @media (hover: hover) { .chip:hover { background: var(--muted); border-color: var(--border-strong); } }
 
 /* Yours: mint tint and edge (primary = selected). */
+.chip { position: relative; }
+.chip::before { position: absolute; inset: -7px -2px; content: ""; } /* 44px tap height */
 .chip[aria-pressed="true"] {
   background: var(--primary-soft);
   border-color: color-mix(in srgb, var(--primary) 45%, transparent);

@@ -56,7 +56,7 @@ export function TodayStrip({
               </li>
             )
           })}
-          {extra > 0 && <li className="tnum -ml-[6px] grid size-8 place-items-center rounded-full bg-on-color text-[11px] font-bold text-white">+{extra}</li>}
+          {extra > 0 && <li className="tnum -ml-[6px] grid size-8 place-items-center rounded-full bg-on-color text-[12px] font-bold text-white">+{extra}</li>}
         </ul>
         <span className="flex-1" />
         <button
@@ -70,7 +70,14 @@ export function TodayStrip({
             <RollingCount n={n} tight label={`${n} of ${total} in today`} />
             <span aria-hidden="true" className="text-[14px] opacity-60">/{total}</span>
           </span>
-          <span className="whitespace-nowrap text-[12px] font-bold">in today</span>
+          {/* The whole crew in is the moment the app is for: say it, in the crew's ink with a check. */}
+          {total > 1 && n === total ? (
+            <span className="inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-bold">
+              <CheckIcon size={12} /> all in
+            </span>
+          ) : (
+            <span className="whitespace-nowrap text-[12px] font-bold">in today</span>
+          )}
           <span className="grid size-7 place-items-center rounded-full bg-black/10">
             <ChevronIcon size={15} className={cn('transition-transform duration-200 ease-out', open && 'rotate-180')} />
           </span>
@@ -83,7 +90,7 @@ export function TodayStrip({
           <p className="px-1 pt-3 text-[13px] font-semibold">{heroLine(n, total, members.some((m) => m.isMe && m.inToday))}</p>
           {recent && recent.length > 1 && (
             <div className="mt-2 rounded-md bg-black/[.08] px-3 pb-2 pt-2">
-              <div className="flex items-baseline justify-between text-[11.5px] font-bold">
+              <div className="flex items-baseline justify-between text-[12px] font-bold">
                 <span>Last 14 days</span>
                 <span className="opacity-70">today</span>
               </div>

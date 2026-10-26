@@ -99,7 +99,7 @@ export function StatsGrid({ stats, insights }: { stats: MyStats; insights?: MyIn
         <div className="mt-auto pt-4">
           <div className="h-[10px] overflow-hidden rounded-full bg-white/35" role="img" aria-label={`Current run ${stats.streak} of your best ${stats.best}`}>
             <span
-              className="block h-full origin-left rounded-full bg-on-color transition-transform duration-700 ease-out"
+              className="block h-full origin-left rounded-full bg-on-color transition-transform duration-300 ease-out"
               style={{ transform: `scaleX(${ready && stats.best ? Math.min(1, stats.streak / stats.best) : 0})` }}
             />
           </div>

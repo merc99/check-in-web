@@ -1,7 +1,7 @@
 'use client'
 
 import { CrewCover } from '@/components/checkin/CrewCover'
-import { CrewMedal, CrewSurface } from '@/components/checkin/CrewSurface'
+import { CrewSurface } from '@/components/checkin/CrewSurface'
 import { Swatches } from '@/components/checkin/Swatches'
 import { CREW_HUES, HUE_CLASS, type Hue } from '@/lib/colors'
 import { CREW_EMOJI, CREW_PATTERNS, PATTERN_LABEL, type CrewPattern } from '@/lib/crewStyle'
@@ -24,9 +24,7 @@ export function CrewLook({ name, value, onChange }: { name: string; value: CrewL
     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
       {/* Preview: the banner as the feed shows it. */}
       <CrewSurface hue={value.color} className="flex items-center gap-3 p-4 shadow-none!" aria-hidden="true">
-        <CrewCover pattern={value.pattern} className="text-on-color opacity-[.09]" />
         <span className="relative min-w-0 flex-1 truncate font-display text-[26px] font-extrabold leading-none tracking-tighter">{name}</span>
-        <CrewMedal name={name} emoji={value.emoji} className="relative size-12 text-[22px]" />
       </CrewSurface>
 
       <div className="flex flex-col gap-5 p-4">
