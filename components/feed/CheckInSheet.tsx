@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { Plus, Sparkles } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button as UiButton } from '@/components/ui/button'
 import { suggestCheckIn } from '@/lib/ai/demo'
@@ -10,7 +10,10 @@ import { Button } from '@/components/checkin/Button'
 import { AddChip, TagChip, ToggleChip } from '@/components/checkin/Chip'
 import { FormField, Textarea } from '@/components/checkin/FormField'
 import { CheckIcon } from '@/components/checkin/icons'
+import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { SearchInput } from '@/components/checkin/SearchInput'
+import { DetailsEditor } from '@/components/feed/DetailsEditor'
+import { cleanDetails, type CheckInDetails, type SkillKind } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
 import type { Hue } from '@/lib/colors'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -21,6 +24,8 @@ const STAMP_MS = 520
 export interface CheckInDraft {
   note: string
   tags: string[]
+  /** Optional specifics; null for a loose check-in. */
+  details: CheckInDetails | null
 }
 
 /**
@@ -32,7 +37,7 @@ export function CheckInSheet({
 }: {
   open: boolean
   onClose: () => void
-  group: { name: string; color: Hue }
+  group: { name: string; color: Hue; skillKind: SkillKind }
   tags: string[]
   onSubmit: (draft: CheckInDraft) => void
 }) {
@@ -41,6 +46,9 @@ export function CheckInSheet({
   const [added, setAdded] = useState<string[]>([])
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [stamping, setStamping] = useState(false)
+  // Session details: collapsed until asked for (loose is the default).
+  const [details, setDetails] = useState<CheckInDetails>({})
+  const [detailsOpen, setDetailsOpen] = useState(false)
   // Smart check-in: a tidied note and matching tags from a few loose words (AI, on request).
   const [tidy, setTidy] = useState<{ step: 'busy' } | { step: 'ready'; for: string; s: AssistSuggestion } | null>(null)
   const tidyAbort = useRef<AbortController | null>(null)
@@ -56,6 +64,8 @@ export function CheckInSheet({
       setSelected(new Set())
       setStamping(false)
       setTidy(null)
+      setDetails({})
+      setDetailsOpen(false)
     }
   }
 
@@ -67,7 +77,7 @@ export function CheckInSheet({
     const asked = note
     setTidy({ step: 'busy' })
     try {
-      const s = await suggestCheckIn(asked, tags, ctrl.signal)
+      const s = await suggestCheckIn(asked, tags, group.skillKind, ctrl.signal)
       setTidy({ step: 'ready', for: asked, s })
     } catch {
       // Aborted.
@@ -76,6 +86,10 @@ export function CheckInSheet({
   const applyTidy = (s: AssistSuggestion) => {
     setNote(s.note)
     setSelected((prev) => new Set([...prev, ...s.tags]))
+    if (s.details) {
+      setDetails((d) => ({ ...d, ...s.details }))
+      setDetailsOpen(true)
+    }
     setTidy(null)
   }
   // A suggestion only stands for the words it was made from.
@@ -108,7 +122,8 @@ export function CheckInSheet({
     } catch {
       // Not supported everywhere; the stamp is the feedback that matters.
     }
-    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected) }), prefersReducedMotion() ? 0 : STAMP_MS)
+    const d = detailsOpen ? cleanDetails(details) : null
+    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d }), prefersReducedMotion() ? 0 : STAMP_MS)
   }
 
   return (
@@ -154,6 +169,7 @@ export function CheckInSheet({
               <Sparkles size={13} strokeWidth={1.75} aria-hidden="true" /> Suggestion
             </p>
             <p className="mt-1 text-[15px] leading-[1.45]">{suggestion.note}</p>
+            {suggestion.details && <SessionDetails details={suggestion.details} skill={group.skillKind} className="mt-2" />}
             {suggestion.tags.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-[6px]">
                 {suggestion.tags.map((t) => (
@@ -169,6 +185,25 @@ export function CheckInSheet({
                 Keep mine
               </UiButton>
             </div>
+          </div>
+        )}
+
+        {/* Session details: specific or loose. Fields follow the crew's skill. */}
+        {detailsOpen ? (
+          <div className="rounded-md border bg-muted/50 p-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-[13px] font-semibold">Details <span className="font-normal text-muted-foreground">optional</span></p>
+              <UiButton size="sm" variant="ghost" className="-mr-2" onClick={() => setDetailsOpen(false)}>
+                Remove
+              </UiButton>
+            </div>
+            <DetailsEditor skill={group.skillKind} value={details} onChange={setDetails} />
+          </div>
+        ) : (
+          <div className="-mt-2">
+            <UiButton size="sm" variant="ghost" className="-ml-3" onClick={() => setDetailsOpen(true)}>
+              <Plus size={15} /> Add details
+            </UiButton>
           </div>
         )}
 

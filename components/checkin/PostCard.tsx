@@ -11,6 +11,7 @@ import { Avatar } from './Avatar'
 import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
 import { SheenOnce } from '@/components/fx/loops'
+import { SessionDetails } from './SessionDetails'
 
 const DOUBLE_TAP_MS = 300
 const DOUBLE_TAP_PX = 30
@@ -104,6 +105,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
 
       <div className="-mt-1 pl-[52px]">
         {item.note && <p className="text-base leading-[1.45] lg:text-[17px]">{item.note}</p>}
+        <SessionDetails details={item.details} skill={item.skill} source={item.source} className={item.note ? 'mt-2' : undefined} />
         {item.tags.length > 0 && (
           <div className="mt-[10px] flex flex-wrap gap-2">
             {item.tags.map((t) => (
