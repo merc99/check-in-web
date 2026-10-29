@@ -1,4 +1,6 @@
 import { TierCard } from '@/components/checkin/TierCard'
+import { ChallengeBar } from '@/components/checkin/ChallengeBar'
+import { SkillAchievements } from '@/components/you/SkillAchievements'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import type { SkillProgress } from '@/lib/data'
 import { tierOf } from '@/lib/mastery'
@@ -31,6 +33,8 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
             <p className="px-1 py-2 text-[14px] text-muted-foreground">No sessions in {s.crewName} yet. The first one gets you Started.</p>
           )}
           {s.next && <NextTier skill={s} />}
+          <SkillAchievements groupId={s.groupId} color={s.color} />
+          <ChallengeBar groupId={s.groupId} color={s.color} className="px-1 pb-1 pt-3" />
         </li>
       ))}
     </ul>

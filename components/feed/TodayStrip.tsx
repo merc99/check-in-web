@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { burstFrom } from '@/components/fx/burst'
+import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import type { Hue } from '@/lib/colors'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { CheckIcon, ChevronIcon } from '@/components/checkin/icons'
@@ -19,8 +20,9 @@ const SHOWN = 6
  * Closed: a sticker per member and "n/total". Open: the brand line, the last 14 days and the bar.
  */
 export function TodayStrip({
-  color, members, arrivedId, onPersonTap, onWave, waved, recent,
+  groupId, color, members, arrivedId, onPersonTap, onWave, waved, recent,
 }: {
+  groupId: string
   color: Hue
   members: HeroMember[]
   arrivedId?: string | null
@@ -127,6 +129,8 @@ export function TodayStrip({
               )}
             </div>
           )}
+          {/* This month's crew challenge: optional, behind the tap like the rest of the details. */}
+          <ChallengeBar groupId={groupId} color={color} onColor className="mt-3 rounded-md bg-black/[.08] px-3 py-2" />
           <div aria-hidden="true" className="mt-3 flex gap-[5px] px-1 pb-1">
             {members.map((m, i) => (
               <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/10">

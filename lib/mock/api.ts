@@ -455,8 +455,14 @@ export async function getCrewChallenge(groupId: UUID): Promise<CrewChallenge> {
   const now = new Date()
   const first = new Date(now.getFullYear(), now.getMonth(), 1)
   const last = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  const target = Math.max(20, Math.round((membersOf(groupId).length * 15) / 10) * 10)
+  // A stretch on the crew's own pace: last month's sessions plus 10%, rounded to ten.
+  const prevFirst = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const lastMonth = checkInsOf((c) => c.group_id === groupId && new Date(c.created_at) >= prevFirst && new Date(c.created_at) < first).length
   const done = checkInsOf((c) => c.group_id === groupId && new Date(c.created_at) >= first).length
+  // Demo: also keep room above what the crew had done before today, so the goal stays ahead while you watch.
+  const beforeToday = checkInsOf((c) => c.group_id === groupId && new Date(c.created_at) >= first && c.local_date !== today()).length
+  const base = Math.max(Math.round((lastMonth || membersOf(groupId).length * 15) * 1.25), beforeToday + membersOf(groupId).length * 4)
+  const target = Math.max(20, Math.ceil(base / 10) * 10)
   return {
     groupId,
     month: now.toLocaleDateString('en-US', { month: 'long' }),

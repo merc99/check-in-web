@@ -14,6 +14,7 @@ import { BrandMark } from '@/components/checkin/BrandMark'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
 import { CrewHero } from '@/components/checkin/CrewHero'
+import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import { HeatmapGrid, weekDays } from '@/components/checkin/HeatmapGrid'
 import { CheckIcon, PinIcon } from '@/components/checkin/icons'
 import { useLive } from '@/components/checkin/LivePill'
@@ -302,6 +303,7 @@ export default function FeedPage() {
           !desktop && (
             <TodayStrip
               key={g.id}
+              groupId={g.id}
               color={g.color}
               members={g.members}
               arrivedId={arrivedId}
@@ -378,6 +380,9 @@ export default function FeedPage() {
             <CheckIcon size={18} /> {meIn ? 'You’re in for today' : 'Check in'}
           </Button>
           {hero}
+          <Card>
+            <ChallengeBar groupId={g.id} color={g.color} />
+          </Card>
           <Card>
             <div className="mb-[14px] flex items-baseline justify-between gap-3">
               <h2 className="font-display text-[17px] leading-none">Your week</h2>
