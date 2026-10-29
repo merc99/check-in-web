@@ -45,7 +45,7 @@ export default function YouPage() {
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
-  const skills = useQuery(getMySkills, [], ['check_ins', 'groups', 'group_members'])
+  const skills = useQuery(getMySkills, [], ['check_ins', 'groups', 'group_members', 'vouches', 'profiles'])
   const [foilFrame, setFoilFrame] = usePref(PREF.foilFrame)
   const [perkSeen, setPerkSeen] = usePref(`${PREF.foilFrame}.seen`)
   const perkUnlocked = !!skills.data?.some((s) => s.tier && tierOf(s.tier).at >= tierOf('committed').at)

@@ -13,6 +13,9 @@ import { HEART_PATH } from './icons'
 import { SheenOnce } from '@/components/fx/loops'
 import { SessionDetails } from './SessionDetails'
 import { TierCard } from './TierCard'
+import { CheerButton } from './CheerButton'
+import { BadgeCheck, Share2 } from 'lucide-react'
+import { Button as UiButton } from '@/components/ui/button'
 import { tierOf } from '@/lib/mastery'
 import type { Hue } from '@/lib/colors'
 
@@ -30,10 +33,14 @@ export interface PostCardProps {
   /** The crew this post is in, for a milestone post's tier card. */
   crewName?: string
   crewColor?: Hue
+  /** Milestone posts: cheer it, vouch for the tier, share your own card. */
+  onCheer?: (on: boolean) => void
+  onVouch?: (on: boolean) => void
+  onShare?: () => void
 }
 
 /** One check-in. Heart pill, who hearted, and double-tap anywhere on the card to heart it. */
-export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, crewColor }: PostCardProps) {
+export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, crewColor, onCheer, onVouch, onShare }: PostCardProps) {
   const [burst, setBurst] = useState(0)
   const [pop, setPop] = useState(false)
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
@@ -126,6 +133,24 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
               {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
             </p>
             <TierCard tier={item.milestone.tier} skill={item.skill} crewName={crewName ?? ''} color={crewColor ?? item.user.color} sessions={item.milestone.sessions} />
+            <VouchLine milestone={item.milestone} isMine={item.isMine} name={item.user.name} onVouch={onVouch} />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {onCheer && (
+                <CheerButton
+                  count={item.milestone.cheers.count}
+                  byMe={item.milestone.cheers.byMe}
+                  people={item.milestone.cheers.people}
+                  color={crewColor ?? item.user.color}
+                  isMine={item.isMine}
+                  onCheer={onCheer}
+                />
+              )}
+              {item.isMine && onShare && (
+                <UiButton size="sm" variant="ghost" className="mt-3" onClick={onShare}>
+                  <Share2 size={15} /> Share card
+                </UiButton>
+              )}
+            </div>
           </div>
         )}
         {reactions ? (
@@ -184,5 +209,44 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         </span>
       )}
     </article>
+  )
+}
+
+/**
+ * Under a milestone's tier card (Committed and up): verified, with who vouched; or how many vouches
+ * it still needs; or, on a crewmate's, a button to vouch for it.
+ */
+function VouchLine({
+  milestone: m, isMine, name, onVouch,
+}: { milestone: NonNullable<FeedItem['milestone']>; isMine: boolean; name: string; onVouch?: (on: boolean) => void }) {
+  const v = m.vouches
+  if (!v) return null
+  const names = v.people.map((p) => p.name)
+  if (v.verified) {
+    return (
+      <p className="mt-2 inline-flex items-center gap-[6px] text-[13px] font-semibold text-primary-ink">
+        <BadgeCheck size={16} strokeWidth={2} aria-hidden="true" /> Verified
+        <span className="font-normal text-muted-foreground">vouched by {names.slice(0, 3).join(', ')}{names.length > 3 ? ` and ${names.length - 3} more` : ''}</span>
+      </p>
+    )
+  }
+  if (isMine) {
+    return <p className="mt-2 text-[13px] text-muted-foreground">{2 - v.count} more vouch{2 - v.count === 1 ? '' : 'es'} from your crew to verify it.</p>
+  }
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
+      {v.byMe ? (
+        <span className="inline-flex items-center gap-[6px] font-semibold text-primary-ink">
+          <BadgeCheck size={16} strokeWidth={2} aria-hidden="true" /> You vouched
+        </span>
+      ) : (
+        onVouch && (
+          <UiButton size="sm" variant="secondary" onClick={() => onVouch(true)}>
+            <BadgeCheck size={15} /> Vouch for {name}
+          </UiButton>
+        )
+      )}
+      <span>{v.count ? `${v.count} of 2 vouches` : 'Two vouches verify it'}</span>
+    </div>
   )
 }

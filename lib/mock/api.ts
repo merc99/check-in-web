@@ -182,6 +182,7 @@ function milestoneOf(c: CheckIn): FeedItem['milestone'] {
   return {
     tier: t.key,
     sessions: n,
+    rarity: rarityOf(t.key),
     vouches: vouchInfo(c.user_id, c.group_id, t.key),
     cheers: { count: cheers.length, byMe: cheers.some((x) => x.user_id === ME_ID), people: cheers.filter((x) => x.user_id !== ME_ID).slice(0, 3).map((x) => personOf(x.user_id)) },
   }

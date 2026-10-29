@@ -222,7 +222,7 @@ export interface FeedItem {
   /** The crew's skill (decides how details read). */
   skill: SkillKind
   /** Set when this session reached a tier: a milestone post. `sessions` is the count it reached. */
-  milestone: { tier: TierKey; sessions: number; vouches: VouchInfo | null; cheers: { count: number; byMe: boolean; people: Person[] } } | null
+  milestone: { tier: TierKey; sessions: number; rarity: number; vouches: VouchInfo | null; cheers: { count: number; byMe: boolean; people: Person[] } } | null
   /** Proof photo, if any. */
   photoUrl: string | null
 }

@@ -68,7 +68,7 @@ export function simulateHeart(checkInId: string): boolean {
 
 /** Crewmates cheer a milestone post (1 to 3 of them). */
 function simulateCheers(checkInId: string, groupId: string, authorId: string, schedule: (fn: () => void, ms: number) => void) {
-  const crew = db().group_members.filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== authorId).map((m) => m.user_id)
+  const crew = db().group_members.filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== authorId && m.user_id !== ME_ID).map((m) => m.user_id)
   const fans = [...crew].sort(() => Math.random() - 0.5).slice(0, 1 + Math.floor(Math.random() * Math.min(3, crew.length)))
   fans.forEach((uid, i) => schedule(() => setCheer(uid, checkInId, true), 2200 + i * 1800 + Math.random() * 1500))
 }
@@ -76,7 +76,7 @@ function simulateCheers(checkInId: string, groupId: string, authorId: string, sc
 /** Two crewmates vouch for a fresh Committed-and-up tier, a little after the cheers. */
 function simulateVouches(userId: string, groupId: string, tier: TierKey, schedule: (fn: () => void, ms: number) => void) {
   if (tierOf(tier).at < tierOf('committed').at) return
-  const crew = db().group_members.filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== userId).map((m) => m.user_id)
+  const crew = db().group_members.filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== userId && m.user_id !== ME_ID).map((m) => m.user_id)
   ;[...crew].sort(() => Math.random() - 0.5).slice(0, 2).forEach((uid, i) => schedule(() => setVouch(uid, userId, groupId, tier, true), 8000 + i * 4000 + Math.random() * 3000))
 }
 

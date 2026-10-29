@@ -347,7 +347,7 @@ function seedVouches(checkIns: CheckIn[], members: GroupMember[], at: string): V
   for (const c of checkIns) counts.set(`${c.user_id}|${c.group_id}`, (counts.get(`${c.user_id}|${c.group_id}`) ?? 0) + 1)
   for (const [key, n] of counts) {
     const [uid, gid] = key.split('|')
-    const crew = members.filter((m) => m.group_id === gid && m.user_id !== uid).map((m) => m.user_id)
+    const crew = members.filter((m) => m.group_id === gid && m.user_id !== uid && m.user_id !== ME_ID).map((m) => m.user_id)
     for (const t of TIERS.filter((x) => x.at >= 50 && n >= x.at)) {
       const take = uid === ME_ID && gid === 'g1' ? 1 : Math.min(3, crew.length)
       crew.slice(0, take).forEach((v) => out.push({ id: `v-${uid}-${gid}-${t.key}-${v}`, voucher_id: v, user_id: uid, group_id: gid, tier: t.key, created_at: at, deleted_at: null }))

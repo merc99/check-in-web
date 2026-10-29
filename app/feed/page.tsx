@@ -33,6 +33,8 @@ import {
   getMyStats,
   getMySkills,
   getMasterCount,
+  cheer,
+  vouch,
   onCheckIn,
   onHeart,
   react,
@@ -44,7 +46,8 @@ import {
 import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
-import { tierOf } from '@/lib/mastery'
+import { tierOf, type TierKey } from '@/lib/mastery'
+import { shareCard } from '@/lib/shareCard'
 import { useDesktop } from '@/lib/viewport'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS } from '@/lib/colors'
@@ -77,7 +80,7 @@ export default function FeedPage() {
   const desktop = useDesktop()
 
   const group = useQuery(() => (activeId ? getGroup(activeId) : Promise.resolve(null)), [activeId], ['groups', 'group_members', 'check_ins', 'tags', 'profiles'])
-  const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([])), [activeId], ['check_ins', 'reactions', 'tags', 'profiles'])
+  const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([])), [activeId], ['check_ins', 'reactions', 'tags', 'profiles', 'cheers', 'vouches'])
   const requests = useQuery(() => (activeId ? getJoinRequests(activeId) : Promise.resolve([])), [activeId], ['join_requests', 'group_members'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
@@ -164,6 +167,24 @@ export default function FeedPage() {
     if (!groups?.length || crewIndex < 0) return
     setActiveId(groups[(crewIndex + dir + groups.length) % groups.length].id)
     window.scrollTo({ top: 0 })
+  }
+
+  // Mastery: vouch for a crewmate's tier, and share your own tier card as an image.
+  const vouchFor = (item: FeedItem, on: boolean) => {
+    if (!item.milestone) return
+    vouch(item.user.id, item.groupId, item.milestone.tier, on).then(
+      () => on && toast(`You vouched for ${item.user.name}’s ${tierOf(item.milestone!.tier).name}.`),
+      (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
+    )
+  }
+  const share = async ({ tier, sessions, rarity, serial }: { tier: TierKey; sessions: number; rarity?: number; serial?: number | null }) => {
+    if (!g || !me.data) return
+    try {
+      const how = await shareCard({ tier, crewName: g.name, color: g.color, sessions, personName: me.data.person.name, rarity, serial })
+      if (how === 'downloaded') toast('Card saved as an image.')
+    } catch {
+      toast('That card didn’t draw. Try again.')
+    }
   }
 
   const openCheckIn = () => {
@@ -340,6 +361,9 @@ export default function FeedPage() {
                   onPersonTap={setProfileId}
                   crewName={g.name}
                   crewColor={g.color}
+                  onCheer={item.milestone ? (on) => cheer(item.id, on).catch(() => toast('That didn’t go through. Try again.')) : undefined}
+                  onVouch={item.milestone?.vouches ? (on) => vouchFor(item, on) : undefined}
+                  onShare={item.milestone && item.isMine ? () => share({ tier: item.milestone!.tier, sessions: item.milestone!.sessions, rarity: item.milestone!.rarity }) : undefined}
                 />
               </Fragment>
             )
@@ -395,7 +419,7 @@ export default function FeedPage() {
       <ProfileSheet userId={profileId} onClose={() => setProfileId(null)} />
 
       {milestone && <RevealCard achievement={milestone} onClose={() => setMilestone(null)} />}
-      {ceremony && <TierCeremony {...ceremony} onClose={() => setCeremony(null)} />}
+      {ceremony && <TierCeremony {...ceremony} onShare={() => share(ceremony)} onClose={() => setCeremony(null)} />}
     </main>
   )
 }
