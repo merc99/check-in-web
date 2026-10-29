@@ -96,7 +96,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   exit, transform and opacity only. Entrances `animate-rise`. Press `active:scale-[.97]`.
 - **Delight moments** (springs allowed, `ease-spring` / `--fx-spring`): check-in stamp, avatar check-badge pop, heart
   burst, chip selection, rolling digits, emoji reactions (picker rise, the flying landing and squash, each emoji's
-  own arrival), and the 👋 on a crewmate you waved at. The list is closed.
+  own arrival), the 👋 on a crewmate you waved at, and a cheer on a milestone post. The list is closed.
 - **Effects** are the `components/fx` system (below). Use one of them before writing a new effect.
 - transitions.dev recipes are the default source for chrome motion; keep our durations and easing when adopting them.
 - Always respect `prefers-reduced-motion` (globals.css zeroes animations; every fx piece has a reduced-motion branch).
@@ -133,6 +133,9 @@ Loops are scoped to exactly one place each (three: the ticket sheen, the aurora 
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
 | Tier card materials (paper, enamel, `Foil`, holo film, aurora edge on hover only) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
 | Foil frame (static holo ring) | calm (static) | Your avatar, when the perk is on |
+| `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
+| Cheer press (pop, small burst, rolling count) | delight | The Cheer button on milestone posts |
+| Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover lift / press | calm | Post cards, Explore crew cards, leaderboard rows, ring chart legend, heatmap and streak squares |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
@@ -220,6 +223,25 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   (`lib/prefs.ts`, remembered in this browser). More perks: see the ideas doc.
 - **Demo seed:** Ben at Committed in DIALED (61) and one session from Habit in Sketchbook Daily (9); Dre one from
   Committed (49), so his next check-in is a milestone post; Maya at Seasoned (152).
+
+### Mastery, slice 2 (`docs/ideas/mastery-slice-2-plan.md`)
+- **Ceremony** (`components/fx/TierCeremony.tsx`): your own tier-up opens a face-down card; a tap flips it and the
+  finish grows with the tier (paper stamp, enamel fill, foil flash, holo prism, aurora turn, all of it for Master),
+  then rarity, Share card and Keep going. Every tier plays from the kitchen sink.
+- **Cheers** (`cheers` table, `CheerButton`): one per person on a milestone post, separate from emoji reactions.
+- **Vouches** (`vouches` table): crewmates vouch for Committed-and-up tiers; two make it **Verified** (a mark on the
+  card, who vouched on posts, the trophy case and the card's back). You can't vouch for yourself.
+- **Proof:** "Add photo" in the check-in sheet (demo: an object URL, kept on this device); it shows on the post.
+- **Share card** (`lib/shareCard.ts`): a 1080×1350 image drawn on a canvas (share sheet or download); the rarity
+  line only when 40% or fewer members reach the tier.
+- **Binder** (`components/checkin/Binder.tsx`): every tier card earned as portrait trading cards; tap to flip for
+  its history; pin one to the front (`Profile.pinned_group_id`); share; next tiers as locked slots (Master:
+  "No. 0001 unclaimed"). A crewmate's top cards on their profile.
+- **Achievements per skill** (`lib/mastery-achievements.ts`): obtainable goals from sessions and details; "14 of 17"
+  in the trophy case. **Crew challenge** (`getCrewChallenge`, `ChallengeBar`): a monthly shared target a stretch
+  above the crew's pace, on You, in the today panel and the desktop rail. Never a countdown.
+- **Demo:** the crew cheers milestone posts within seconds and vouches for big tiers a little later (never as you);
+  now and then a crewmate vouches for your unverified card. Ben's Committed starts one vouch short.
 
 ## Demo AI (`lib/ai`)
 A demo only: **no model, no API key, no server calls.** `lib/ai/writer.ts` writes from the crew's own data in the

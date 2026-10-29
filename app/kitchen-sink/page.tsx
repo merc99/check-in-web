@@ -17,6 +17,7 @@ import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { TierCard } from '@/components/checkin/TierCard'
 import { TierCeremony } from '@/components/fx/TierCeremony'
+import { CheerButton } from '@/components/checkin/CheerButton'
 import { TIER_KEYS, tierOf, type TierKey } from '@/lib/mastery'
 import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
@@ -187,6 +188,15 @@ export default function KitchenSink() {
             onClose={() => setCeremony(null)}
           />
         )}
+      </Section>
+
+      <Section title="Cheer and challenge" note="milestone posts · monthly goal">
+        <div className="flex flex-col gap-4">
+          <CheerButton count={4} byMe={false} people={[{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }, { id: 'k2', name: 'Priya', color: 'grape', photoUrl: null }]} color="sky" isMine={false} onCheer={() => {}} />
+          <CheerButton count={5} byMe people={[{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }]} color="sky" isMine={false} onCheer={() => {}} />
+          <TierCard tier="committed" skill="fitness" crewName="DIALED" color="sky" sessions={50} verified />
+          <TierCard tier="seasoned" skill="art" crewName="Sketchbook Daily" color="grape" sessions={150} portrait className="max-w-[180px]" />
+        </div>
       </Section>
 
       <Section title="Session details" note="fitness · music · reading · Strava">
