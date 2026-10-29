@@ -30,15 +30,14 @@ export function StravaPicker({ pickedId, onPick }: { pickedId: string | null; on
   }
 
   return (
-    <div role="radiogroup" aria-label="Recent Strava activities" className="flex flex-col gap-2">
+    <div role="group" aria-label="Recent Strava activities" className="flex flex-col gap-2">
       {activities.data?.map((a) => {
         const on = a.id === pickedId
         return (
           <button
             key={a.id}
             type="button"
-            role="radio"
-            aria-checked={on}
+            aria-pressed={on}
             onClick={() => onPick(on ? null : a)}
             className={cn(
               'flex items-center gap-3 rounded-md border px-3 py-[10px] text-left transition-colors duration-150 ease-out',

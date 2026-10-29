@@ -14,6 +14,8 @@ import { SectionTitle } from '@/components/checkin/SectionTitle'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
+import { SessionDetails } from '@/components/checkin/SessionDetails'
+import { TierCard } from '@/components/checkin/TierCard'
 import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
 import { cn } from '@/lib/utils'
@@ -148,6 +150,24 @@ export default function KitchenSink() {
           <CrewBlock name="Lifters" color="sky" emoji="💪" />
           <CrewBlock name="Sketch" color="grape" emoji="🎨" />
           <CrewBlock name="Letter" color="lemon" />
+        </div>
+      </Section>
+
+      <Section title="Tier cards" note="paper · enamel · foil · holo · aurora · locked">
+        <div className="flex flex-col gap-3">
+          {(['started', 'habit', 'committed', 'seasoned', 'expert'] as const).map((t, i) => (
+            <TierCard key={t} tier={t} skill="music" crewName="Guitar, 20 Minutes" color={(['clay', 'grape', 'sky', 'coral', 'leaf'] as const)[i]} sessions={[1, 12, 61, 152, 400][i]} />
+          ))}
+          <TierCard tier="master" skill="music" crewName="Guitar, 20 Minutes" color="clay" sessions={400} locked />
+          <TierCard tier="habit" skill="art" crewName="Sketchbook Daily" color="grape" sessions={10} size="sm" />
+        </div>
+      </Section>
+
+      <Section title="Session details" note="fitness · music · reading · Strava">
+        <div className="flex flex-col gap-3">
+          <SessionDetails skill="fitness" details={{ activity: 'Run', minutes: 27, distanceKm: 5.2 }} source="strava" />
+          <SessionDetails skill="music" details={{ minutes: 20, items: ['Wonderwall intro', 'C major scale'] }} />
+          <SessionDetails skill="reading" details={{ book: 'The Creative Act', pages: 30 }} />
         </div>
       </Section>
 

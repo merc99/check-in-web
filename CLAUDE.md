@@ -73,7 +73,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
   1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
-  crews in two columns) and You (glossy stat cards, then two columns: week, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
+  crews in two columns) and You (glossy stat cards, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
@@ -131,6 +131,8 @@ Loops are scoped to exactly one place each (three: the ticket sheen, the aurora 
 | Banner swipe (follows the finger, slides out/in 150/200ms) | calm | Phones: the feed banner, to move between your crews |
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
+| Tier card materials (paper, enamel, `Foil`, holo film, aurora edge on hover only) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
+| Foil frame (static holo ring) | calm (static) | Your avatar, when the perk is on |
 | Hover lift / press | calm | Post cards, Explore crew cards, leaderboard rows, ring chart legend, heatmap and streak squares |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
@@ -194,6 +196,30 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   hearts your post ~2.6s after you check in. On by default, including production; `NEXT_PUBLIC_SIMULATE_LIVE=false`
   turns it off. Screens react through the same change events a real backend would send.
 - Demo-only shortcut: an invite code that matches no crew joins the first open public crew.
+
+## Mastery (`lib/mastery.ts`)
+The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew is the skill**; every check-in is a
+**session**.
+- **Skill kind** per crew (`Group.skill_kind`: fitness, music, reading, art, writing, mind, health, other), picked by
+  the owner. It decides the check-in's detail fields (`DETAIL_FIELDS`).
+- **Tiers** by sessions: Started 1, Habit 10, Committed 50, Seasoned 150, Expert 365, Master 1,000. `tierFor`,
+  `nextTier`, `tierReachedAt`. Data: `getMySkills()`, `getSkillsOf(userId)`; a `FeedItem.milestone` marks the
+  session that reached a tier.
+- **Session details** (`CheckIn.details`, optional): an "Add details" section in the check-in sheet
+  (`components/feed/DetailsEditor.tsx`); quiet icon rows on posts (`SessionDetails`). Loose check-ins stay the default.
+  "Tidy with AI" (demo) spots details in a rough note.
+- **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
+  edge that turns only on hover; Master shows locked). Foil and up tilt with a mouse (fx/Foil).
+- **Milestone posts:** a crewmate's (or your) tier-up shows its TierCard in the post, and the live line says "Dre
+  reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
+  week", with sessions to the next tier and a Perks list; a crewmate's cards on their profile sheet.
+- **Strava (mocked):** `CheckIn.source` (`manual` | `strava`). You → Settings → Strava, or "Connect Strava" in the
+  sheet, turns on the demo (sample activities, `getStravaActivities`). Fitness crews get "Add from Strava"; posts say
+  "From Strava" in plain text (no logo, no implied partnership). A real integration needs a backend.
+- **Perk:** the foil frame (`foil-frame` utility) on your avatar, unlocked at Committed, switched in Settings
+  (`lib/prefs.ts`, remembered in this browser). More perks: see the ideas doc.
+- **Demo seed:** Ben at Committed in DIALED (61) and one session from Habit in Sketchbook Daily (9); Dre one from
+  Committed (49), so his next check-in is a milestone post; Maya at Seasoned (152).
 
 ## Demo AI (`lib/ai`)
 A demo only: **no model, no API key, no server calls.** `lib/ai/writer.ts` writes from the crew's own data in the

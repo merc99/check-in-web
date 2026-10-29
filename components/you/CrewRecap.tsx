@@ -54,15 +54,14 @@ export function CrewRecap({ crews, initialId }: { crews: { id: string; name: str
   return (
     <div className="rounded-lg border bg-card p-4 shadow-card">
       {crews.length > 1 && (
-        <div role="radiogroup" aria-label="Crew to recap" className="-mx-1 mb-3 flex flex-wrap gap-2">
+        <div role="group" aria-label="Crew to recap" className="-mx-1 mb-3 flex flex-wrap gap-2">
           {crews.map((c) => {
             const on = c.id === crewId
             return (
               <button
                 key={c.id}
                 type="button"
-                role="radio"
-                aria-checked={on}
+                aria-pressed={on}
                 onClick={() => choose(c.id)}
                 className={cn(
                   'hit-44 inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors duration-150 ease-out',
