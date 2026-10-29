@@ -24,6 +24,8 @@ export {
   getMyInsights,
   getMyRecentCheckIns,
   getMyStats,
+  getMySkills,
+  getSkillsOf,
   getTags,
   getUserProfile,
   joinGroupBySlug,

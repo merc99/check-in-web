@@ -5,6 +5,7 @@ import type {
   CheckIn,
   CheckInInput,
   CrewWeek,
+  SkillProgress,
   ExploreDetail,
   ExploreGroup,
   FeedItem,
@@ -31,6 +32,7 @@ import type {
   UUID,
 } from '@/lib/data/types'
 import { addDays, bestStreak, currentStreak, localDate, startOfDay, type LocalDate } from '@/lib/dates'
+import { cleanDetails, nextTier, tierFor, tierReachedAt } from '@/lib/mastery'
 import { HEART, REACTIONS } from '@/lib/reactions'
 import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
@@ -116,6 +118,7 @@ function summary(g: Group): GroupSummary {
     color: g.color,
     emoji: g.emoji,
     pattern: g.pattern,
+    skillKind: g.skill_kind,
     memberCount: members.length,
     maxMembers: g.max_members,
     inToday: members.filter((m) => inToday(m.user_id, g.id)).length,
@@ -151,6 +154,37 @@ function toFeedItem(c: CheckIn): FeedItem {
       people: reactions.filter((r) => r.user_id !== ME_ID).slice(0, 3).map((r) => personOf(r.user_id)),
     },
     reactions: chips,
+    details: c.details,
+    source: c.source,
+    skill: db().groups.find((g) => g.id === c.group_id)?.skill_kind ?? 'other',
+    milestone: milestoneOf(c),
+  }
+}
+
+/** Sessions a person has in a crew, oldest first (one per day). */
+const sessionsOf = (userId: UUID, groupId: UUID) =>
+  checkInsOf((x) => x.user_id === userId && x.group_id === groupId).sort((a, b) => a.created_at.localeCompare(b.created_at))
+
+/** If this check-in was the session that reached a tier, which one. */
+function milestoneOf(c: CheckIn): FeedItem['milestone'] {
+  const n = sessionsOf(c.user_id, c.group_id).findIndex((x) => x.id === c.id) + 1
+  const t = n > 0 ? tierReachedAt(n) : null
+  return t ? { tier: t.key, sessions: n } : null
+}
+
+function progressOf(userId: UUID, g: Group): SkillProgress {
+  const rows = sessionsOf(userId, g.id)
+  const tier = tierFor(rows.length)
+  const next = nextTier(rows.length)
+  return {
+    groupId: g.id,
+    crewName: g.name,
+    color: g.color,
+    skill: g.skill_kind,
+    sessions: rows.length,
+    tier: tier?.key ?? null,
+    next: next ? { tier: next.tier.key, toGo: next.toGo } : null,
+    tierReachedAt: tier ? (rows[tier.at - 1]?.created_at ?? null) : null,
   }
 }
 
@@ -221,6 +255,29 @@ export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => vo
     const row = c.row as CheckIn
     if (groupId ? row.group_id === groupId : isMember(ME_ID, row.group_id)) listener(toFeedItem(row))
   })
+}
+
+// ─── Mastery ───
+
+/** Your progress in every crew's skill: sessions, tier, the next tier. Most sessions first. */
+export async function getMySkills(): Promise<SkillProgress[]> {
+  await settle()
+  return skillsOf(ME_ID)
+}
+
+/** A crewmate's progress in the crews you share with them (their profile's trophies). */
+export async function getSkillsOf(userId: UUID): Promise<SkillProgress[]> {
+  await settle()
+  return skillsOf(userId).filter((s) => isMember(ME_ID, s.groupId))
+}
+
+function skillsOf(userId: UUID): SkillProgress[] {
+  return alive(db().group_members)
+    .filter((m) => m.user_id === userId)
+    .map((m) => db().groups.find((g) => g.id === m.group_id && !g.deleted_at))
+    .filter((g): g is Group => !!g)
+    .map((g) => progressOf(userId, g))
+    .sort((a, b) => b.sessions - a.sessions)
 }
 
 // ─── AI recap input ───
@@ -494,6 +551,7 @@ export async function createGroup(input: NewGroupInput): Promise<UUID> {
     color: input.color,
     emoji: null,
     pattern: 'dots',
+    skill_kind: input.skillKind ?? 'other',
     cover_url: null,
     invite_slug: uniqueSlug(),
     created_by: ME_ID,
@@ -535,6 +593,7 @@ export async function updateGroup(groupId: UUID, patch: GroupPatch): Promise<voi
   if (patch.color !== undefined) g.color = patch.color
   if (patch.emoji !== undefined) g.emoji = patch.emoji
   if (patch.pattern !== undefined) g.pattern = patch.pattern
+  if (patch.skill_kind !== undefined) g.skill_kind = patch.skill_kind
   if (patch.pinned_message !== undefined) g.pinned_message = patch.pinned_message?.trim() || null
   if (patch.is_public !== undefined) g.is_public = patch.is_public
   emit({ table: 'groups', type: 'UPDATE', row: g })
@@ -625,6 +684,8 @@ export function insertCheckIn(userId: UUID, input: CheckInInput): FeedItem {
     group_id: input.groupId,
     local_date: today(),
     note: input.note?.trim().slice(0, 280) || null,
+    details: cleanDetails(input.details),
+    source: input.source === 'strava' ? 'strava' : 'manual',
     created_at: nowIso(),
     deleted_at: null,
   }

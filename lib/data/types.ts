@@ -1,5 +1,6 @@
 import type { Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
+import type { CheckInDetails, CheckInSource, SkillKind, TierKey } from '@/lib/mastery'
 import type { LocalDate } from '@/lib/dates'
 
 // ─── Rows: shaped exactly like the Supabase tables (snake_case, nullable where the column is) ───
@@ -29,6 +30,8 @@ export interface Group {
   emoji: string | null
   /** The texture on the crew's banner and cards. */
   pattern: CrewPattern
+  /** What the crew practises: decides the check-in detail fields and the skill in mastery tiers. */
+  skill_kind: SkillKind
   /** A cover photo for the crew's Explore card, if it has one. */
   cover_url: string | null
   invite_slug: string
@@ -67,6 +70,10 @@ export interface CheckIn {
   group_id: UUID
   local_date: LocalDate
   note: string | null
+  /** Optional specifics (minutes, songs, book, distance...). */
+  details: CheckInDetails | null
+  /** Where it came from: typed in, or picked from a Strava activity. */
+  source: CheckInSource
   created_at: Timestamp
   deleted_at: Timestamp | null
 }
@@ -136,6 +143,7 @@ export interface GroupSummary {
   color: Hue
   emoji: string | null
   pattern: CrewPattern
+  skillKind: SkillKind
   memberCount: number
   maxMembers: number
   inToday: number
@@ -182,6 +190,12 @@ export interface FeedItem {
   }
   /** Every emoji on this check-in, in the order each was first left. */
   reactions: ReactionCount[]
+  details: CheckInDetails | null
+  source: CheckInSource
+  /** The crew's skill (decides how details read). */
+  skill: SkillKind
+  /** Set when this session reached a tier: a milestone post. `sessions` is the count it reached. */
+  milestone: { tier: TierKey; sessions: number } | null
 }
 
 export interface ReactionCount {
@@ -275,12 +289,15 @@ export interface CheckInInput {
   note?: string
   /** Tag names. New names become new crew tags. */
   tags?: string[]
+  details?: CheckInDetails | null
+  source?: CheckInSource
 }
 
 export interface NewGroupInput {
   name: string
   color: Hue
   maxMembers: number
+  skillKind?: SkillKind
 }
 
 export interface ProfilePatch {
@@ -296,8 +313,24 @@ export interface GroupPatch {
   color?: Hue
   emoji?: string | null
   pattern?: CrewPattern
+  skill_kind?: SkillKind
   pinned_message?: string | null
   is_public?: boolean
+}
+
+/** One person's progress in one crew's skill (mastery tiers). */
+export interface SkillProgress {
+  groupId: UUID
+  crewName: string
+  color: Hue
+  skill: SkillKind
+  sessions: number
+  /** Reached so far (null before the first session). */
+  tier: TierKey | null
+  /** The next tier and sessions to go (null at Master). */
+  next: { tier: TierKey; toGo: number } | null
+  /** When the current tier was reached. */
+  tierReachedAt: Timestamp | null
 }
 
 /** A crew's last seven days, for the AI weekly recap. Plain values only (it's sent to the server). */

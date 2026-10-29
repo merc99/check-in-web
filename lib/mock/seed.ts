@@ -1,5 +1,6 @@
 import { getTagHue, type Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
+import type { CheckInDetails, CheckInSource, SkillKind } from '@/lib/mastery'
 import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag } from '@/lib/data/types'
 import { addDays, DAY, HOUR, localDate, MINUTE, startOfDay } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
@@ -22,14 +23,20 @@ interface PersonSeed {
   total: number
   /** A past run longer than the current streak (only matters for you: "best streak"). */
   bestRun?: number
+  /**
+   * Exact sessions per crew (mastery tiers), instead of spreading `total` at random. Set for people the
+   * demo needs at a particular tier: you at Committed in DIALED and one session from Habit in Sketchbook
+   * Daily; Dre one session from Committed, so his next check-in is a milestone post.
+   */
+  sessions?: Record<string, number>
   handle?: string
   bio?: string
 }
 
 const PEOPLE: PersonSeed[] = [
-  { id: ME_ID, name: 'Ben', color: 'leaf', joined: 52, streak: 6, total: 41, bestRun: 14, handle: 'benwoods', bio: 'Showing up, mostly.' },
-  { id: 'u1', name: 'Maya', color: 'coral', joined: 140, streak: 12, total: 88 },
-  { id: 'u2', name: 'Dre', color: 'sky', joined: 100, streak: 4, total: 37 },
+  { id: ME_ID, name: 'Ben', color: 'leaf', joined: 120, streak: 6, total: 70, bestRun: 14, handle: 'benwoods', bio: 'Showing up, mostly.', sessions: { g1: 61, g2: 9 } },
+  { id: 'u1', name: 'Maya', color: 'coral', joined: 200, streak: 12, total: 152, sessions: { g1: 152 } },
+  { id: 'u2', name: 'Dre', color: 'sky', joined: 100, streak: 4, total: 49, sessions: { g1: 49 } },
   { id: 'u3', name: 'Priya', color: 'grape', joined: 190, streak: 21, total: 112 },
   { id: 'u4', name: 'Sam', color: 'lemon', joined: 160, streak: 0, total: 54 },
   { id: 'u5', name: 'Theo', color: 'leaf', joined: 70, streak: 9, total: 30 },
@@ -51,6 +58,7 @@ interface GroupSeed {
   color: Hue
   emoji: string
   pattern: CrewPattern
+  skill: SkillKind
   slug: string
   max: number
   createdBy: string
@@ -61,13 +69,13 @@ interface GroupSeed {
 }
 
 const GROUPS: GroupSeed[] = [
-  { id: 'g1', name: 'DIALED', color: 'sky', emoji: '💪', pattern: 'plain', slug: 'LIFT05', max: 8, createdBy: ME_ID, pinned: 'Leg day is not optional. Love you all.', members: [ME_ID, 'u1', 'u2', 'u3', 'u4'], tags: ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push'] },
-  { id: 'g2', name: 'Sketchbook Daily', color: 'grape', emoji: '🎨', pattern: 'confetti', slug: 'SKTCH7', max: 10, createdBy: 'u3', description: 'Draw something. Anything. Every day.', members: [ME_ID, 'u3', 'u5', 'u6'], tags: ['sketch', 'gouache', 'ink', 'study'] },
-  { id: 'e1', name: 'Morning Pages', color: 'lemon', emoji: '📝', pattern: 'grid', slug: 'PAGES3', max: 10, createdBy: 'u8', description: 'Three pages, longhand, before anything else.', members: ['u8', 'u10', 'u12', 'u14'], tags: ['pages', 'longhand'] },
-  { id: 'e2', name: 'Couch to 5K', color: 'leaf', emoji: '🏃', pattern: 'waves', slug: 'RUN5KC', max: 8, createdBy: 'u9', description: 'Slow runs count. Walking breaks count.', members: ['u9', 'u11', 'u13', 'u15', 'u10', 'u8', 'u12', 'u14'], tags: ['run', 'walk-run', 'rest day'] },
-  { id: 'e3', name: 'Hydration Station', color: 'sky', emoji: '💧', pattern: 'dots', slug: 'WATER8', max: 15, createdBy: 'u10', description: 'Eight glasses. We remind each other.', members: ['u10', 'u13', 'u6', 'u7'], tags: ['water'] },
-  { id: 'e4', name: 'No Phone Before 9', color: 'indigo', emoji: '📵', pattern: 'grid', slug: 'NOFON9', max: 10, createdBy: 'u11', description: 'Mornings belong to you, not the feed.', members: ['u11', 'u12', 'u9', 'u15', 'u14'], tags: ['no phone', 'reading'] },
-  { id: 'e5', name: 'Guitar, 20 Minutes', color: 'clay', emoji: '🎸', pattern: 'waves', slug: 'GTR20M', max: 5, createdBy: 'u15', description: 'Scales, songs, noodling. It all counts.', members: ['u15', 'u9'], tags: ['scales', 'songs'] },
+  { id: 'g1', name: 'DIALED', color: 'sky', emoji: '💪', pattern: 'plain', skill: 'fitness', slug: 'LIFT05', max: 8, createdBy: ME_ID, pinned: 'Leg day is not optional. Love you all.', members: [ME_ID, 'u1', 'u2', 'u3', 'u4'], tags: ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push'] },
+  { id: 'g2', name: 'Sketchbook Daily', color: 'grape', emoji: '🎨', pattern: 'confetti', skill: 'art', slug: 'SKTCH7', max: 10, createdBy: 'u3', description: 'Draw something. Anything. Every day.', members: [ME_ID, 'u3', 'u5', 'u6'], tags: ['sketch', 'gouache', 'ink', 'study'] },
+  { id: 'e1', name: 'Morning Pages', color: 'lemon', emoji: '📝', pattern: 'grid', skill: 'writing', slug: 'PAGES3', max: 10, createdBy: 'u8', description: 'Three pages, longhand, before anything else.', members: ['u8', 'u10', 'u12', 'u14'], tags: ['pages', 'longhand'] },
+  { id: 'e2', name: 'Couch to 5K', color: 'leaf', emoji: '🏃', pattern: 'waves', skill: 'fitness', slug: 'RUN5KC', max: 8, createdBy: 'u9', description: 'Slow runs count. Walking breaks count.', members: ['u9', 'u11', 'u13', 'u15', 'u10', 'u8', 'u12', 'u14'], tags: ['run', 'walk-run', 'rest day'] },
+  { id: 'e3', name: 'Hydration Station', color: 'sky', emoji: '💧', pattern: 'dots', skill: 'health', slug: 'WATER8', max: 15, createdBy: 'u10', description: 'Eight glasses. We remind each other.', members: ['u10', 'u13', 'u6', 'u7'], tags: ['water'] },
+  { id: 'e4', name: 'No Phone Before 9', color: 'indigo', emoji: '📵', pattern: 'grid', skill: 'mind', slug: 'NOFON9', max: 10, createdBy: 'u11', description: 'Mornings belong to you, not the feed.', members: ['u11', 'u12', 'u9', 'u15', 'u14'], tags: ['no phone', 'reading'] },
+  { id: 'e5', name: 'Guitar, 20 Minutes', color: 'clay', emoji: '🎸', pattern: 'waves', skill: 'music', slug: 'GTR20M', max: 5, createdBy: 'u15', description: 'Scales, songs, noodling. It all counts.', members: ['u15', 'u9'], tags: ['scales', 'songs'] },
 ]
 
 type NoteSeed = [note: string, tags: string[]]
@@ -136,6 +144,7 @@ export function createSeed(now: Date = new Date()): Tables {
     color: g.color,
     emoji: g.emoji,
     pattern: g.pattern,
+    skill_kind: g.skill,
     // Placeholder covers made with Higgsfield (public/covers), for the public crews.
     cover_url: ['e1', 'e2', 'e3', 'e4', 'e5', 'g2'].includes(g.id) ? `/covers/${g.id}.webp` : null,
     invite_slug: g.slug,
@@ -189,12 +198,14 @@ export function createSeed(now: Date = new Date()): Tables {
     note: string,
     tagNames: string[],
     hearts: string[],
+    details: CheckInDetails | null = null,
+    source: CheckInSource = 'manual',
   ) => {
     const day = localDate(at)
     const key = `${userId}|${groupId}|${day}`
     if (used.has(key)) return false
     used.add(key)
-    check_ins.push({ id, user_id: userId, group_id: groupId, local_date: day, note: note || null, created_at: iso(at), deleted_at: null })
+    check_ins.push({ id, user_id: userId, group_id: groupId, local_date: day, note: note || null, details, source, created_at: iso(at), deleted_at: null })
     for (const name of tagNames) {
       const t = tagId(groupId, name)
       if (t) check_in_tags.push({ check_in_id: id, tag_id: t })
@@ -222,12 +233,12 @@ export function createSeed(now: Date = new Date()): Tables {
         ? Math.min(Math.max(nowMs - ago, sod + Math.min(ago, HOUR) / 10), nowMs - MINUTE)
         : sod - (ago - DAY) - 2 * HOUR,
     )
-  add('c1', 'u1', 'g1', at(40 * MINUTE), '5x5 squats, finally felt smooth. Coffee is earned.', ['leg day', 'pr'], ['u2', 'u3'])
+  add('c1', 'u1', 'g1', at(40 * MINUTE), '5x5 squats, finally felt smooth. Coffee is earned.', ['leg day', 'pr'], ['u2', 'u3'], { activity: 'Strength', minutes: 55 })
   add('c3', 'u3', 'g1', at(5 * HOUR), '', ['stretch'], ['u1'])
-  add('c4', ME_ID, 'g1', at(DAY + 2 * HOUR), 'Bench and rows. Shoulder felt fine for once.', ['push'], ['u1', 'u3', 'u4'])
-  add('c5', 'u4', 'g1', at(DAY + 5 * HOUR), 'Rest day. Walked the dog twice, counts in my book.', ['rest day'], [ME_ID, 'u1'])
+  add('c4', ME_ID, 'g1', at(DAY + 2 * HOUR), 'Bench and rows. Shoulder felt fine for once.', ['push'], ['u1', 'u3', 'u4'], { activity: 'Strength', minutes: 60 })
+  add('c5', 'u4', 'g1', at(DAY + 5 * HOUR), 'Rest day. Walked the dog twice, counts in my book.', ['rest day'], [ME_ID, 'u1'], { activity: 'Walk', minutes: 48, distanceKm: 4.2 }, 'strava')
   add('c6', 'u1', 'g1', at(DAY + 9 * HOUR), 'Deadlifts. Did not die.', ['pr'], ['u2'])
-  add('c7', 'u3', 'g2', at(2 * HOUR), 'Gouache study of the plant by my window.', ['gouache', 'study'], ['u5', 'u6'])
+  add('c7', 'u3', 'g2', at(2 * HOUR), 'Gouache study of the plant by my window.', ['gouache', 'study'], ['u5', 'u6'], { minutes: 40, items: ['Gouache', 'Plant study'] })
   add('c8', 'u5', 'g2', at(6 * HOUR), 'Ten minutes of gesture drawings at the coffee shop.', ['sketch'], ['u3'])
   add('c9', ME_ID, 'g2', at(DAY + 3 * HOUR), 'Inked the cat. The cat did not cooperate.', ['ink'], ['u3', 'u5', 'u6'])
 
@@ -248,6 +259,26 @@ export function createSeed(now: Date = new Date()): Tables {
   for (const p of PEOPLE) {
     const gs = groupsOf(p.id)
     if (!gs.length) continue
+    if (p.sessions) {
+      // Exact sessions per crew: the streak first, your longer past run in the first crew, then older days.
+      const base = p.streak + 2 + (p.bestRun ? p.bestRun + 1 : 0)
+      for (const gid of gs) {
+        const target = p.sessions[gid] ?? 0
+        let c = check_ins.filter((x) => x.user_id === p.id && x.group_id === gid).length
+        const tryG = (off: number) => {
+          if (c < target && off <= p.joined && generated(p.id, gid, off)) c++
+        }
+        for (let off = 1; off <= p.streak; off++) tryG(off)
+        if (p.bestRun && gid === gs[0]) for (let off = p.streak + 2; off < p.streak + 2 + p.bestRun; off++) tryG(off)
+        const older = Array.from({ length: Math.max(0, p.joined - base + 1) }, (_, i) => base + i)
+        for (let i = older.length - 1; i > 0; i--) {
+          const j = Math.floor(rand() * (i + 1))
+          ;[older[i], older[j]] = [older[j], older[i]]
+        }
+        for (const off of older) tryG(off)
+      }
+      continue
+    }
     let count = check_ins.filter((c) => c.user_id === p.id).length
     const tryAdd = (gid: string, offset: number) => {
       if (count >= p.total || offset > p.joined) return
