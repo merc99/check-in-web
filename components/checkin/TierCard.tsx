@@ -11,7 +11,7 @@ const MATERIAL: Record<ReturnType<typeof tierOf>['material'], string> = {
   foil: styles.foil,
   holo: styles.holo,
   aurora: styles.aurora,
-  master: styles.locked,
+  master: styles.aurora,
 }
 
 export interface TierCardProps {
@@ -23,6 +23,8 @@ export interface TierCardProps {
   sessions: number
   /** Not reached yet: a dashed silhouette (Master, or a preview of the next tier). */
   locked?: boolean
+  /** Master cards: their number ("No. 0007"). */
+  serial?: number | null
   size?: 'md' | 'sm'
   className?: string
 }
@@ -31,7 +33,7 @@ export interface TierCardProps {
  * A mastery tier as a card: the material says the tier (paper, enamel, foil, holo, holo with an
  * aurora edge), the medal shows the tier's session number. Foil and up tilt toward a mouse (fx/Foil).
  */
-export function TierCard({ tier, skill, crewName, color, sessions, locked, size = 'md', className }: TierCardProps) {
+export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, size = 'md', className }: TierCardProps) {
   const t = tierOf(tier)
   const material = locked ? styles.locked : MATERIAL[t.material]
   const shiny = !locked && (t.material === 'foil' || t.material === 'holo' || t.material === 'aurora')
@@ -52,6 +54,7 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, size 
         </span>
         <span className={cn('tnum block font-semibold', size === 'sm' ? 'text-[12px]' : 'text-[13px]')}>
           {locked ? `${t.at.toLocaleString()} sessions` : `${sessions.toLocaleString()} session${sessions === 1 ? '' : 's'}`}
+          {!locked && serial ? `, No. ${String(serial).padStart(4, '0')}` : ''}
         </span>
       </span>
       {shiny && <FoilLight />}

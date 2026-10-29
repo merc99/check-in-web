@@ -16,6 +16,8 @@ import { CrewCover } from '@/components/checkin/CrewCover'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { TierCard } from '@/components/checkin/TierCard'
+import { TierCeremony } from '@/components/fx/TierCeremony'
+import { TIER_KEYS, tierOf, type TierKey } from '@/lib/mastery'
 import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
 import { cn } from '@/lib/utils'
@@ -44,6 +46,7 @@ export default function KitchenSink() {
   const toast = useToast()
   const live = useLive()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [ceremony, setCeremony] = useState<TierKey | null>(null)
   const [arcSheetOpen, setArcSheetOpen] = useState(false)
   const [mode, setMode] = useState<'create' | 'join'>('create')
   const [tab, setTab] = useState<TabKey>('feed')
@@ -161,6 +164,29 @@ export default function KitchenSink() {
           <TierCard tier="master" skill="music" crewName="Guitar, 20 Minutes" color="clay" sessions={400} locked />
           <TierCard tier="habit" skill="art" crewName="Sketchbook Daily" color="grape" sessions={10} size="sm" />
         </div>
+      </Section>
+
+      <Section title="Tier ceremony" note="tap a tier to play it">
+        <div className="flex flex-wrap gap-2">
+          {TIER_KEYS.map((t) => (
+            <Button key={t} size="sm" onClick={() => setCeremony(t)}>
+              {tierOf(t).name}
+            </Button>
+          ))}
+        </div>
+        {ceremony && (
+          <TierCeremony
+            tier={ceremony}
+            skill="music"
+            crewName="Guitar, 20 Minutes"
+            color="clay"
+            sessions={tierOf(ceremony).at}
+            rarity={{ started: 96, habit: 71, committed: 38, seasoned: 9, expert: 2, master: 0 }[ceremony]}
+            serial={ceremony === 'master' ? 1 : null}
+            onShare={() => {}}
+            onClose={() => setCeremony(null)}
+          />
+        )}
       </Section>
 
       <Section title="Session details" note="fitness · music · reading · Strava">

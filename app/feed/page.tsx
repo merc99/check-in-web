@@ -31,6 +31,8 @@ import {
   getJoinRequests,
   getMe,
   getMyStats,
+  getMySkills,
+  getMasterCount,
   onCheckIn,
   onHeart,
   react,
@@ -49,6 +51,7 @@ import { HUE_CLASS } from '@/lib/colors'
 import { burstFrom } from '@/components/fx/burst'
 import { flyArc } from '@/components/fx/fly'
 import { RevealCard } from '@/components/fx/RevealCard'
+import { TierCeremony, type CeremonyProps } from '@/components/fx/TierCeremony'
 import { RollingCount } from '@/components/fx/RollingCount'
 import { sfx } from '@/components/fx/sound'
 
@@ -66,6 +69,7 @@ export default function FeedPage() {
   const [entering, setEntering] = useState<ReadonlySet<string>>(() => new Set())
   const [arrivedId, setArrivedId] = useState<string | null>(null)
   const [milestone, setMilestone] = useState<Achievement | null>(null)
+  const [ceremony, setCeremony] = useState<Omit<CeremonyProps, 'onClose' | 'onShare'> | null>(null)
   /** Crewmates you've waved at today, as `crewId:userId`. */
   const [waved, setWaved] = useState<ReadonlySet<string>>(() => new Set())
   const fab = useRef<HTMLButtonElement>(null)
@@ -189,10 +193,12 @@ export default function FeedPage() {
       // A milestone (fx, F2) gets the reveal card; otherwise one toast says it counted.
       const fresh = earned.find((a) => a.unlocked && !unlockedBefore.has(a.key))
       const tierUp = item.milestone ? tierOf(item.milestone.tier) : null
-      if (tierUp) {
-        // A tier-up is the bigger moment: the reveal shows the tier, in the crew's color.
-        const reveal = { key: `tier-${tierUp.key}`, title: `${tierUp.name} in ${g.name}`, subtitle: `${item.milestone!.sessions} sessions`, glyph: String(tierUp.at), color: g.color, unlocked: true }
-        window.setTimeout(() => setMilestone(reveal), 700)
+      if (tierUp && item.milestone) {
+        // A tier-up is the bigger moment: the ceremony (fx/TierCeremony), escalating with the tier.
+        const [skills, masters] = await Promise.all([getMySkills(), tierUp.key === 'master' ? getMasterCount() : Promise.resolve(0)])
+        const sp = skills.find((s) => s.groupId === g.id)
+        const c = { tier: tierUp.key, skill: g.skillKind, crewName: g.name, color: g.color, sessions: item.milestone.sessions, rarity: sp?.rarity, serial: tierUp.key === 'master' ? masters : null }
+        window.setTimeout(() => setCeremony(c), 700)
       } else if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
       else toast(firstToday && after.streak === 7 ? 'Week one. Seven days in a row.' : 'You showed up. That one’s yours for good.')
     } catch (e) {
@@ -389,6 +395,7 @@ export default function FeedPage() {
       <ProfileSheet userId={profileId} onClose={() => setProfileId(null)} />
 
       {milestone && <RevealCard achievement={milestone} onClose={() => setMilestone(null)} />}
+      {ceremony && <TierCeremony {...ceremony} onClose={() => setCeremony(null)} />}
     </main>
   )
 }
