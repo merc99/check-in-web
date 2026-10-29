@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Route, Sparkles } from 'lucide-react'
+import { ImagePlus, Plus, Route, Sparkles } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button as UiButton } from '@/components/ui/button'
 import { suggestCheckIn } from '@/lib/ai/demo'
@@ -23,6 +23,8 @@ const NOTE_MAX = 280
 const STAMP_MS = 520
 
 export interface CheckInDraft {
+  /** A proof photo (demo: an object URL for an image picked on this device). */
+  photoUrl: string | null
   note: string
   tags: string[]
   /** Optional specifics; null for a loose check-in. */
@@ -55,6 +57,8 @@ export function CheckInSheet({
   // Strava (fitness crews, demo): a picked activity fills the details.
   const [stravaOpen, setStravaOpen] = useState(false)
   const [stravaId, setStravaId] = useState<string | null>(null)
+  const [photo, setPhoto] = useState<string | null>(null)
+  const photoInput = useRef<HTMLInputElement>(null)
   // Smart check-in: a tidied note and matching tags from a few loose words (AI, on request).
   const [tidy, setTidy] = useState<{ step: 'busy' } | { step: 'ready'; for: string; s: AssistSuggestion } | null>(null)
   const tidyAbort = useRef<AbortController | null>(null)
@@ -74,6 +78,7 @@ export function CheckInSheet({
       setDetailsOpen(false)
       setStravaOpen(false)
       setStravaId(null)
+      setPhoto(null)
     }
   }
 
@@ -132,7 +137,7 @@ export function CheckInSheet({
     }
     const d = detailsOpen ? cleanDetails(details) : null
     const source: CheckInSource = stravaId && d ? 'strava' : 'manual'
-    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d, source }), prefersReducedMotion() ? 0 : STAMP_MS)
+    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d, source, photoUrl: photo }), prefersReducedMotion() ? 0 : STAMP_MS)
   }
 
   return (
@@ -204,17 +209,23 @@ export function CheckInSheet({
               <p className="text-[13px] font-semibold">
                 Details <span className="font-normal text-muted-foreground">{stravaId ? 'from Strava' : 'optional'}</span>
               </p>
-              <UiButton
-                size="sm"
-                variant="ghost"
-                className="-mr-2"
-                onClick={() => {
-                  setDetailsOpen(false)
-                  setStravaId(null)
-                }}
-              >
-                Remove
-              </UiButton>
+              <span className="-mr-2 flex">
+                {!photo && (
+                  <UiButton size="sm" variant="ghost" onClick={() => photoInput.current?.click()}>
+                    <ImagePlus size={15} /> Add photo
+                  </UiButton>
+                )}
+                <UiButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setDetailsOpen(false)
+                    setStravaId(null)
+                  }}
+                >
+                  Remove
+                </UiButton>
+              </span>
             </div>
             <DetailsEditor skill={group.skillKind} value={details} onChange={setDetails} />
           </div>
@@ -223,11 +234,37 @@ export function CheckInSheet({
             <UiButton size="sm" variant="ghost" className="-ml-3" onClick={() => setDetailsOpen(true)}>
               <Plus size={15} /> Add details
             </UiButton>
+            <UiButton size="sm" variant="ghost" onClick={() => photoInput.current?.click()}>
+              <ImagePlus size={15} /> {photo ? 'Change photo' : 'Add photo'}
+            </UiButton>
             {group.skillKind === 'fitness' && (
               <UiButton size="sm" variant="ghost" aria-expanded={stravaOpen} onClick={() => setStravaOpen((o) => !o)}>
                 <Route size={15} /> Add from Strava
               </UiButton>
             )}
+          </div>
+        )}
+
+        <input
+          ref={photoInput}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) setPhoto(URL.createObjectURL(f))
+            e.target.value = ''
+          }}
+        />
+        {photo && (
+          <div className="relative -mt-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo} alt="Your proof photo" className="max-h-[180px] w-full rounded-md border object-cover" />
+            <UiButton size="sm" variant="secondary" className="absolute right-2 top-2" onClick={() => setPhoto(null)}>
+              Remove photo
+            </UiButton>
           </div>
         )}
 

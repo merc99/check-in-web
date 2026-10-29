@@ -1,3 +1,4 @@
+import { BadgeCheck } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Foil, FoilLight } from '@/components/fx/Foil'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
@@ -25,6 +26,8 @@ export interface TierCardProps {
   locked?: boolean
   /** Master cards: their number ("No. 0007"). */
   serial?: number | null
+  /** Two or more crewmates vouched for it. */
+  verified?: boolean
   size?: 'md' | 'sm'
   className?: string
 }
@@ -33,7 +36,7 @@ export interface TierCardProps {
  * A mastery tier as a card: the material says the tier (paper, enamel, foil, holo, holo with an
  * aurora edge), the medal shows the tier's session number. Foil and up tilt toward a mouse (fx/Foil).
  */
-export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, size = 'md', className }: TierCardProps) {
+export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, verified, size = 'md', className }: TierCardProps) {
   const t = tierOf(tier)
   const material = locked ? styles.locked : MATERIAL[t.material]
   const shiny = !locked && (t.material === 'foil' || t.material === 'holo' || t.material === 'aurora')
@@ -42,7 +45,7 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
       className={cn(styles.card, material, size === 'sm' && styles.sm, className)}
       style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}
       role="img"
-      aria-label={locked ? `${t.name}, ${t.at.toLocaleString()} sessions, not reached yet` : `${t.name} in ${crewName} (${SKILL_LABEL[skill].toLowerCase()}), ${sessions} sessions`}
+      aria-label={locked ? `${t.name}, ${t.at.toLocaleString()} sessions, not reached yet` : `${t.name} in ${crewName} (${SKILL_LABEL[skill].toLowerCase()}), ${sessions} sessions${verified ? ', verified' : ''}`}
     >
       <span aria-hidden="true" className={styles.medal}>
         {t.at >= 1000 ? '1K' : t.at}
@@ -57,6 +60,11 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
           {!locked && serial ? `, No. ${String(serial).padStart(4, '0')}` : ''}
         </span>
       </span>
+      {verified && !locked && (
+        <span aria-hidden="true" className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-on-color px-2 py-[3px] text-[12px] font-bold text-white">
+          <BadgeCheck size={13} strokeWidth={2.25} /> Verified
+        </span>
+      )}
       {shiny && <FoilLight />}
     </div>
   )

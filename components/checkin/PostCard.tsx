@@ -119,6 +119,10 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
       <div className="-mt-1 pl-[52px]">
         {item.note && <p className="text-base leading-[1.45] lg:text-[17px]">{item.note}</p>}
         <SessionDetails details={item.details} skill={item.skill} source={item.source} className={item.note ? 'mt-2' : undefined} />
+        {item.photoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={item.photoUrl} alt={`${item.isMine ? 'Your' : `${item.user.name}’s`} proof photo`} className="mt-3 max-h-[320px] w-full rounded-md border object-cover" />
+        )}
         {item.tags.length > 0 && (
           <div className="mt-[10px] flex flex-wrap gap-2">
             {item.tags.map((t) => (
@@ -132,7 +136,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             <p className="mb-2 text-[13px] font-semibold">
               {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
             </p>
-            <TierCard tier={item.milestone.tier} skill={item.skill} crewName={crewName ?? ''} color={crewColor ?? item.user.color} sessions={item.milestone.sessions} />
+            <TierCard tier={item.milestone.tier} skill={item.skill} crewName={crewName ?? ''} color={crewColor ?? item.user.color} sessions={item.milestone.sessions} verified={item.milestone.vouches?.verified} />
             <VouchLine milestone={item.milestone} isMine={item.isMine} name={item.user.name} onVouch={onVouch} />
             <div className="flex flex-wrap items-center justify-between gap-2">
               {onCheer && (
