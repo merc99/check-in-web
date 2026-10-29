@@ -172,7 +172,7 @@ export default function FeedPage() {
     const firstToday = !stats.data?.checkedInToday
     const unlockedBefore = new Set(achievements.data?.filter((a) => a.unlocked).map((a) => a.key))
     try {
-      const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags, details: draft.details })
+      const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags, details: draft.details, source: draft.source })
       const [after, earned] = await Promise.all([getMyStats(), getAchievements()])
       setCheckInOpen(false)
       // The celebration (fx, D2): a burst from whichever check-in button is on screen

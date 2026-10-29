@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus, Route, Sparkles } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button as UiButton } from '@/components/ui/button'
 import { suggestCheckIn } from '@/lib/ai/demo'
@@ -13,7 +13,8 @@ import { CheckIcon } from '@/components/checkin/icons'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { SearchInput } from '@/components/checkin/SearchInput'
 import { DetailsEditor } from '@/components/feed/DetailsEditor'
-import { cleanDetails, type CheckInDetails, type SkillKind } from '@/lib/mastery'
+import { StravaPicker } from '@/components/feed/StravaPicker'
+import { cleanDetails, type CheckInDetails, type CheckInSource, type SkillKind } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
 import type { Hue } from '@/lib/colors'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -26,6 +27,8 @@ export interface CheckInDraft {
   tags: string[]
   /** Optional specifics; null for a loose check-in. */
   details: CheckInDetails | null
+  /** Picked from a Strava activity (fitness crews). */
+  source: CheckInSource
 }
 
 /**
@@ -49,6 +52,9 @@ export function CheckInSheet({
   // Session details: collapsed until asked for (loose is the default).
   const [details, setDetails] = useState<CheckInDetails>({})
   const [detailsOpen, setDetailsOpen] = useState(false)
+  // Strava (fitness crews, demo): a picked activity fills the details.
+  const [stravaOpen, setStravaOpen] = useState(false)
+  const [stravaId, setStravaId] = useState<string | null>(null)
   // Smart check-in: a tidied note and matching tags from a few loose words (AI, on request).
   const [tidy, setTidy] = useState<{ step: 'busy' } | { step: 'ready'; for: string; s: AssistSuggestion } | null>(null)
   const tidyAbort = useRef<AbortController | null>(null)
@@ -66,6 +72,8 @@ export function CheckInSheet({
       setTidy(null)
       setDetails({})
       setDetailsOpen(false)
+      setStravaOpen(false)
+      setStravaId(null)
     }
   }
 
@@ -123,7 +131,8 @@ export function CheckInSheet({
       // Not supported everywhere; the stamp is the feedback that matters.
     }
     const d = detailsOpen ? cleanDetails(details) : null
-    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d }), prefersReducedMotion() ? 0 : STAMP_MS)
+    const source: CheckInSource = stravaId && d ? 'strava' : 'manual'
+    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d, source }), prefersReducedMotion() ? 0 : STAMP_MS)
   }
 
   return (
@@ -192,18 +201,48 @@ export function CheckInSheet({
         {detailsOpen ? (
           <div className="rounded-md border bg-muted/50 p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-[13px] font-semibold">Details <span className="font-normal text-muted-foreground">optional</span></p>
-              <UiButton size="sm" variant="ghost" className="-mr-2" onClick={() => setDetailsOpen(false)}>
+              <p className="text-[13px] font-semibold">
+                Details <span className="font-normal text-muted-foreground">{stravaId ? 'from Strava' : 'optional'}</span>
+              </p>
+              <UiButton
+                size="sm"
+                variant="ghost"
+                className="-mr-2"
+                onClick={() => {
+                  setDetailsOpen(false)
+                  setStravaId(null)
+                }}
+              >
                 Remove
               </UiButton>
             </div>
             <DetailsEditor skill={group.skillKind} value={details} onChange={setDetails} />
           </div>
         ) : (
-          <div className="-mt-2">
+          <div className="-mt-2 flex flex-wrap gap-1">
             <UiButton size="sm" variant="ghost" className="-ml-3" onClick={() => setDetailsOpen(true)}>
               <Plus size={15} /> Add details
             </UiButton>
+            {group.skillKind === 'fitness' && (
+              <UiButton size="sm" variant="ghost" aria-expanded={stravaOpen} onClick={() => setStravaOpen((o) => !o)}>
+                <Route size={15} /> Add from Strava
+              </UiButton>
+            )}
+          </div>
+        )}
+
+        {stravaOpen && !detailsOpen && (
+          <div className="-mt-2 animate-rise rounded-md border bg-muted/50 p-3">
+            <StravaPicker
+              pickedId={stravaId}
+              onPick={(a) => {
+                setStravaId(a?.id ?? null)
+                if (!a) return
+                setDetails({ activity: a.type, minutes: a.minutes, distanceKm: a.distanceKm })
+                setDetailsOpen(true)
+                setStravaOpen(false)
+              }}
+            />
           </div>
         )}
 

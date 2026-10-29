@@ -6,6 +6,7 @@ import type {
   CheckInInput,
   CrewWeek,
   SkillProgress,
+  StravaActivity,
   ExploreDetail,
   ExploreGroup,
   FeedItem,
@@ -255,6 +256,22 @@ export function onCheckIn(groupId: UUID | null, listener: (item: FeedItem) => vo
     const row = c.row as CheckIn
     if (groupId ? row.group_id === groupId : isMember(ME_ID, row.group_id)) listener(toFeedItem(row))
   })
+}
+
+// ─── Strava (demo) ───
+
+/**
+ * Your recent Strava activities. Demo: three sample ones relative to now, no account. A real version
+ * needs OAuth and the activities API on a server (see docs/ideas/mastery-slice-1-plan.md).
+ */
+export async function getStravaActivities(): Promise<StravaActivity[]> {
+  await settle()
+  const at = (hoursAgo: number) => new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString()
+  return [
+    { id: 'sa1', name: 'Morning run', type: 'Run', minutes: 27, distanceKm: 5.2, startedAt: at(3) },
+    { id: 'sa2', name: 'Lunch walk', type: 'Walk', minutes: 34, distanceKm: 2.8, startedAt: at(26) },
+    { id: 'sa3', name: 'Evening ride', type: 'Ride', minutes: 52, distanceKm: 18.4, startedAt: at(49) },
+  ]
 }
 
 // ─── Mastery ───

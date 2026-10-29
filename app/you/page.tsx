@@ -30,6 +30,7 @@ import { useAuth } from '@/lib/auth'
 import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 import { useDragScroll } from '@/lib/useDragScroll'
+import { PREF, usePref } from '@/lib/prefs'
 
 export default function YouPage() {
   const router = useRouter()
@@ -37,6 +38,7 @@ export default function YouPage() {
   const { groups, activeId } = useActiveCrew()
   const toast = useToast()
   const { soundOn, setSoundOn } = useSound()
+  const [strava, setStrava] = usePref(PREF.strava)
   const me = useQuery(getMe, [], ['profiles'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
@@ -213,6 +215,13 @@ export default function YouPage() {
             <p className="mt-1 text-[13px] text-muted-foreground">Small sounds for check-ins, reactions and milestones.</p>
           </div>
           <Switch checked={soundOn} onChange={setSoundOn} label="Sounds" />
+        </div>
+        <div className="flex items-center gap-4 border-t pt-4">
+          <div className="min-w-0 flex-1">
+            <p className="font-bold">Strava</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">Add a recent run, walk or ride when you check in to a fitness crew. Demo: sample activities, no account.</p>
+          </div>
+          <Switch checked={strava} onChange={setStrava} label="Strava" />
         </div>
       </Card>
 

@@ -26,6 +26,7 @@ export {
   getMyStats,
   getMySkills,
   getSkillsOf,
+  getStravaActivities,
   getTags,
   getUserProfile,
   joinGroupBySlug,

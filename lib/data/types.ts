@@ -318,6 +318,17 @@ export interface GroupPatch {
   is_public?: boolean
 }
 
+/** A recent activity from Strava (sample data in the demo). */
+export interface StravaActivity {
+  id: string
+  name: string
+  /** Matches the check-in activity choices: Run, Walk, Ride, Swim... */
+  type: string
+  minutes: number
+  distanceKm: number
+  startedAt: Timestamp
+}
+
 /** One person's progress in one crew's skill (mastery tiers). */
 export interface SkillProgress {
   groupId: UUID
