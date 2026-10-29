@@ -273,6 +273,11 @@
 }
 
 @utility tnum { font-variant-numeric: tabular-nums; }
+/* Perk: the foil frame on your avatar (mastery, Committed). A static holo ring in the crew palette. */
+@utility foil-frame {
+  background: conic-gradient(from 210deg, var(--rose), var(--lemon), var(--leaf), var(--sky), var(--grape), var(--rose));
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--grape) 45%, transparent);
+}
 /* Grows a small control's tap area to at least 44x44 (the profile's floor) without changing its look. */
 @utility hit-44 {
   position: relative;

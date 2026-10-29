@@ -1,5 +1,8 @@
+'use client'
+
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
+import { PREF, usePref } from '@/lib/prefs'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 const SIZE: Record<Size, string> = {
@@ -22,7 +25,20 @@ export interface AvatarProps {
   className?: string
 }
 
-export function Avatar({ name, color = 'leaf', photoUrl, size = 'md', you, pending, className }: AvatarProps) {
+export function Avatar(props: AvatarProps) {
+  const [foil] = usePref(PREF.foilFrame)
+  // Perk (mastery, Committed): your avatar wears a thin holo foil ring instead of the mint one.
+  if (props.you && foil && !props.pending) {
+    return (
+      <span className={cn('foil-frame -m-[3px] inline-grid flex-none rounded-full p-[3px]', props.className)}>
+        <AvatarFace {...props} className="shadow-[0_0_0_2px_var(--background)]" you={false} />
+      </span>
+    )
+  }
+  return <AvatarFace {...props} />
+}
+
+function AvatarFace({ name, color = 'leaf', photoUrl, size = 'md', you, pending, className }: AvatarProps) {
   return (
     <span
       className={cn(

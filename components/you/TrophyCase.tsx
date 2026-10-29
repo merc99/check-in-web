@@ -10,7 +10,9 @@ import { cn } from '@/lib/utils'
  */
 export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
   if (!skills.length) return null
+  const committed = skills.some((s) => s.tier && tierOf(s.tier).at >= tierOf('committed').at)
   return (
+    <>
     <ul className="flex flex-col gap-3">
       {skills.map((s) => (
         <li key={s.groupId} className="rounded-lg border bg-card p-3 shadow-card">
@@ -23,6 +25,29 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
         </li>
       ))}
     </ul>
+    {/* Perks: what showing up unlocks. Cosmetic and social, a thank-you, never the reason to show up. */}
+    <div className="mt-3 rounded-lg border bg-card p-4 shadow-card">
+      <p className="text-[13px] font-semibold">Perks</p>
+      <ul className="mt-2 flex flex-col gap-2 text-[14px]">
+        <li className="flex items-center gap-3">
+          <span aria-hidden="true" className={cn('size-5 flex-none rounded-full', committed ? 'foil-frame' : 'border border-dashed border-border-strong')} />
+          <span className="min-w-0 flex-1">
+            Foil frame for your avatar
+            <span className="block text-[12.5px] text-muted-foreground">
+              {committed ? 'Unlocked. Turn it on in Settings.' : 'Reach Committed (50 sessions) in any skill.'}
+            </span>
+          </span>
+        </li>
+        <li className="flex items-center gap-3 text-muted-foreground">
+          <span aria-hidden="true" className="size-5 flex-none rounded-full border border-dashed border-border-strong" />
+          <span className="min-w-0 flex-1">
+            A holo finish for your posts
+            <span className="block text-[12.5px]">Coming at Seasoned (150 sessions).</span>
+          </span>
+        </li>
+      </ul>
+    </div>
+    </>
   )
 }
 

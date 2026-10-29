@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
@@ -31,6 +31,7 @@ import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckI
 import { localDate, timeAgo } from '@/lib/dates'
 import { useDragScroll } from '@/lib/useDragScroll'
 import { PREF, usePref } from '@/lib/prefs'
+import { tierOf } from '@/lib/mastery'
 
 export default function YouPage() {
   const router = useRouter()
@@ -45,6 +46,16 @@ export default function YouPage() {
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
   const skills = useQuery(getMySkills, [], ['check_ins', 'groups', 'group_members'])
+  const [foilFrame, setFoilFrame] = usePref(PREF.foilFrame)
+  const [perkSeen, setPerkSeen] = usePref(`${PREF.foilFrame}.seen`)
+  const perkUnlocked = !!skills.data?.some((s) => s.tier && tierOf(s.tier).at >= tierOf('committed').at)
+  // The first time you open You with the perk unlocked, say so once.
+  useEffect(() => {
+    if (perkUnlocked && !perkSeen) {
+      setPerkSeen(true)
+      toast('New perk: a foil frame for your avatar. Turn it on in Settings.')
+    }
+  }, [perkUnlocked, perkSeen, setPerkSeen, toast])
   const [profileId, setProfileId] = useState<string | null>(null)
   const shelf = useRef<HTMLDivElement>(null)
   useDragScroll(shelf, achievements.data)
@@ -222,6 +233,15 @@ export default function YouPage() {
             <p className="mt-1 text-[13px] text-muted-foreground">Add a recent run, walk or ride when you check in to a fitness crew. Demo: sample activities, no account.</p>
           </div>
           <Switch checked={strava} onChange={setStrava} label="Strava" />
+        </div>
+        <div className="flex items-center gap-4 border-t pt-4">
+          <div className="min-w-0 flex-1">
+            <p className="font-bold">Foil frame</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              {perkUnlocked ? 'A perk for reaching Committed: a foil ring on your avatar.' : 'Unlocks at Committed (50 sessions) in any skill.'}
+            </p>
+          </div>
+          <Switch checked={perkUnlocked && foilFrame} onChange={setFoilFrame} disabled={!perkUnlocked} label="Foil frame" />
         </div>
       </Card>
 
