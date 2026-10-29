@@ -6,6 +6,11 @@ import type {
   CheckInInput,
   CrewWeek,
   SkillProgress,
+  Binder,
+  BinderCard,
+  CrewChallenge,
+  SkillAchievement,
+  VouchInfo,
   StravaActivity,
   ExploreDetail,
   ExploreGroup,
@@ -33,7 +38,8 @@ import type {
   UUID,
 } from '@/lib/data/types'
 import { addDays, bestStreak, currentStreak, localDate, startOfDay, type LocalDate } from '@/lib/dates'
-import { cleanDetails, nextTier, tierFor, tierReachedAt } from '@/lib/mastery'
+import { cleanDetails, nextTier, tierFor, tierOf, tierReachedAt, TIERS, type TierKey } from '@/lib/mastery'
+import { bestMonthOf, skillAchievements, type SessionRow } from '@/lib/mastery-achievements'
 import { HEART, REACTIONS } from '@/lib/reactions'
 import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
@@ -159,6 +165,7 @@ function toFeedItem(c: CheckIn): FeedItem {
     source: c.source,
     skill: db().groups.find((g) => g.id === c.group_id)?.skill_kind ?? 'other',
     milestone: milestoneOf(c),
+    photoUrl: c.photo_url,
   }
 }
 
@@ -170,7 +177,32 @@ const sessionsOf = (userId: UUID, groupId: UUID) =>
 function milestoneOf(c: CheckIn): FeedItem['milestone'] {
   const n = sessionsOf(c.user_id, c.group_id).findIndex((x) => x.id === c.id) + 1
   const t = n > 0 ? tierReachedAt(n) : null
-  return t ? { tier: t.key, sessions: n } : null
+  if (!t) return null
+  const cheers = alive(db().cheers).filter((x) => x.check_in_id === c.id).sort((a, b) => b.created_at.localeCompare(a.created_at))
+  return {
+    tier: t.key,
+    sessions: n,
+    vouches: vouchInfo(c.user_id, c.group_id, t.key),
+    cheers: { count: cheers.length, byMe: cheers.some((x) => x.user_id === ME_ID), people: cheers.filter((x) => x.user_id !== ME_ID).slice(0, 3).map((x) => personOf(x.user_id)) },
+  }
+}
+
+/** Tiers from Committed up take vouches. */
+const vouchable = (tier: TierKey) => tierOf(tier).at >= tierOf('committed').at
+
+function vouchInfo(userId: UUID, groupId: UUID, tier: TierKey): VouchInfo | null {
+  if (!vouchable(tier)) return null
+  const rows = alive(db().vouches).filter((v) => v.user_id === userId && v.group_id === groupId && v.tier === tier)
+  return { count: rows.length, verified: rows.length >= 2, people: rows.map((v) => personOf(v.voucher_id)), byMe: rows.some((v) => v.voucher_id === ME_ID) }
+}
+
+/** Share of all crew memberships (every crew, every member) that have reached a tier, 0–100. */
+function rarityOf(tier: TierKey): number {
+  const members = alive(db().group_members)
+  if (!members.length) return 0
+  const at = tierOf(tier).at
+  const reached = members.filter((m) => sessionsOf(m.user_id, m.group_id).length >= at).length
+  return Math.round((reached / members.length) * 100)
 }
 
 function progressOf(userId: UUID, g: Group): SkillProgress {
@@ -186,6 +218,9 @@ function progressOf(userId: UUID, g: Group): SkillProgress {
     tier: tier?.key ?? null,
     next: next ? { tier: next.tier.key, toGo: next.toGo } : null,
     tierReachedAt: tier ? (rows[tier.at - 1]?.created_at ?? null) : null,
+    vouches: tier ? vouchInfo(userId, g.id, tier.key) : null,
+    rarity: tier ? rarityOf(tier.key) : 0,
+    pinned: profile(userId).pinned_group_id === g.id,
   }
 }
 
@@ -295,6 +330,139 @@ function skillsOf(userId: UUID): SkillProgress[] {
     .filter((g): g is Group => !!g)
     .map((g) => progressOf(userId, g))
     .sort((a, b) => b.sessions - a.sessions)
+}
+
+// ─── Mastery, slice 2: vouches, cheers, the binder, achievements, challenges ───
+
+/** Vouch for a crewmate's tier (Committed and up). You can't vouch for yourself. */
+export function setVouch(voucherId: UUID, userId: UUID, groupId: UUID, tier: TierKey, on = true): boolean {
+  if (voucherId === userId) throw new Error('You can’t vouch for yourself.')
+  if (!isMember(voucherId, groupId) || !isMember(userId, groupId)) throw new Error('not authorized')
+  if (!vouchable(tier)) throw new Error('This tier doesn’t take vouches.')
+  if (sessionsOf(userId, groupId).length < tierOf(tier).at) throw new Error('They haven’t reached that tier.')
+  const row = db().vouches.find((v) => v.voucher_id === voucherId && v.user_id === userId && v.group_id === groupId && v.tier === tier)
+  if (on && !row) {
+    const fresh = { id: newId(), voucher_id: voucherId, user_id: userId, group_id: groupId, tier, created_at: nowIso(), deleted_at: null }
+    db().vouches.push(fresh)
+    emit({ table: 'vouches', type: 'INSERT', row: fresh })
+  } else if (row && on === !!row.deleted_at) {
+    row.deleted_at = on ? null : nowIso()
+    emit({ table: 'vouches', type: 'UPDATE', row })
+  }
+  return on
+}
+
+export async function vouch(userId: UUID, groupId: UUID, tier: TierKey, on = true): Promise<boolean> {
+  await settle()
+  return setVouch(ME_ID, userId, groupId, tier, on)
+}
+
+/** Cheer a milestone post (one per person; soft-deleted when taken back). */
+export function setCheer(userId: UUID, checkInId: UUID, on: boolean): boolean {
+  const c = alive(db().check_ins).find((x) => x.id === checkInId)
+  if (!c || !isMember(userId, c.group_id)) throw new Error('not authorized')
+  const row = db().cheers.find((x) => x.check_in_id === checkInId && x.user_id === userId)
+  if (on && !row) {
+    const fresh = { id: newId(), check_in_id: checkInId, user_id: userId, created_at: nowIso(), deleted_at: null }
+    db().cheers.push(fresh)
+    emit({ table: 'cheers', type: 'INSERT', row: fresh })
+  } else if (row && on === !!row.deleted_at) {
+    row.deleted_at = on ? null : nowIso()
+    if (on) row.created_at = nowIso()
+    emit({ table: 'cheers', type: 'UPDATE', row })
+  }
+  return on
+}
+
+export async function cheer(checkInId: UUID, on: boolean): Promise<boolean> {
+  await settle()
+  return setCheer(ME_ID, checkInId, on)
+}
+
+/** Pin one crew's top card to the front of your binder (null to unpin). */
+export async function pinCard(groupId: UUID | null): Promise<void> {
+  await settle()
+  if (groupId) requireMember(groupId)
+  const p = profile(ME_ID)
+  p.pinned_group_id = groupId
+  emit({ table: 'profiles', type: 'UPDATE', row: p })
+}
+
+const sessionRows = (userId: UUID, groupId: UUID): SessionRow[] =>
+  sessionsOf(userId, groupId).map((c) => ({ at: new Date(c.created_at), details: c.details, source: c.source, photo: !!c.photo_url }))
+
+/** Every tier card someone has earned (in crews you share, for others), plus the next locked slot per skill. */
+export async function getBinder(userId: UUID): Promise<Binder> {
+  await settle()
+  const isMe = userId === ME_ID
+  const pinned = profile(userId).pinned_group_id
+  const crews = alive(db().group_members)
+    .filter((m) => m.user_id === userId && (isMe || isMember(ME_ID, m.group_id)))
+    .map((m) => db().groups.find((g) => g.id === m.group_id && !g.deleted_at))
+    .filter((g): g is Group => !!g)
+  const cards: BinderCard[] = []
+  const next: Binder['next'] = []
+  for (const g of crews) {
+    const rows = sessionsOf(userId, g.id)
+    const best = bestMonthOf(sessionRows(userId, g.id))
+    for (const t of TIERS) {
+      if (rows.length < t.at) {
+        next.push({ groupId: g.id, crewName: g.name, color: g.color, skill: g.skill_kind, tier: t.key, toGo: t.at - rows.length })
+        break
+      }
+      cards.push({
+        groupId: g.id, crewName: g.name, color: g.color, skill: g.skill_kind, tier: t.key, sessions: rows.length,
+        reachedAt: rows[t.at - 1].created_at, firstSessionAt: rows[0].created_at, bestMonth: best,
+        vouches: vouchInfo(userId, g.id, t.key), rarity: rarityOf(t.key), serial: t.key === 'master' ? serialOf(userId, g.id) : null,
+      })
+    }
+  }
+  const rank = (c: BinderCard) => (c.groupId === pinned && c.tier === topTier(cards, c.groupId) ? 1e6 : 0) + tierOf(c.tier).at
+  cards.sort((a, b) => rank(b) - rank(a))
+  return { person: personOf(userId), isMe, cards, next, pinnedGroupId: pinned }
+}
+
+const topTier = (cards: BinderCard[], groupId: UUID) =>
+  cards.filter((c) => c.groupId === groupId).sort((a, b) => tierOf(b.tier).at - tierOf(a.tier).at)[0]?.tier
+
+/** Master cards are numbered in the order they were reached (none yet in the demo: the next is No. 1). */
+function serialOf(userId: UUID, groupId: UUID): number {
+  const masters = alive(db().group_members)
+    .map((m) => ({ m, rows: sessionsOf(m.user_id, m.group_id) }))
+    .filter((x) => x.rows.length >= 1000)
+    .sort((a, b) => a.rows[999].created_at.localeCompare(b.rows[999].created_at))
+  return masters.findIndex((x) => x.m.user_id === userId && x.m.group_id === groupId) + 1
+}
+
+/** How many Master cards exist (the next one's number is this + 1). */
+export async function getMasterCount(): Promise<number> {
+  await settle()
+  return alive(db().group_members).filter((m) => sessionsOf(m.user_id, m.group_id).length >= 1000).length
+}
+
+/** Your achievements in one crew's skill: obtainable goals from your sessions and their details. */
+export async function getSkillAchievements(groupId: UUID): Promise<SkillAchievement[]> {
+  await settle()
+  requireMember(groupId)
+  return skillAchievements(group(groupId).skill_kind, sessionRows(ME_ID, groupId))
+}
+
+/** This month's crew challenge: a shared session target, sized to the crew. */
+export async function getCrewChallenge(groupId: UUID): Promise<CrewChallenge> {
+  await settle()
+  requireMember(groupId)
+  const now = new Date()
+  const first = new Date(now.getFullYear(), now.getMonth(), 1)
+  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  const target = Math.max(20, Math.round((membersOf(groupId).length * 15) / 10) * 10)
+  const done = checkInsOf((c) => c.group_id === groupId && new Date(c.created_at) >= first).length
+  return {
+    groupId,
+    month: now.toLocaleDateString('en-US', { month: 'long' }),
+    target,
+    done,
+    daysLeft: last.getDate() - now.getDate() + 1,
+  }
 }
 
 // ─── AI recap input ───
@@ -703,6 +871,7 @@ export function insertCheckIn(userId: UUID, input: CheckInInput): FeedItem {
     note: input.note?.trim().slice(0, 280) || null,
     details: cleanDetails(input.details),
     source: input.source === 'strava' ? 'strava' : 'manual',
+    photo_url: input.photoUrl ?? null,
     created_at: nowIso(),
     deleted_at: null,
   }

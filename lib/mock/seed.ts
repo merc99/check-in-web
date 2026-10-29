@@ -1,7 +1,7 @@
 import { getTagHue, type Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
-import type { CheckInDetails, CheckInSource, SkillKind } from '@/lib/mastery'
-import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag } from '@/lib/data/types'
+import { TIERS, type CheckInDetails, type CheckInSource, type SkillKind } from '@/lib/mastery'
+import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag, Vouch } from '@/lib/data/types'
 import { addDays, DAY, HOUR, localDate, MINUTE, startOfDay } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
 
@@ -119,6 +119,20 @@ export function createSeed(now: Date = new Date()): Tables {
   const rand = mulberry32(42)
   // A separate stream for reaction emoji, so adding them didn't reshuffle the rest of the demo.
   const emojiRand = mulberry32(7)
+  const detailRand = mulberry32(99)
+  const pickD = <T,>(a: readonly T[]) => a[Math.floor(detailRand() * a.length)]
+  const sampleDetails = (skill: SkillKind): CheckInDetails => {
+    const minutes = pickD([15, 20, 25, 30, 40, 45, 60, 75, 90])
+    if (skill === 'fitness') {
+      const activity = pickD(['Run', 'Run', 'Walk', 'Ride', 'Strength', 'Strength', 'Yoga'])
+      const distanceKm = activity === 'Run' ? pickD([3.2, 4, 5, 5.5, 6.4, 8, 10]) : activity === 'Walk' ? pickD([2.1, 3, 4.2]) : activity === 'Ride' ? pickD([12, 18.4, 25, 32]) : undefined
+      return { activity, minutes, ...(distanceKm && { distanceKm }) }
+    }
+    if (skill === 'music') return { minutes, items: [pickD(['C major scale', 'Wonderwall intro', 'Blackbird', 'Barre chords', 'Fingerpicking', 'Hotel California solo', 'G-C-D changes', 'Ear training'])] }
+    if (skill === 'art') return { minutes, items: [pickD(['Gouache', 'Ink', 'Gesture drawing', 'Still life', 'Watercolour', 'Portrait', 'Thumbnails'])] }
+    if (skill === 'reading') return { book: pickD(['The Creative Act', 'Atomic Habits', 'Piranesi', 'Dune']), pages: pickD([12, 20, 30, 45]) }
+    return { minutes }
+  }
   const pick = <T,>(a: readonly T[]) => a[Math.floor(rand() * a.length)]
   const today = startOfDay(now)
   const iso = (d: Date) => d.toISOString()
@@ -133,6 +147,7 @@ export function createSeed(now: Date = new Date()): Tables {
     avatar_url: null,
     avatar_color: p.color,
     timezone: 'UTC',
+    pinned_group_id: null,
     created_at: daysAgo(p.joined),
     deleted_at: null,
   }))
@@ -205,7 +220,7 @@ export function createSeed(now: Date = new Date()): Tables {
     const key = `${userId}|${groupId}|${day}`
     if (used.has(key)) return false
     used.add(key)
-    check_ins.push({ id, user_id: userId, group_id: groupId, local_date: day, note: note || null, details, source, created_at: iso(at), deleted_at: null })
+    check_ins.push({ id, user_id: userId, group_id: groupId, local_date: day, note: note || null, details, source, photo_url: null, created_at: iso(at), deleted_at: null })
     for (const name of tagNames) {
       const t = tagId(groupId, name)
       if (t) check_in_tags.push({ check_in_id: id, tag_id: t })
@@ -253,7 +268,11 @@ export function createSeed(now: Date = new Date()): Tables {
     const [note, tagNames] = rand() < 0.35 ? ['', []] : pick(NOTES[gid] ?? NOTES._)
     const others = membersOf(gid).filter((m) => m !== uid)
     const hearts = others.filter(() => rand() < 0.3).slice(0, 3)
-    return add(`h${++n}`, uid, gid, d, note, rand() < 0.5 ? tagNames : tagNames.slice(0, 1), hearts)
+    // About half of older sessions carry details for the crew's skill, so per-skill achievements have
+    // something to count (a separate stream, so the rest of the history stays as it was).
+    const det = detailRand() < 0.5 ? sampleDetails(GROUPS.find((g) => g.id === gid)?.skill ?? 'other') : null
+    const strava = !!det?.distanceKm && detailRand() < 0.5
+    return add(`h${++n}`, uid, gid, d, note, rand() < 0.5 ? tagNames : tagNames.slice(0, 1), hearts, det, strava ? 'strava' : 'manual')
   }
 
   for (const p of PEOPLE) {
@@ -312,5 +331,27 @@ export function createSeed(now: Date = new Date()): Tables {
     check_in_tags,
     reactions,
     join_requests: [{ id: 'jr1', group_id: 'g1', user_id: 'u7', status: 'pending', created_at: iso(new Date(nowMs - 3 * HOUR)) }],
+    vouches: seedVouches(check_ins, group_members, iso(new Date(nowMs - 6 * HOUR))),
+    cheers: [],
   }
+}
+
+/**
+ * Vouches for everyone's Committed-and-up tiers, from up to three crewmates, so most rare cards start
+ * verified. Two exceptions make the demo interesting: Ben's Committed in DIALED has one vouch (one to go)
+ * and Dre has none yet (he reaches Committed live).
+ */
+function seedVouches(checkIns: CheckIn[], members: GroupMember[], at: string): Vouch[] {
+  const out: Vouch[] = []
+  const counts = new Map<string, number>()
+  for (const c of checkIns) counts.set(`${c.user_id}|${c.group_id}`, (counts.get(`${c.user_id}|${c.group_id}`) ?? 0) + 1)
+  for (const [key, n] of counts) {
+    const [uid, gid] = key.split('|')
+    const crew = members.filter((m) => m.group_id === gid && m.user_id !== uid).map((m) => m.user_id)
+    for (const t of TIERS.filter((x) => x.at >= 50 && n >= x.at)) {
+      const take = uid === ME_ID && gid === 'g1' ? 1 : Math.min(3, crew.length)
+      crew.slice(0, take).forEach((v) => out.push({ id: `v-${uid}-${gid}-${t.key}-${v}`, voucher_id: v, user_id: uid, group_id: gid, tier: t.key, created_at: at, deleted_at: null }))
+    }
+  }
+  return out
 }
