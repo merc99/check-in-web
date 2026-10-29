@@ -29,6 +29,8 @@ export interface TierCardProps {
   /** Two or more crewmates vouched for it. */
   verified?: boolean
   size?: 'md' | 'sm'
+  /** Binder: a trading-card shape (medal on top, centered words). */
+  portrait?: boolean
   className?: string
 }
 
@@ -36,13 +38,13 @@ export interface TierCardProps {
  * A mastery tier as a card: the material says the tier (paper, enamel, foil, holo, holo with an
  * aurora edge), the medal shows the tier's session number. Foil and up tilt toward a mouse (fx/Foil).
  */
-export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, verified, size = 'md', className }: TierCardProps) {
+export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, verified, size = 'md', portrait, className }: TierCardProps) {
   const t = tierOf(tier)
   const material = locked ? styles.locked : MATERIAL[t.material]
   const shiny = !locked && (t.material === 'foil' || t.material === 'holo' || t.material === 'aurora')
   const card = (
     <div
-      className={cn(styles.card, material, size === 'sm' && styles.sm, className)}
+      className={cn(styles.card, material, size === 'sm' && styles.sm, portrait && styles.portrait, className)}
       style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}
       role="img"
       aria-label={locked ? `${t.name}, ${t.at.toLocaleString()} sessions, not reached yet` : `${t.name} in ${crewName} (${SKILL_LABEL[skill].toLowerCase()}), ${sessions} sessions${verified ? ', verified' : ''}`}
@@ -52,7 +54,7 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
       </span>
       <span aria-hidden="true" className="min-w-0 flex-1">
         <span className={cn('block truncate font-semibold opacity-75', size === 'sm' ? 'text-[12px]' : 'text-[12.5px]')}>{crewName}</span>
-        <span className={cn('block font-display font-extrabold leading-[1.05] tracking-tighter', size === 'sm' ? 'text-[19px]' : 'text-[26px]')}>
+        <span className={cn('block font-display font-extrabold leading-[1.05] tracking-tighter', portrait ? 'text-[22px]' : size === 'sm' ? 'text-[19px]' : 'text-[26px]')}>
           {t.name}
         </span>
         <span className={cn('tnum block font-semibold', size === 'sm' ? 'text-[12px]' : 'text-[13px]')}>
@@ -61,8 +63,8 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
         </span>
       </span>
       {verified && !locked && (
-        <span aria-hidden="true" className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-on-color px-2 py-[3px] text-[12px] font-bold text-white">
-          <BadgeCheck size={13} strokeWidth={2.25} /> Verified
+        <span aria-hidden="true" className={cn('absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-on-color py-[3px] text-[12px] font-bold text-white', portrait ? 'px-[5px]' : 'px-2')}>
+          <BadgeCheck size={13} strokeWidth={2.25} /> {!portrait && 'Verified'}
         </span>
       )}
       {shiny && <FoilLight />}

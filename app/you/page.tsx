@@ -25,9 +25,11 @@ import { HoldButton } from '@/components/fx/HoldButton'
 import { useSound } from '@/components/fx/sound'
 import { CrewRecap } from '@/components/you/CrewRecap'
 import { TrophyCase } from '@/components/you/TrophyCase'
+import { Binder } from '@/components/checkin/Binder'
+import { shareCard } from '@/lib/shareCard'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
-import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, useQuery } from '@/lib/data'
+import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, getBinder, pinCard, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 import { useDragScroll } from '@/lib/useDragScroll'
 import { PREF, usePref } from '@/lib/prefs'
@@ -41,11 +43,14 @@ export default function YouPage() {
   const { soundOn, setSoundOn } = useSound()
   const [strava, setStrava] = usePref(PREF.strava)
   const me = useQuery(getMe, [], ['profiles'])
+  const meId = me.data?.person.id
+  const binder = useQuery(() => (meId ? getBinder(meId) : Promise.resolve(null)), [meId], ['check_ins', 'groups', 'group_members', 'vouches', 'profiles'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
   const skills = useQuery(getMySkills, [], ['check_ins', 'groups', 'group_members', 'vouches', 'profiles'])
+
   const [foilFrame, setFoilFrame] = usePref(PREF.foilFrame)
   const [perkSeen, setPerkSeen] = usePref(`${PREF.foilFrame}.seen`)
   const perkUnlocked = !!skills.data?.some((s) => s.tier && tierOf(s.tier).at >= tierOf('committed').at)
@@ -111,6 +116,23 @@ export default function YouPage() {
         <>
           <SectionTitle title="Your skills" note="sessions per crew" />
           <TrophyCase skills={skills.data} />
+        </>
+      )}
+
+      {/* The collector binder: every tier card earned; tap one to flip it. */}
+      {binder.data && binder.data.cards.length > 0 && (
+        <>
+          <SectionTitle title="Your binder" note={`${binder.data.cards.length} card${binder.data.cards.length === 1 ? '' : 's'}`} />
+          <Binder
+            binder={binder.data}
+            onPin={(id) => pinCard(id).then(() => toast(id ? 'Pinned to the front of your binder' : 'Unpinned'), () => toast('That didn’t go through. Try again.'))}
+            onShare={(c) =>
+              shareCard({ tier: c.tier, crewName: c.crewName, color: c.color, sessions: c.sessions, personName: person.name, rarity: c.rarity, serial: c.serial }).then(
+                (how) => how === 'downloaded' && toast('Card saved as an image.'),
+                () => toast('That card didn’t draw. Try again.'),
+              )
+            }
+          />
         </>
       )}
 

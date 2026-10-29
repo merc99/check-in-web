@@ -1,0 +1,18 @@
+/* The binder's cards flip on a tap (calm: answers the tap, then rests). */
+.flip { position: relative; perspective: 1000px; }
+.inner { position: relative; transform-style: preserve-3d; transition: transform .5s var(--ease-out); }
+.flip[data-back] .inner { transform: rotateY(180deg); }
+.front, .back { backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 16px; }
+.back {
+  position: absolute; inset: 0; transform: rotateY(180deg); overflow: hidden;
+  display: flex; flex-direction: column; gap: 8px; padding: 14px 14px 8px;
+  background: var(--card); border: 1px solid var(--border-strong); box-shadow: var(--elev-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner { transition: none; transform: none !important; }
+  .front, .back { backface-visibility: visible; }
+  .back { transform: none; visibility: hidden; }
+  .flip[data-back] .back { visibility: visible; }
+  .flip[data-back] .front { visibility: hidden; }
+}

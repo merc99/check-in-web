@@ -99,6 +99,10 @@
 .sm { padding: 10px 12px; gap: 10px; border-radius: 14px; }
 .sm .medal { width: 42px; height: 42px; font-size: 15px; }
 
+/* Binder: a trading-card shape. */
+.portrait { flex-direction: column; justify-content: center; text-align: center; gap: 10px; padding: 18px 12px; min-height: 196px; }
+.portrait .medal { width: 64px; height: 64px; font-size: 21px; }
+
 @media (prefers-reduced-motion: reduce) {
   .aurora::before { animation: none; }
 }
