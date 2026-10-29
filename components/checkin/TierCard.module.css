@@ -1,0 +1,104 @@
+/* Tier cards (mastery): one shape, a material per tier, so how far someone has come reads at a glance.
+   Paper (Started) → enamel (Habit) → foil (Committed) → holo (Seasoned) → holo + aurora edge (Expert).
+   All static at rest; foil and holo tilt with a mouse through fx/Foil, and the aurora edge turns only on hover. */
+.card {
+  --deep: color-mix(in srgb, var(--hue) 74%, black);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: var(--on-color);
+}
+
+/* Paper: warm card stock in a whisper of the crew's hue, ink text, a stamped disc. */
+.paper {
+  background: color-mix(in srgb, var(--hue) 10%, color-mix(in srgb, var(--lemon) 14%, white));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on-color) 14%, transparent), var(--elev-card);
+}
+.paper .medal {
+  background: transparent;
+  color: var(--on-color);
+  border: 2px dashed color-mix(in srgb, var(--on-color) 70%, transparent);
+  transform: rotate(-8deg);
+  box-shadow: none;
+}
+
+/* Enamel and up: the crew's hue with depth, a lit top edge and a dark enamel medal. */
+.enamel,
+.foil,
+.holo,
+.aurora {
+  background:
+    radial-gradient(90% 140% at 100% 0%, color-mix(in srgb, var(--hue) 70%, white) 0%, transparent 60%),
+    linear-gradient(160deg, var(--hue) 0%, var(--hue) 45%, var(--deep) 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 40%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, black 10%, transparent),
+    0 18px 30px -22px color-mix(in srgb, var(--deep) 50%, black),
+    var(--elev-card);
+}
+
+/* Holo: an iridescent film over the hue, still at rest (the Foil tilt moves the light). */
+.holo::after,
+.aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(115deg,
+    transparent 10%,
+    color-mix(in srgb, var(--rose) 55%, white) 30%,
+    color-mix(in srgb, var(--sky) 55%, white) 45%,
+    color-mix(in srgb, var(--lemon) 55%, white) 60%,
+    color-mix(in srgb, var(--grape) 50%, white) 75%,
+    transparent 92%);
+  mix-blend-mode: soft-light;
+  opacity: .9;
+}
+
+/* Expert: a turning multicolor edge, only while a mouse is over it. */
+.aurora::before {
+  content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; padding: 2px; pointer-events: none;
+  background: conic-gradient(from var(--fx-ang, 0deg), var(--sky), var(--leaf), var(--grape), var(--rose), var(--sky));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: turn 6s linear infinite paused;
+}
+@media (hover: hover) { .aurora:hover::before { animation-play-state: running; } }
+@keyframes turn { to { --fx-ang: 360deg; } }
+
+/* Master, not reached: a quiet silhouette of what's ahead. */
+.locked {
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border: 1.5px dashed var(--border-strong);
+}
+.locked .medal { background: var(--background); color: var(--muted-foreground); border: 1.5px dashed var(--border-strong); box-shadow: none; }
+
+/* The medal: the tier's session number on a dark enamel disc in the card's own color. */
+.medal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--on-color) 70%, white) 0%, var(--on-color) 60%);
+  color: color-mix(in srgb, var(--hue) 75%, white);
+  box-shadow: 0 0 0 3px color-mix(in srgb, white 28%, transparent), inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+}
+.sm { padding: 10px 12px; gap: 10px; border-radius: 14px; }
+.sm .medal { width: 42px; height: 42px; font-size: 15px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before { animation: none; }
+}

@@ -24,9 +24,10 @@ import { useToast } from '@/components/checkin/Toast'
 import { HoldButton } from '@/components/fx/HoldButton'
 import { useSound } from '@/components/fx/sound'
 import { CrewRecap } from '@/components/you/CrewRecap'
+import { TrophyCase } from '@/components/you/TrophyCase'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
-import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMyStats, useQuery } from '@/lib/data'
+import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 import { useDragScroll } from '@/lib/useDragScroll'
 
@@ -41,6 +42,7 @@ export default function YouPage() {
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
+  const skills = useQuery(getMySkills, [], ['check_ins', 'groups', 'group_members'])
   const [profileId, setProfileId] = useState<string | null>(null)
   const shelf = useRef<HTMLDivElement>(null)
   useDragScroll(shelf, achievements.data)
@@ -90,6 +92,14 @@ export default function YouPage() {
           {stats.data.checkedInToday ? 'You’re in for today.' : 'Today’s still open. No rush.'}
         </p>
       </Card>
+
+      {/* Mastery: each crew's skill, the tier you've reached and the next one. */}
+      {skills.data && skills.data.length > 0 && (
+        <>
+          <SectionTitle title="Your skills" note="sessions per crew" />
+          <TrophyCase skills={skills.data} />
+        </>
+      )}
 
       {/* Optional extra, kept off the feed: a demo-AI recap of one crew's week (lib/ai). */}
       {groups && groups.length > 0 && (

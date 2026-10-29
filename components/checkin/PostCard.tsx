@@ -12,6 +12,9 @@ import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
 import { SheenOnce } from '@/components/fx/loops'
 import { SessionDetails } from './SessionDetails'
+import { TierCard } from './TierCard'
+import { tierOf } from '@/lib/mastery'
+import type { Hue } from '@/lib/colors'
 
 const DOUBLE_TAP_MS = 300
 const DOUBLE_TAP_PX = 30
@@ -24,10 +27,13 @@ export interface PostCardProps {
   onPersonTap?: (id: string) => void
   /** Emoji reactions. They include the heart, so they replace the heart pill. */
   reactions?: ReactNode
+  /** The crew this post is in, for a milestone post's tier card. */
+  crewName?: string
+  crewColor?: Hue
 }
 
 /** One check-in. Heart pill, who hearted, and double-tap anywhere on the card to heart it. */
-export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: PostCardProps) {
+export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, crewColor }: PostCardProps) {
   const [burst, setBurst] = useState(0)
   const [pop, setPop] = useState(false)
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
@@ -111,6 +117,15 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions }: Po
             {item.tags.map((t) => (
               <TagChip key={t.id} name={t.name} />
             ))}
+          </div>
+        )}
+        {/* A milestone post: this session reached a tier. The tier card makes it stand out in the scroll. */}
+        {item.milestone && (
+          <div className="mt-3">
+            <p className="mb-2 text-[13px] font-semibold">
+              {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
+            </p>
+            <TierCard tier={item.milestone.tier} skill={item.skill} crewName={crewName ?? ''} color={crewColor ?? item.user.color} sessions={item.milestone.sessions} />
           </div>
         )}
         {reactions ? (

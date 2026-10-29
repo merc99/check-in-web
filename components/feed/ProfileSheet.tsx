@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Avatar } from '@/components/checkin/Avatar'
 import { Sheet } from '@/components/checkin/Sheet'
 import { StatCard } from '@/components/checkin/StatCard'
-import { getUserProfile, useQuery } from '@/lib/data'
+import { TierCard } from '@/components/checkin/TierCard'
+import { getSkillsOf, getUserProfile, useQuery } from '@/lib/data'
 import { monthYear } from '@/lib/dates'
 
 /** Tap any crewmate's avatar: who they are, their counts, which crews you share. */
@@ -15,6 +16,7 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
 
   const profile = useQuery(() => (shownId ? getUserProfile(shownId) : Promise.resolve(null)), [shownId], ['check_ins', 'group_members', 'profiles'])
   const p = profile.data
+  const skills = useQuery(() => (shownId ? getSkillsOf(shownId) : Promise.resolve([])), [shownId], ['check_ins', 'group_members'])
 
   return (
     <Sheet open={!!userId} onClose={onClose} label={p ? p.person.name : 'Profile'}>
@@ -30,6 +32,15 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
             <StatCard value={p.streak} label="day streak" />
             <StatCard value={p.sharedGroups.length} label="crews with you" />
           </div>
+          {!!skills.data?.some((s) => s.tier) && (
+            <div className="flex flex-col gap-2 text-left">
+              {skills.data
+                .filter((s) => s.tier)
+                .map((s) => (
+                  <TierCard key={s.groupId} tier={s.tier!} skill={s.skill} crewName={s.crewName} color={s.color} sessions={s.sessions} size="sm" />
+                ))}
+            </div>
+          )}
           {p.sharedGroups.length > 0 && (
             <p className="text-[13.5px] text-muted-foreground">
               You’re both in {p.sharedGroups.map((g) => g.name).join(' and ')}.

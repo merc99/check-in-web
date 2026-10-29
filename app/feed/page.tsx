@@ -42,6 +42,7 @@ import {
 import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
+import { tierOf } from '@/lib/mastery'
 import { useDesktop } from '@/lib/viewport'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS } from '@/lib/colors'
@@ -111,7 +112,8 @@ export default function FeedPage() {
           const sticker = document.querySelector(`[data-person="${item.user.id}"]`)
           if (sticker) burstFrom(sticker, [`--${item.user.color}`, 'white', '--primary'], 22)
         })
-        live({ user: item.user, message: <>{name} just checked in</>, onTap: scrollTop })
+        const tier = item.milestone ? tierOf(item.milestone.tier).name : null
+        live({ user: item.user, message: tier ? <>{name} reached {tier}</> : <>{name} just checked in</>, onTap: scrollTop })
       } else {
         const crew = groups?.find((g) => g.id === item.groupId)?.name ?? 'your crew'
         live({
@@ -186,7 +188,12 @@ export default function FeedPage() {
       }
       // A milestone (fx, F2) gets the reveal card; otherwise one toast says it counted.
       const fresh = earned.find((a) => a.unlocked && !unlockedBefore.has(a.key))
-      if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
+      const tierUp = item.milestone ? tierOf(item.milestone.tier) : null
+      if (tierUp) {
+        // A tier-up is the bigger moment: the reveal shows the tier, in the crew's color.
+        const reveal = { key: `tier-${tierUp.key}`, title: `${tierUp.name} in ${g.name}`, subtitle: `${item.milestone!.sessions} sessions`, glyph: String(tierUp.at), color: g.color, unlocked: true }
+        window.setTimeout(() => setMilestone(reveal), 700)
+      } else if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
       else toast(firstToday && after.streak === 7 ? 'Week one. Seven days in a row.' : 'You showed up. That one’s yours for good.')
     } catch (e) {
       setCheckInOpen(false)
@@ -325,6 +332,8 @@ export default function FeedPage() {
                   onHeart={(on) => react(item.id, HEART, on)}
                   reactions={<Reactions chips={item.reactions} onReact={(emoji, on) => react(item.id, emoji, on)} />}
                   onPersonTap={setProfileId}
+                  crewName={g.name}
+                  crewColor={g.color}
                 />
               </Fragment>
             )
