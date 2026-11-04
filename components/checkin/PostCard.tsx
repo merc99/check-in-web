@@ -11,7 +11,7 @@ import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
 import { SessionDetails } from './SessionDetails'
 import { TIER_HUE, TierMedal } from './TierCard'
-import { crewTint } from './CrewTint'
+import { crewTint, TintMark } from './CrewTint'
 import { Share2 } from 'lucide-react'
 import { Button as UiButton } from '@/components/ui/button'
 import { tierOf } from '@/lib/mastery'
@@ -69,8 +69,9 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
     lastTap.current = { t: now, x: e.clientX, y: e.clientY }
   }
 
-  // A milestone post is the crew's big moment: the whole card wears the tier's own color (green for
-  // Started, fire for Committed...) with a soft glow, and a still holo edge from Seasoned up. The tier
+  // A milestone post is the crew's big moment: a matte printed card with foil in the tier's own color
+  // (green for Started, fire for Committed...), holographic foil from Seasoned up, the session count
+  // pressed into it. The tier
   // shows as one compact line with its coin, not a second card.
   const moment = item.milestone
     ? crewTint(TIER_HUE[item.milestone.tier], ['holo', 'aurora', 'master'].includes(tierOf(item.milestone.tier).material) ? 'holo' : 'glow')
@@ -93,6 +94,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
       )}
       style={moment?.style}
     >
+      {item.milestone && <TintMark>{item.milestone.sessions}</TintMark>}
       <div className="flex items-center gap-3">
         {onPersonTap && !item.isMine ? (
           <button
