@@ -69,6 +69,7 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Brand accent = `primary` (mint)**, a few percent of a screen: the check-in action (`variant="brand"`), "in" states
   (the tally, check badges), your own chart line or bar, `text-primary-ink` for links and mint text, `bg-primary-soft`
   for a delta pill, `ring` for focus. The default primary button is off-white on dark, near-black on light.
+  Selected options (tags, detail chips) use the neutral selected chip (`bg-foreground text-background`), not mint.
   Note: shadcn's `accent` token is a neutral hover fill, not the brand color.
 - **Destructive:** `bg-destructive-soft text-destructive-ink` (soft) or `bg-destructive text-white` (solid, rare).
 - **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
@@ -189,7 +190,7 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **Switch**: renders Bencho's `LiquidToggle`; same API (`checked`, `onChange`, `label`, `disabled`).
 - **TaskRun** (`components/checkin/TaskRun.tsx`, after magpui's agent task list): a list driven by typed events
   (`useTaskRun().emit`): one active step with a turning lemon ring and a timer, sub-lines that fold when it ends, a mint
-  check and rail when done, and a `gate` step that says "Asks first" (or shows the `gate` node) and waits for the person.
+  check and rail when done, and a `gate` step that says "Asks first" in plain muted mono text (or shows the `gate` node) and waits for the person.
   aria-live announces each step; reduced motion stills it.
 - **CrewSurface** (`components/checkin/CrewSurface.tsx`): a crew's own surface, its hue with depth (deeper toward the
   bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
