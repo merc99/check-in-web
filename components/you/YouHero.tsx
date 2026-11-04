@@ -4,13 +4,13 @@ import { Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Avatar } from '@/components/checkin/Avatar'
-import { CrewCover } from '@/components/checkin/CrewCover'
-import { CrewTint } from '@/components/checkin/CrewTint'
+import { CrewTint, engraved, tintWell } from '@/components/checkin/CrewTint'
 import { TierMedal } from '@/components/checkin/TierCard'
 import { RollingCount } from '@/components/fx/RollingCount'
 import type { Hue } from '@/lib/colors'
 import type { MyStats, Person } from '@/lib/data'
 import { tierOf, type TierKey } from '@/lib/mastery'
+import { cn } from '@/lib/utils'
 
 /**
  * The top of You: your own card, in your color (Ben, Nov 2026: make You more appealing). Your avatar,
@@ -35,7 +35,6 @@ export function YouHero({
 
   return (
     <CrewTint hue={person.color as Hue} level="glow" className="mt-6 rounded-xl p-5 [--roll-ms:900ms] lg:p-6">
-      <CrewCover pattern="dots" className="text-(--hue) opacity-20" />
       <Link
         href="/profile/edit"
         aria-label="Edit profile"
@@ -47,7 +46,7 @@ export function YouHero({
       <div className="relative flex items-center gap-4 pr-10 lg:gap-5">
         <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you className="max-sm:size-[84px] max-sm:text-[38px]" />
         <div className="min-w-0 flex-1">
-          <h1 className="wrap-break-word text-[26px] font-medium leading-tight tracking-tight sm:text-[30px]">{person.name}</h1>
+          <h1 className={cn(engraved, 'wrap-break-word text-[26px] font-medium leading-tight tracking-tight sm:text-[30px]')}>{person.name}</h1>
           {handle && <p className="mt-0.5 text-[14px] text-muted-foreground">@{handle}</p>}
           {topTier && (
             <p className="mt-2.5 inline-flex items-center gap-2 rounded-full bg-black/10 py-1 pl-1 pr-3 text-[13px] dark:bg-black/25">
@@ -61,7 +60,7 @@ export function YouHero({
       {bio && <p className="relative mt-4 text-[15px] leading-snug">{bio}</p>}
 
       {/* The numbers: overlays on a hue are dark ink, never white. */}
-      <dl className="relative mt-5 grid grid-cols-[1.3fr_1fr_1fr] divide-x divide-black/10 rounded-lg bg-black/[.06] py-3 dark:divide-white/[.07] dark:bg-black/25">
+      <dl className={cn('relative mt-5 grid grid-cols-[1.3fr_1fr_1fr] divide-x divide-black/10 rounded-lg py-3 dark:divide-white/[.07]', tintWell)}>
         <Figure label="All time" unit="check-ins" big>
           <RollingCount n={n(stats.total)} tight label={`${stats.total} check-ins, all time`} />
         </Figure>

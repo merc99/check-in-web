@@ -155,7 +155,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
-| `CrewTint` glow (soft hue halo, brighter edge; still holo edge from Seasoned) | calm (static) | Milestone posts only |
+| `CrewTint` card (solid hue, white text, one still sheen, lit edge, soft glow; holo hairline from Seasoned) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
 | `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
 | `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
@@ -166,7 +166,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
 **Not used** (judged on `/fx-preview` and the live demo): white pointer lights and glows on colored surfaces,
-dark press shading on cards, metallic text and metal buttons, rarity tiles, parallax art, liquid glass
+dark press shading on cards, metal buttons, metallic text anywhere but `engraved` names on tinted cards, rarity tiles, parallax art, liquid glass
 refraction, light rings as default borders, the full-screen joy takeover.
 
 ## Product components (`components/checkin/`)
@@ -206,17 +206,23 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   screens in the clean UI pass (the feed header, Explore covers and crew-look preview are neutral now); kept for
   the kitchen sink and as a reference.
 - **FeedHeader:** the crew you're in as its own card (Ben, Nov 2026: make the crew obvious, crews look different):
-  a `CrewTint` in the crew's hue, its cover pattern faint on the right (`CrewCover`), its emoji on a solid hue tile,
-  the name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the
-  round gear, the crew's pinned note on a dark ink strip inside the card, then the TodayStrip on phones.
+  a matte `CrewTint` card, its emoji on a solid hue tile,
+  the engraved name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the
+  round gear, the crew's pinned note in a recessed well, then the TodayStrip on phones.
 - **Join requests** (`components/feed/JoinRequests.tsx`, owners only): a dashed row in the "In today" card
   (TodayStrip on phones, CrewHero on desktop): faces + "Jordan wants to join" + Review, which opens a `ui/popover`
   list to accept or decline in place. Gone with the last request.
 - **Crew switcher** (`CrewSwitcherSheet`): each crew is a small copy of its header card (`CrewTint`, cover, emoji
   tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
-- **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue washed into a card, a hue edge and a brighter tone
-  top right; text stays light (dark) or dark (light). `glow` adds a soft hue halo, `holo` a still holo edge. Only on
-  the feed header and the crew switcher (plain), milestone posts (glow; holo from Seasoned up) and `YouHero` (glow).
+- **CrewTint** (`components/checkin/CrewTint.tsx`, Ben, Nov 2026: bright, obvious, high contrast, a little
+  metallic, clean): the hue as a solid, saturated card, the same in light and dark: a mid tone top left deepening
+  toward the bottom right (clamped in oklch so white text holds on every hue), one soft still sheen, a lit top
+  edge, a hairline, a soft glow of the hue underneath and a fine grain. Inside it the theme tokens are remapped:
+  text is white (muted = white 80%), and `card` / `muted` / `border` become dark ink, so chips and buttons on it are
+  ink. `glow` widens the halo (milestone posts, `YouHero`); `holo` adds a still holo hairline (Seasoned and up).
+  Helpers: `engraved` (bright silver lettering: the crew name on the header, your name on You) and `tintWell` (a
+  recessed ink well: the pinned note, your numbers). Only on the feed header, the crew switcher, milestone posts
+  and `YouHero`.
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
 - **You** (revamp, Nov 2026): `YouHero` (`components/you/YouHero.tsx`), your own card as a `CrewTint` glow in your
@@ -269,7 +275,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
   edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card in the **tier's**
-  color (`TIER_HUE`: Started leaf, Habit sky, Committed clay, Seasoned indigo, Expert grape, Master lemon) with a
+  color (`TIER_HUE`: Started leaf, Habit sky, Committed coral, Seasoned indigo, Expert grape, Master lemon) with a
   lighter glow wash (a still holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
   DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px disc
   (`TierBadge.module.css`) in the tier's own palette with a white icon: green sprout, sky calendar, fire flame (lemon →

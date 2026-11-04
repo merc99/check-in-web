@@ -69,8 +69,8 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
     lastTap.current = { t: now, x: e.clientX, y: e.clientY }
   }
 
-  // A milestone post is the crew's big moment: the whole card wears the tier's own color (green for
-  // Started, fire for Committed...) with a soft glow, and a still holo edge from Seasoned up. The tier
+  // A milestone post is the crew's big moment: a matte printed card with an edge in the tier's own
+  // color (green for Started, fire for Committed...). The tier
   // shows as one compact line with its coin, not a second card.
   const moment = item.milestone
     ? crewTint(TIER_HUE[item.milestone.tier], ['holo', 'aurora', 'master'].includes(tierOf(item.milestone.tier).material) ? 'holo' : 'glow')

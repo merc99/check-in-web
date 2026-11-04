@@ -4,7 +4,6 @@ import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/checkin/Button'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
-import { CrewCover } from '@/components/checkin/CrewCover'
 import { crewTint } from '@/components/checkin/CrewTint'
 import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
 import { afterSheetClose, ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
@@ -56,7 +55,6 @@ export function CrewSwitcherSheet({
                   )}
                   style={t.style}
                 >
-                  <CrewCover pattern={g.pattern} className="text-(--hue) opacity-25" />
                   <CrewBlock name={g.name} color={g.color} emoji={g.emoji} className={cn('relative', HUE_CLASS[g.color].solid, 'text-on-color')} />
                   <span className="relative min-w-0 flex-1">
                     <span className="block truncate text-[16px] font-medium">{g.name}</span>

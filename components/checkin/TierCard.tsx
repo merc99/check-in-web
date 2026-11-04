@@ -45,7 +45,7 @@ const BADGE_ICON: Record<TierKey, LucideIcon> = {
 export const TIER_HUE: Record<TierKey, Hue> = {
   started: 'leaf',
   habit: 'sky',
-  committed: 'clay',
+  committed: 'coral',
   seasoned: 'indigo',
   expert: 'grape',
   master: 'lemon',

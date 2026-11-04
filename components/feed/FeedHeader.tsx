@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from 'react'
 import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
-import { CrewCover } from '@/components/checkin/CrewCover'
-import { CrewTint } from '@/components/checkin/CrewTint'
+import { CrewTint, engraved, tintWell } from '@/components/checkin/CrewTint'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon, PinIcon } from '@/components/checkin/icons'
 import { cn } from '@/lib/utils'
@@ -77,12 +76,11 @@ export function FeedHeader({
       </header>
 
       {/* The crew you're looking at, as its own card (Ben, Nov 2026: make it obvious which crew this is):
-          the crew's hue washed in, its cover pattern faint on the right, its emoji on a solid tile, the
+          a matte printed card, its emoji on a solid tile, the
           name (tap to switch crews), one line of facts and the gear. The wrapper takes the swipe
           (touch only; pan-y keeps the page scrolling up and down). */}
       <div ref={swipe} className={cn('mb-4 pt-5', onSwipe && 'touch-pan-y')}>
         <CrewTint hue={group.color} className="rounded-xl p-4 lg:p-5">
-        <CrewCover pattern={group.pattern} className="text-(--hue) opacity-25" />
         <div className="relative flex items-center gap-3 lg:gap-4">
           <CrewBlock name={group.name} color={group.color} emoji={group.emoji} size="lg" className={cn(HUE_CLASS[group.color].solid, 'text-on-color lg:size-16 lg:text-[28px]')} />
           <div className="min-w-0 flex-1">
@@ -94,7 +92,7 @@ export function FeedHeader({
                 className="group hit-44 inline-flex max-w-full items-center gap-2 text-left text-[22px] font-medium leading-[1.12] tracking-tighter sm:text-[28px]"
               >
                 {/* Long names wrap to a second line on phones rather than lose their end. */}
-                <span className="line-clamp-2 break-words">{group.name}</span>
+                <span className={cn('line-clamp-2 break-words', engraved)}>{group.name}</span>
                 <ChevronIcon
                   size={18}
                   className="flex-none text-muted-foreground transition-[transform,color] duration-150 ease-out group-hover:translate-y-px group-hover:text-foreground"
@@ -128,8 +126,8 @@ export function FeedHeader({
           </IconLink>
         </div>
         {pinned && (
-          // The crew's pinned note, on a dark ink strip inside the card (overlays on a crew's hue are ink, never white).
-          <p className="relative mt-4 flex items-start gap-2 rounded-lg bg-black/[.06] px-3 py-2 text-[14px] leading-snug dark:bg-black/25">
+          // The crew's pinned note, in a recessed well on the card.
+          <p className={cn('relative mt-4 flex items-start gap-2 rounded-lg px-3 py-2 text-[14px] leading-snug', tintWell)}>
             <PinIcon size={15} className="mt-[2px] flex-none text-muted-foreground" />
             <span className="sr-only">Pinned: </span>
             {pinned}
