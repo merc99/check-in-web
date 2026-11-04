@@ -25,6 +25,7 @@ import type {
   Me,
   MembershipStatus,
   MyStats,
+  MyYear,
   NewGroupInput,
   Person,
   Profile,
@@ -592,6 +593,26 @@ export async function getMyStats(): Promise<MyStats> {
     checkedInToday: days.has(today()),
     days: Array.from(days).sort(),
   }
+}
+
+export async function getMyYear(): Promise<MyYear> {
+  await settle()
+  const mine = checkInsOf((c) => c.user_id === ME_ID)
+  const year = new Date().getFullYear()
+  const counts: Record<LocalDate, number> = {}
+  for (const c of mine) counts[c.local_date] = (counts[c.local_date] ?? 0) + 1
+  const crews = alive(db().group_members)
+    .filter((m) => m.user_id === ME_ID)
+    .map((m) => group(m.group_id))
+    .map((g) => ({
+      id: g.id,
+      name: g.name,
+      color: g.color,
+      emoji: g.emoji ?? null,
+      count: mine.filter((c) => c.group_id === g.id && c.local_date.startsWith(`${year}-`)).length,
+    }))
+    .sort((a, b) => b.count - a.count)
+  return { year, counts, crews }
 }
 
 export async function getMyInsights(): Promise<MyInsights> {

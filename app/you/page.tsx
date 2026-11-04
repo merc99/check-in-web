@@ -7,6 +7,7 @@ import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
 import { ShowingUp } from '@/components/you/ShowingUp'
 import { YouHero } from '@/components/you/YouHero'
+import { YearActivity } from '@/components/checkin/YearActivity'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
@@ -29,7 +30,7 @@ import { Binder } from '@/components/checkin/Binder'
 import { shareCard } from '@/lib/shareCard'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
-import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, getBinder, pinCard, useQuery } from '@/lib/data'
+import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, getMyYear, getBinder, pinCard, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
 import { useDragScroll } from '@/lib/useDragScroll'
 import { PREF, usePref } from '@/lib/prefs'
@@ -45,6 +46,7 @@ export default function YouPage() {
   const meId = me.data?.person.id
   const binder = useQuery(() => (meId ? getBinder(meId) : Promise.resolve(null)), [meId], ['check_ins', 'groups', 'group_members', 'vouches', 'profiles'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
+  const year = useQuery(getMyYear, [], ['check_ins', 'groups', 'group_members'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
@@ -111,6 +113,14 @@ export default function YouPage() {
           {stats.data.checkedInToday ? 'You’re in for today.' : 'Today’s still open. No rush.'}
         </p>
       </Card>
+
+      {/* The year in one card: the last 31 weeks, and your top crews behind the toggle. */}
+      {year.data && (
+        <>
+          <SectionTitle title="Your year" />
+          <YearActivity counts={year.data.counts} crews={year.data.crews} />
+        </>
+      )}
 
       {/* Mastery: each crew's skill, the tier you've reached and the next one. */}
       {skills.data && skills.data.length > 0 && (

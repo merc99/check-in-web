@@ -329,7 +329,7 @@ export default function KitchenSink() {
       </Section>
 
       <Section title="Year activity" note="the year · top crews · hover or arrow keys">
-        <YearActivity {...yearDemo} />
+        <YearActivity {...yearDemo} className="max-w-[340px]" />
       </Section>
 
       <Section title="Overlays" note="sheet · arc sheet · toast · live pill">

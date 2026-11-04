@@ -25,7 +25,7 @@ const LEVEL = ['bg-muted', 'bg-primary/25', 'bg-primary/45', 'bg-primary/70', 'b
 const DAY = ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays']
 
 /**
- * Your year in one small card: the check-in count for the year over the last 31 weeks as a mint
+ * Your year in one small card (340:172, filling its column): the check-in count for the year over the last 31 weeks as a mint
  * grid, and your top three crews behind the round toggle. The card keeps its size while the two views
  * crossfade (280ms, the entering one rises 8px, rows stagger 35ms); hover or focus a day for a pale
  * tooltip. The grid is one tab stop: arrow keys move by day (up/down) and week (left/right).
@@ -72,7 +72,7 @@ export function YearActivity({
   return (
     <section
       aria-label="Your year"
-      className={cn('relative h-[172px] w-full max-w-[340px] rounded-[18px] border bg-card edge-lit', className)}
+      className={cn('relative aspect-[340/172] w-full min-h-[172px] rounded-[18px] border bg-card edge-lit', className)}
     >
       <AnimatePresence initial={false}>
         {view === 'year' ? (
