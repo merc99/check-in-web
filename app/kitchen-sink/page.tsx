@@ -215,9 +215,9 @@ export default function KitchenSink() {
         )}
       </Section>
 
-      <Section title="Tier cards in use" note="verified · portrait">
+      <Section title="Tier cards in use" note="landscape · portrait">
         <div className="flex flex-col gap-4">
-          <TierCard tier="committed" skill="fitness" crewName="DIALED" color="sky" sessions={50} verified />
+          <TierCard tier="committed" skill="fitness" crewName="DIALED" color="sky" sessions={50} />
           <TierCard tier="seasoned" skill="art" crewName="Sketchbook Daily" color="grape" sessions={150} portrait className="max-w-[180px]" />
         </div>
       </Section>

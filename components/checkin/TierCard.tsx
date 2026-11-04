@@ -1,4 +1,4 @@
-import { BadgeCheck, CalendarCheck, Crown, Flame, Gem, Mountain, Sprout, type LucideIcon } from 'lucide-react'
+import { CalendarCheck, Crown, Flame, Gem, Mountain, Sprout, type LucideIcon } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Foil, FoilLight } from '@/components/fx/Foil'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
@@ -27,8 +27,6 @@ export interface TierCardProps {
   locked?: boolean
   /** Master cards: their number ("No. 0007"). */
   serial?: number | null
-  /** Two or more crewmates vouched for it. */
-  verified?: boolean
   size?: 'md' | 'sm'
   /** Binder: a trading-card shape (medal on top, centered words). */
   portrait?: boolean
@@ -54,7 +52,7 @@ export const TIER_HUE: Record<TierKey, Hue> = {
 }
 
 /**
- * The tier as a glossy coin in its own colors, for a milestone post's line (TierBadge.module.css):
+ * The tier as a flat tile in its own colors, for a milestone post's line (TierBadge.module.css):
  * green sprout, sky calendar, fire flame, dusk mountain, prism gem, gold crown. The post's text says
  * the tier and the count, so it's decorative.
  */
@@ -63,7 +61,7 @@ export function TierMedal({ tier, className }: { tier: TierKey; color?: Hue; cla
   const prism = tier === 'seasoned' || tier === 'expert' || tier === 'master'
   return (
     <span aria-hidden="true" className={cn(badge.badge, badge[tier], prism && badge.prism, className)}>
-      <Icon size={21} strokeWidth={2} />
+      <Icon size={20} strokeWidth={2} />
     </span>
   )
 }
@@ -72,7 +70,7 @@ export function TierMedal({ tier, className }: { tier: TierKey; color?: Hue; cla
  * A mastery tier as a card: the material says the tier (paper, enamel, foil, holo, holo with an
  * aurora edge), the medal shows the tier's session number. Foil and up carry the sheen (fx/Foil); a tap sweeps it on touch, nothing moves on hover.
  */
-export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, verified, size = 'md', portrait, className }: TierCardProps) {
+export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, size = 'md', portrait, className }: TierCardProps) {
   const t = tierOf(tier)
   const material = locked ? styles.locked : MATERIAL[t.material]
   const shiny = !locked && (t.material === 'foil' || t.material === 'holo' || t.material === 'aurora')
@@ -81,7 +79,7 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
       className={cn(styles.card, material, size === 'sm' && styles.sm, portrait && styles.portrait, className)}
       style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}
       role="img"
-      aria-label={locked ? `${t.name}, ${t.at.toLocaleString()} sessions, not reached yet` : `${t.name} in ${crewName} (${SKILL_LABEL[skill].toLowerCase()}), ${sessions} sessions${verified ? ', verified' : ''}`}
+      aria-label={locked ? `${t.name}, ${t.at.toLocaleString()} sessions, not reached yet` : `${t.name} in ${crewName} (${SKILL_LABEL[skill].toLowerCase()}), ${sessions} sessions`}
     >
       <span aria-hidden="true" className={styles.medal}>
         {t.at >= 1000 ? '1K' : t.at}
@@ -96,11 +94,6 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
           {!locked && serial ? `, No. ${String(serial).padStart(4, '0')}` : ''}
         </span>
       </span>
-      {verified && !locked && (
-        <span aria-hidden="true" className={cn('absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-on-color py-[3px] text-[12px] font-bold text-white', portrait ? 'px-[5px]' : 'px-2')}>
-          <BadgeCheck size={13} strokeWidth={2.25} /> {!portrait && 'Verified'}
-        </span>
-      )}
       {shiny && <FoilLight />}
     </div>
   )

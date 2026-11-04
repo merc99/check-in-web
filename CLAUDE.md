@@ -263,10 +263,10 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card in the **tier's**
   color (`TIER_HUE`: Started leaf, Habit sky, Committed clay, Seasoned indigo, Expert grape, Master lemon) with a
   lighter glow wash (a still holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
-  DIALED"; vouches under the note, then the reactions (and Share card on yours). `TierMedal` is a glossy 48px coin
+  DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px rounded tile
   (`TierBadge.module.css`) in the tier's own palette with a white icon: green sprout, sky calendar, fire flame (lemon →
-  clay → coral), dusk mountain, prism gem, gold crown; a lit top, bright rim and glow, a still holo ring from
-  Seasoned. No numbers, no dark orb (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
+  clay → coral), dusk mountain, prism gem, gold crown; a smooth gradient, a hairline lit edge and a soft glow, a still
+  holo ring from Seasoned. No numbers, no orb or gloss (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
   week", with sessions to the next tier and a Perks list; a crewmate's cards on their profile sheet.
 - **Strava (mocked):** `CheckIn.source` (`manual` | `strava`). You → Settings → Strava, or "Connect Strava" in the
   sheet, turns on the demo (sample activities, `getStravaActivities`). Fitness crews get "Add from Strava"; posts say
@@ -282,8 +282,8 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   then rarity, Share card and Keep going. Every tier plays from the kitchen sink.
 - **Cheers:** retired from screens (Ben, Nov 2026: redundant with reactions). The `cheers` table and `cheer()` stay in
   the data layer; the demo crew now celebrates milestone posts with 🙌 👏 🔥 reactions.
-- **Vouches** (`vouches` table): crewmates vouch for Committed-and-up tiers; two make it **Verified** (a mark on the
-  card, who vouched on posts, the trophy case and the card's back). You can't vouch for yourself.
+- **Vouches:** retired from screens (Ben, Nov 2026: it added nothing). The `vouches` table and `vouch()` stay in the
+  data layer; nothing shows "Verified" and the demo crew no longer vouches.
 - **With:** a check-in can name crewmates who did the session with you (`CheckIn.with_user_ids`, `FeedItem.with`;
   same crew only, never yourself, up to six). Picked in the sheet ("Just me" when empty); posts read "You with Maya".
   The demo crew sometimes tags a crewmate who's already in.
@@ -296,8 +296,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Achievements per skill** (`lib/mastery-achievements.ts`): obtainable goals from sessions and details; "14 of 17"
   in the trophy case. **Crew challenge** (`getCrewChallenge`, `ChallengeBar`): a monthly shared target a stretch
   above the crew's pace, on You, in the today panel and the desktop rail. Never a countdown.
-- **Demo:** the crew reacts to milestone posts within seconds and vouches for big tiers a little later (never as you);
-  now and then a crewmate vouches for your unverified card. Ben's Committed starts one vouch short.
+- **Demo:** the crew reacts to milestone posts within seconds (🙌 👏 🔥).
 
 ## Demo AI (`lib/ai`)
 A demo only: **no model, no API key, no server calls.** `lib/ai/writer.ts` writes from the crew's own data in the

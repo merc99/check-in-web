@@ -12,7 +12,7 @@ import { HEART_PATH } from './icons'
 import { SessionDetails } from './SessionDetails'
 import { TIER_HUE, TierMedal } from './TierCard'
 import { crewTint } from './CrewTint'
-import { BadgeCheck, Share2 } from 'lucide-react'
+import { Share2 } from 'lucide-react'
 import { Button as UiButton } from '@/components/ui/button'
 import { tierOf } from '@/lib/mastery'
 import type { Hue } from '@/lib/colors'
@@ -31,13 +31,12 @@ export interface PostCardProps {
   /** The crew this post is in, for a milestone post's line (crewColor is kept for callers; the card wears the tier's color). */
   crewName?: string
   crewColor?: Hue
-  /** Milestone posts: vouch for the tier, share your own card. */
-  onVouch?: (on: boolean) => void
+  /** Milestone posts: share your own card. */
   onShare?: () => void
 }
 
 /** One check-in. Heart pill, who hearted, and double-tap anywhere on the card to heart it. */
-export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, onVouch, onShare }: PostCardProps) {
+export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, onShare }: PostCardProps) {
   const [burst, setBurst] = useState(0)
   const [pop, setPop] = useState(false)
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
@@ -151,10 +150,9 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             ))}
           </div>
         )}
-        {/* Milestone: vouches, then the reactions (and Share on yours) in one row. */}
+        {/* Milestone: the reactions (and Share on yours) in one row. */}
         {item.milestone && (
           <>
-            <VouchLine milestone={item.milestone} isMine={item.isMine} name={item.user.name} onVouch={onVouch} />
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {reactions}
               {item.isMine && onShare && (
@@ -219,45 +217,6 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         </span>
       )}
     </article>
-  )
-}
-
-/**
- * Under a milestone's tier card (Committed and up): verified, with who vouched; or how many vouches
- * it still needs; or, on a crewmate's, a button to vouch for it.
- */
-function VouchLine({
-  milestone: m, isMine, name, onVouch,
-}: { milestone: NonNullable<FeedItem['milestone']>; isMine: boolean; name: string; onVouch?: (on: boolean) => void }) {
-  const v = m.vouches
-  if (!v) return null
-  const names = v.people.map((p) => p.name)
-  if (v.verified) {
-    return (
-      <p className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary-ink">
-        <BadgeCheck size={16} strokeWidth={2} aria-hidden="true" /> Verified
-        <span className="font-normal text-muted-foreground">vouched by {names.slice(0, 3).join(', ')}{names.length > 3 ? ` and ${names.length - 3} more` : ''}</span>
-      </p>
-    )
-  }
-  if (isMine) {
-    return <p className="mt-2 text-[13px] text-muted-foreground">{2 - v.count} more vouch{2 - v.count === 1 ? '' : 'es'} from your crew to verify it</p>
-  }
-  return (
-    <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
-      {v.byMe ? (
-        <span className="inline-flex items-center gap-1.5 font-medium text-primary-ink">
-          <BadgeCheck size={16} strokeWidth={2} aria-hidden="true" /> You vouched
-        </span>
-      ) : (
-        onVouch && (
-          <UiButton size="sm" variant="secondary" onClick={() => onVouch(true)}>
-            <BadgeCheck size={15} /> Vouch for {name}
-          </UiButton>
-        )
-      )}
-      <span>{v.count ? `${v.count} of 2 vouches` : 'Two vouches verify it'}</span>
-    </div>
   )
 }
 

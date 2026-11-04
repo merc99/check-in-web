@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { CheckIn } from '@/lib/data/types'
 import { localDate } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
-import { TIERS, tierOf, type TierKey } from '@/lib/mastery'
-import { insertCheckIn, onCheckIn, onWave, setReaction, setVouch } from './api'
+import { insertCheckIn, onCheckIn, onWave, setReaction } from './api'
 import { db, onChange } from './db'
 import { ME_ID, NOTES } from './seed'
 
@@ -81,30 +80,6 @@ function simulateCheers(checkInId: string, groupId: string, authorId: string, sc
   fans.forEach((uid, i) => schedule(() => setReaction(uid, checkInId, party[Math.floor(Math.random() * party.length)], true), 2200 + i * 1800 + Math.random() * 1500))
 }
 
-/** Two crewmates vouch for a fresh Committed-and-up tier, a little after the cheers. */
-function simulateVouches(userId: string, groupId: string, tier: TierKey, schedule: (fn: () => void, ms: number) => void) {
-  if (tierOf(tier).at < tierOf('committed').at) return
-  const crew = db().group_members.filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== userId && m.user_id !== ME_ID).map((m) => m.user_id)
-  ;[...crew].sort(() => Math.random() - 0.5).slice(0, 2).forEach((uid, i) => schedule(() => setVouch(uid, userId, groupId, tier, true), 8000 + i * 4000 + Math.random() * 3000))
-}
-
-/** Now and then a crewmate vouches for one of your tiers that isn't verified yet. */
-function simulateVouchForMe(): boolean {
-  const t = db()
-  for (const m of t.group_members.filter((x) => x.user_id === ME_ID && !x.deleted_at)) {
-    const n = t.check_ins.filter((c) => c.user_id === ME_ID && c.group_id === m.group_id && !c.deleted_at).length
-    for (const tier of TIERS.filter((x) => x.at >= 50 && n >= x.at)) {
-      const have = t.vouches.filter((v) => v.user_id === ME_ID && v.group_id === m.group_id && v.tier === tier.key && !v.deleted_at)
-      if (have.length >= 2) continue
-      const voucher = t.group_members.find((x) => x.group_id === m.group_id && !x.deleted_at && x.user_id !== ME_ID && !have.some((v) => v.voucher_id === x.user_id))
-      if (!voucher) continue
-      setVouch(voucher.user_id, ME_ID, m.group_id, tier.key, true)
-      return true
-    }
-  }
-  return false
-}
-
 /** Mount once near the top of the app. Pass the crew on screen so most arrivals land there. */
 export function useLiveSimulation(activeGroupId: string | null = null, enabled = SIMULATE_LIVE) {
   const active = useRef(activeGroupId)
@@ -120,7 +95,6 @@ export function useLiveSimulation(activeGroupId: string | null = null, enabled =
       timer = setTimeout(() => {
         if (!document.hidden) {
           simulateArrival(active.current)
-          if (Math.random() < 0.3) simulateVouchForMe()
         }
         schedule()
       }, 9000 + Math.random() * 7000)
@@ -148,7 +122,7 @@ export function useLiveSimulation(activeGroupId: string | null = null, enabled =
       timers.add(t)
     })
 
-    // Milestone posts (anyone's) get cheers, and the big tiers get vouches.
+    // Milestone posts (anyone's) get a few celebratory reactions.
     const later = (fn: () => void, ms: number) => {
       const t = setTimeout(() => {
         timers.delete(t)
@@ -163,7 +137,6 @@ export function useLiveSimulation(activeGroupId: string | null = null, enabled =
     const stopMilestones = onCheckIn(null, (item) => {
       if (!item.milestone) return
       simulateCheers(item.id, item.groupId, item.user.id, later)
-      simulateVouches(item.user.id, item.groupId, item.milestone.tier, later)
     })
 
     return () => {
