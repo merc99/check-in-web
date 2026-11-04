@@ -56,12 +56,12 @@ export const TIER_HUE: Record<TierKey, Hue> = {
  * green sprout, sky calendar, fire flame, dusk mountain, prism gem, gold crown. The post's text says
  * the tier and the count, so it's decorative.
  */
-export function TierMedal({ tier, className }: { tier: TierKey; color?: Hue; className?: string }) {
+export function TierMedal({ tier, size = 'md', className }: { tier: TierKey; color?: Hue; size?: 'md' | 'sm'; className?: string }) {
   const Icon = BADGE_ICON[tier]
   const prism = tier === 'seasoned' || tier === 'expert' || tier === 'master'
   return (
-    <span aria-hidden="true" className={cn(badge.badge, badge[tier], prism && badge.prism, className)}>
-      <Icon size={20} strokeWidth={2} />
+    <span aria-hidden="true" className={cn(badge.badge, badge[tier], prism && badge.prism, size === 'sm' && badge.sm, className)}>
+      <Icon size={size === 'sm' ? 14 : 20} strokeWidth={2} />
     </span>
   )
 }
