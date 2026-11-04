@@ -36,7 +36,7 @@ When this file and the prototype disagree, this file wins.
 - `components/arc/`: Arc installs (motion components). Restyle via tokens, not by forking unless needed.
 - `components/bencho/`: Bencho components (MIT, bencho.dev/licence), their CSS in `app/bencho.css` (imported by
   globals.css), Bencho tokens mapped to ours. On screens: `LiquidToggle` (inside `Switch`), `RollingCounter` (New crew,
-  max size; session time and pages in `DetailsEditor`), `StackedBars` (You, "Your days" via
+  max size), `StackedBars` (You, "Your days" via
   `components/you/CrewDays.tsx`), `CreateMenu variant="rail"` (the desktop rail's +), `Assignees inline` ("With" in
   the check-in sheet). `MagneticSelect` (crew covers as a cluster) and the rest live on the kitchen sink's
   Bencho shelf only. Keep their comments; lint exceptions sit at the top of each file with a reason.
@@ -158,7 +158,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
 | `CrewTint` glow (soft hue halo, brighter edge; still holo edge from Seasoned) | calm (static) | Milestone posts only |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
-| `RollingCounter` (digits roll, drag or step) | calm | New crew, max size; session time and pages in the check-in sheet |
+| `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
 | `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
 | `Assignees` (faces drop into the pill, list unfolds) | calm | "With" in the check-in sheet |
 | `StackedBars` (grow in once, scrub ring + tooltip) | calm | You, "Your days" by crew |
@@ -203,8 +203,9 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   the kitchen sink and as a reference.
 - **FeedHeader:** the crew you're in as its own card (Ben, Nov 2026: make the crew obvious, crews look different):
   a `CrewTint` in the crew's hue, its cover pattern faint on the right (`CrewCover`), its emoji on a solid hue tile,
-  the name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the round
-  gear, then the TodayStrip on phones. Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
+  the name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the
+  join requests pill (owners only, `components/feed/JoinRequests.tsx`: faces + count, opens a `ui/popover` list to
+  accept or decline in place; gone with the last request), the round gear, then the TodayStrip on phones. Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
 - **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue washed into a card, a hue edge and a brighter tone
   top right; text stays light (dark) or dark (light). `glow` adds a soft hue halo, `holo` a still holo edge. Only on
   the feed header (plain) and milestone posts (glow; holo from Seasoned up).
@@ -250,9 +251,10 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Tiers** by sessions: Started 1, Habit 10, Committed 50, Seasoned 150, Expert 365, Master 1,000. `tierFor`,
   `nextTier`, `tierReachedAt`. Data: `getMySkills()`, `getSkillsOf(userId)`; a `FeedItem.milestone` marks the
   session that reached a tier.
-- **Session details** (`CheckIn.details`, optional): an "Add details" section in the check-in sheet
-  (`components/feed/DetailsEditor.tsx`); quiet icon rows on posts (`SessionDetails`). Loose check-ins stay the default.
-  "Tidy with AI" (demo) spots details in a rough note.
+- **Session details** (`CheckIn.details`, optional): only from a picked Strava activity now. The details form is gone
+  (Ben, Nov 2026: a check-in is a quick thing, so no clicking through fields). The sheet is the note, "Add photo",
+  "Add from Strava" (fitness crews), tags (pick or make one) and "With". Posts show details as quiet icon rows
+  (`SessionDetails`); seeded posts still carry some.
 - **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
   edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card with a glow (a still
@@ -297,8 +299,8 @@ brand voice; `lib/ai/demo.ts` delivers it like a model would (a short "reading" 
   `TaskRun` (read, count, pick quotes, write, then "Share with the crew" asks first), the text streams in with a caret
   during the write step, and "Copy to share" copies it. Each "Rewrite" uses different phrasing and quotes
   different notes. Labeled "Demo AI, written on your device from this week's check-ins". Data: `getCrewWeek`.
-- **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" runs a `TaskRun` (read your note, spot
-  the details, match your crew's tags, then "Use the tidy version" asks first) and suggests a tidier note and up to
+- **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" runs a `TaskRun` (read your note,
+  match your crew's tags, then "Use the tidy version" asks first) and suggests a tidier note and up to
   three tags from the crew's own list; "Use this" / "Keep mine".
 - Ben chose to keep it a demo (Oct 2026). If a real model is ever wanted, replace the two functions in `demo.ts`
   with calls to a server route; the screens don't change.

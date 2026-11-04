@@ -1,6 +1,6 @@
 'use client'
 
-import { ImagePlus, Plus, Route, Sparkles } from 'lucide-react'
+import { ImagePlus, Route, Sparkles, X } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button as UiButton } from '@/components/ui/button'
 import { Assignees } from '@/components/bencho/Assignees'
@@ -14,9 +14,9 @@ import { CheckIcon } from '@/components/checkin/icons'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { SearchInput } from '@/components/checkin/SearchInput'
 import { TaskRun, useTaskRun, type TaskStep } from '@/components/checkin/TaskRun'
-import { DetailsEditor } from '@/components/feed/DetailsEditor'
 import { StravaPicker } from '@/components/feed/StravaPicker'
-import { cleanDetails, type CheckInDetails, type CheckInSource, type SkillKind } from '@/lib/mastery'
+import type { StravaActivity } from '@/lib/data'
+import type { CheckInDetails, CheckInSource, SkillKind } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -27,28 +27,16 @@ const STAMP_MS = 520
 // Tidy with AI, shown as a careful helper working down a list; the last step waits for you.
 const TIDY_STEPS: TaskStep[] = [
   { id: 'read', label: 'Read your note' },
-  { id: 'details', label: 'Spot the details' },
   { id: 'tags', label: 'Match your crew’s tags' },
   { id: 'use', label: 'Use the tidy version', gate: true },
 ]
-/** "45 min, 5 km" from the details a suggestion spotted. */
-function detailSummary(d: CheckInDetails) {
-  const out: string[] = []
-  if (d.activity) out.push(d.activity)
-  if (d.minutes) out.push(`${d.minutes} min`)
-  if (d.distanceKm) out.push(`${d.distanceKm} km`)
-  if (d.pages) out.push(`${d.pages} pages`)
-  if (d.book) out.push(d.book)
-  if (d.items?.length) out.push(d.items.join(', '))
-  return out.join(', ')
-}
 
 export interface CheckInDraft {
   /** A proof photo (demo: an object URL for an image picked on this device). */
   photoUrl: string | null
   note: string
   tags: string[]
-  /** Optional specifics; null for a loose check-in. */
+  /** Specifics, only from a picked Strava activity; null otherwise. */
   details: CheckInDetails | null
   /** Picked from a Strava activity (fitness crews). */
   source: CheckInSource
@@ -60,7 +48,8 @@ export interface CheckInDraft {
 export type Crewmate = { id: string; name: string; color: Hue; note: string }
 
 /**
- * Note + tags, then the stamp: the button shrinks to a mint circle and draws a check
+ * Kept short on purpose (Ben, Nov 2026: a check-in is a quick thing): a note, a photo or a Strava
+ * activity if you like, tags (pick or make one), who you did it with. Then the stamp: the button shrinks to a mint circle and draws a check
  * before `onSubmit` runs. New tags only get created if you actually check in.
  */
 export function CheckInSheet({
@@ -78,12 +67,9 @@ export function CheckInSheet({
   const [added, setAdded] = useState<string[]>([])
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [stamping, setStamping] = useState(false)
-  // Session details: collapsed until asked for (loose is the default).
-  const [details, setDetails] = useState<CheckInDetails>({})
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  // Strava (fitness crews, demo): a picked activity fills the details.
+  // Strava (fitness crews, demo): a picked activity brings its own details to the post.
   const [stravaOpen, setStravaOpen] = useState(false)
-  const [stravaId, setStravaId] = useState<string | null>(null)
+  const [strava, setStrava] = useState<StravaActivity | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
   const [withIds, setWithIds] = useState<string[]>([])
   const photoInput = useRef<HTMLInputElement>(null)
@@ -108,10 +94,8 @@ export function CheckInSheet({
       setNote('')
       setAdded([])
       setSelected(new Set())
-      setDetails({})
-      setDetailsOpen(false)
       setStravaOpen(false)
-      setStravaId(null)
+      setStrava(null)
       setPhoto(null)
       setWithIds([])
     }
@@ -134,11 +118,6 @@ export function CheckInSheet({
       await beat(380)
       emit({ type: 'sub-done', step: 'read', id: 'r', text: `Read ${n} words` })
       const s = await pending
-      emit({ type: 'step-start', step: 'details' })
-      emit({ type: 'sub-start', step: 'details', id: 'd', text: 'Looking for times and numbers' })
-      await beat(480)
-      emit({ type: 'sub-done', step: 'details', id: 'd', text: s.details ? `Found ${detailSummary(s.details)}` : 'Nothing specific, and that’s fine' })
-      await beat(260)
       emit({ type: 'step-start', step: 'tags' })
       emit({ type: 'sub-start', step: 'tags', id: 't', text: `Checking ${tags.length} crew tags` })
       await beat(420)
@@ -153,10 +132,6 @@ export function CheckInSheet({
   const applyTidy = (s: AssistSuggestion) => {
     setNote(s.note)
     setSelected((prev) => new Set([...prev, ...s.tags]))
-    if (s.details) {
-      setDetails((d) => ({ ...d, ...s.details }))
-      setDetailsOpen(true)
-    }
     emit({ type: 'step-start', step: 'use' })
     emit({ type: 'step-done', step: 'use' })
     setTidy(null)
@@ -192,8 +167,8 @@ export function CheckInSheet({
     } catch {
       // Not supported everywhere; the stamp is the feedback that matters.
     }
-    const d = detailsOpen ? cleanDetails(details) : null
-    const source: CheckInSource = stravaId && d ? 'strava' : 'manual'
+    const d: CheckInDetails | null = strava ? { activity: strava.type, minutes: strava.minutes, distanceKm: strava.distanceKm } : null
+    const source: CheckInSource = strava ? 'strava' : 'manual'
     setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d, source, photoUrl: photo, with: withIds }), prefersReducedMotion() ? 0 : STAMP_MS)
   }
 
@@ -244,7 +219,6 @@ export function CheckInSheet({
                   <Sparkles size={13} strokeWidth={1.75} aria-hidden="true" /> Suggestion
                 </p>
                 <p className="mt-1 text-[15px] leading-[1.45]">{suggestion.note}</p>
-                {suggestion.details && <SessionDetails details={suggestion.details} skill={group.skillKind} className="mt-2" />}
                 {suggestion.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-[6px]">
                     {suggestion.tags.map((t) => (
@@ -265,48 +239,17 @@ export function CheckInSheet({
           </div>
         )}
 
-        {/* Session details: specific or loose. Fields follow the crew's skill. */}
-        {detailsOpen ? (
-          <div className="rounded-md border bg-muted/50 p-3">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-[13px] font-medium">
-                Details <span className="font-normal text-muted-foreground">{stravaId ? 'from Strava' : 'optional'}</span>
-              </p>
-              <span className="-mr-2 flex">
-                {!photo && (
-                  <UiButton size="sm" variant="ghost" onClick={() => photoInput.current?.click()}>
-                    <ImagePlus size={15} /> Add photo
-                  </UiButton>
-                )}
-                <UiButton
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setDetailsOpen(false)
-                    setStravaId(null)
-                  }}
-                >
-                  Remove
-                </UiButton>
-              </span>
-            </div>
-            <DetailsEditor skill={group.skillKind} value={details} onChange={setDetails} />
-          </div>
-        ) : (
-          <div className="-mt-2 flex flex-wrap gap-1">
-            <UiButton size="sm" variant="ghost" className="-ml-3" onClick={() => setDetailsOpen(true)}>
-              <Plus size={15} /> Add details
+        {/* Extras, all optional and one tap each: a proof photo, a Strava activity (fitness crews). */}
+        <div className="-mt-2 flex flex-wrap gap-1">
+          <UiButton size="sm" variant="ghost" className="-ml-3" onClick={() => photoInput.current?.click()}>
+            <ImagePlus size={15} /> {photo ? 'Change photo' : 'Add photo'}
+          </UiButton>
+          {group.skillKind === 'fitness' && !strava && (
+            <UiButton size="sm" variant="ghost" aria-expanded={stravaOpen} onClick={() => setStravaOpen((o) => !o)}>
+              <Route size={15} /> Add from Strava
             </UiButton>
-            <UiButton size="sm" variant="ghost" onClick={() => photoInput.current?.click()}>
-              <ImagePlus size={15} /> {photo ? 'Change photo' : 'Add photo'}
-            </UiButton>
-            {group.skillKind === 'fitness' && (
-              <UiButton size="sm" variant="ghost" aria-expanded={stravaOpen} onClick={() => setStravaOpen((o) => !o)}>
-                <Route size={15} /> Add from Strava
-              </UiButton>
-            )}
-          </div>
-        )}
+          )}
+        </div>
 
         <input
           ref={photoInput}
@@ -331,15 +274,28 @@ export function CheckInSheet({
           </div>
         )}
 
-        {stravaOpen && !detailsOpen && (
+        {strava && (
+          // The picked activity, as one quiet row; its details go on the post.
+          <div className="-mt-2 flex items-center gap-3 rounded-md border bg-muted/50 py-2 pl-3 pr-1">
+            <SessionDetails details={{ activity: strava.type, minutes: strava.minutes, distanceKm: strava.distanceKm }} skill={group.skillKind} source="strava" className="mt-0 min-w-0 flex-1" />
+            <button
+              type="button"
+              aria-label="Remove the Strava activity"
+              onClick={() => setStrava(null)}
+              className="hit-44 grid size-8 flex-none place-items-center rounded-full text-muted-foreground transition-colors duration-150 ease-out hover:bg-muted hover:text-foreground"
+            >
+              <X size={15} />
+            </button>
+          </div>
+        )}
+
+        {stravaOpen && !strava && (
           <div className="-mt-2 animate-rise rounded-md border bg-muted/50 p-3">
             <StravaPicker
-              pickedId={stravaId}
+              pickedId={null}
               onPick={(a) => {
-                setStravaId(a?.id ?? null)
                 if (!a) return
-                setDetails({ activity: a.type, minutes: a.minutes, distanceKm: a.distanceKm })
-                setDetailsOpen(true)
+                setStrava(a)
                 setStravaOpen(false)
               }}
             />

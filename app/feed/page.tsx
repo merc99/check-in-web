@@ -7,7 +7,7 @@ import { CrewSwitcherSheet } from '@/components/feed/CrewSwitcherSheet'
 import { Fab } from '@/components/feed/Fab'
 import { FeedHeader } from '@/components/feed/FeedHeader'
 import { TodayStrip } from '@/components/feed/TodayStrip'
-import { JoinRequestCard } from '@/components/feed/JoinRequestCard'
+import { JoinRequests } from '@/components/feed/JoinRequests'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { Avatar } from '@/components/checkin/Avatar'
 import { BrandMark } from '@/components/checkin/BrandMark'
@@ -298,6 +298,14 @@ export default function FeedPage() {
       <FeedHeader
         group={g}
         onSwitch={() => setSwitcherOpen(true)}
+        requests={
+          <JoinRequests
+            requests={requests.data ?? []}
+            onPersonTap={setProfileId}
+            onAccept={(r) => act(() => acceptJoinRequest(r.id), `${r.person.name} joined the crew`)}
+            onDecline={(r) => act(() => declineJoinRequest(r.id), 'Request declined')}
+          />
+        }
         today={
           !desktop && (
             <TodayStrip
@@ -317,15 +325,6 @@ export default function FeedPage() {
         position={groups && crewIndex >= 0 ? { index: crewIndex, count: groups.length } : undefined}
       />
 
-      {requests.data?.map((r) => (
-        <JoinRequestCard
-          key={r.id}
-          request={r}
-          onPersonTap={setProfileId}
-          onAccept={() => act(() => acceptJoinRequest(r.id), `${r.person.name} joined the crew`)}
-          onDecline={() => act(() => declineJoinRequest(r.id), 'Request declined')}
-        />
-      ))}
 
       {g.pinnedMessage && (
         // A note pinned to the crew: a quiet row, the pin in muted ink.

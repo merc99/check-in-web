@@ -25,15 +25,17 @@ export interface FeedHeaderCrew {
 
 /**
  * The crew you're looking at, as a quiet header (Rivals-style): the crew's color as a dot, the name
- * (tap to switch crews), a muted line of facts, the gear and, on phones, who's in today (`today`, a
+ * (tap to switch crews), a muted line of facts, join requests (owners), the gear and, on phones, who's in today (`today`, a
  * TodayStrip). Past 70px of scroll it collapses into a sticky bar. Both open the crew switcher.
  */
 export function FeedHeader({
-  group, onSwitch, today, onSwipe, position,
+  group, onSwitch, today, requests, onSwipe, position,
 }: {
   group: FeedHeaderCrew
   onSwitch: () => void
   today?: ReactNode
+  /** People asking to join (a JoinRequests pill), next to the gear. */
+  requests?: ReactNode
   /** Phones: a sideways swipe on the banner moves to the next (1) or previous (-1) crew. */
   onSwipe?: (dir: 1 | -1) => void
   /** Which of your crews this is, for the dots on phones. */
@@ -121,9 +123,12 @@ export function FeedHeader({
               )}
             </p>
           </div>
-          <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
-            <GearIcon size={18} />
-          </IconLink>
+          <span className="flex flex-none items-center gap-2">
+            {requests}
+            <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
+              <GearIcon size={18} />
+            </IconLink>
+          </span>
         </div>
         </CrewTint>
         {today}

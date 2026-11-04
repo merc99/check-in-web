@@ -28,6 +28,7 @@ import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { TabBar, type TabKey } from '@/components/checkin/TabBar'
 import { useToast } from '@/components/checkin/Toast'
 import { AVATAR_HUES } from '@/lib/colors'
+import { JoinRequests } from '@/components/feed/JoinRequests'
 import { BenchoShelf } from './BenchoShelf'
 import { DataCheck } from './DataCheck'
 
@@ -222,6 +223,18 @@ export default function KitchenSink() {
           <SessionDetails skill="music" details={{ minutes: 20, items: ['Wonderwall intro', 'C major scale'] }} />
           <SessionDetails skill="reading" details={{ book: 'The Creative Act', pages: 30 }} />
         </div>
+      </Section>
+
+      <Section title="Join requests" note="crew header pill · tap to open">
+        <JoinRequests
+          requests={[
+            { id: 'ks-jr1', groupId: 'ks', person: { id: 'ks-p1', name: 'Jordan', color: 'grape', photoUrl: null }, totalCheckIns: 3 },
+            { id: 'ks-jr2', groupId: 'ks', person: { id: 'ks-p2', name: 'Alex', color: 'clay', photoUrl: null }, totalCheckIns: 41 },
+          ]}
+          onAccept={(r) => toast(`${r.person.name} joined the crew`)}
+          onDecline={() => toast('Request declined')}
+          onPersonTap={() => {}}
+        />
       </Section>
 
       <Section title="Member stickers" note="in · not yet (tap waves) · waved">
