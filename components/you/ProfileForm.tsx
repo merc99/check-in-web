@@ -36,7 +36,8 @@ export function ProfileForm({
   const [color, setColor] = useState<Hue>('leaf')
   const [photo, setPhoto] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  // Set by a save with no name; the error goes once there is one (the button always works, as on New crew).
+  // Set by a save with no name, or by leaving the name empty after editing it; the next keystroke clears it
+  // (forms skill: blur first, the button always works, as on New crew).
   const [tried, setTried] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -114,7 +115,11 @@ export function ProfileForm({
           <Input
             value={name}
             aria-invalid={tried && !name.trim()}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value)
+              setTried(false)
+            }}
+            onBlur={() => !name.trim() && setTried(true)}
             onKeyDown={(e) => e.key === 'Enter' && save()}
             maxLength={40}
             placeholder="What your crew calls you"

@@ -253,16 +253,16 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
       <div className="mx-auto mt-12 max-w-[360px]">
         {g.isOwner ? (
           <HoldButton
-            label="Hold to delete crew"
-            hint="Hold the button to delete the crew"
+            label={`Hold to delete ${g.name}`}
+            hint={`Hold the button to delete ${g.name}`}
             detail="Everyone loses the feed. Check-in counts stay on each person’s profile."
             onConfirm={destroy}
           />
         ) : (
           <HoldButton
             variant="secondary"
-            label="Hold to leave crew"
-            hint="Hold the button to leave the crew"
+            label={`Hold to leave ${g.name}`}
+            hint={`Hold the button to leave ${g.name}`}
             detail="You can rejoin later with the invite code."
             onConfirm={leave}
           />

@@ -75,9 +75,20 @@ export default function ExplorePage() {
         {crews.data && crews.data.length === 0 && (
           <div className="px-2 py-10 text-center">
             <p className="text-muted-foreground">No crews match “{q}”. Start one and name it whatever you like.</p>
-            <Button size="sm" className="mt-4" onClick={() => router.push('/new-group')}>
-              Start a crew
-            </Button>
+            <div className="mt-4 flex justify-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setQuery('')
+                  setUrl({ q: null })
+                }}
+              >
+                Clear search
+              </Button>
+              <Button size="sm" onClick={() => router.push('/new-group')}>
+                Start a crew
+              </Button>
+            </div>
           </div>
         )}
       </div>
