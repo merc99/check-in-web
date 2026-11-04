@@ -5,7 +5,7 @@
 export const HUES = ['coral', 'sky', 'rose', 'grape', 'lemon', 'leaf', 'clay', 'indigo'] as const
 export type Hue = (typeof HUES)[number]
 
-export const AVATAR_HUES: Hue[] = ['leaf', 'sky', 'coral', 'grape', 'lemon']
+export const AVATAR_HUES: Hue[] = ['leaf', 'sky', 'coral', 'grape', 'lemon', 'rose']
 export const CREW_HUES: Hue[] = [...HUES]
 
 export const HUE_CLASS: Record<Hue, { solid: string; soft: string; ink: string; ring: string; cssVar: string }> = {
