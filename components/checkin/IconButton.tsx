@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 type Size = 'md' | 'sm'
 
 const base =
-  'grid flex-none place-items-center rounded-full border border-border bg-card shadow-xs transition-[transform,box-shadow] duration-150 ease-out active:translate-y-px active:shadow-none'
+  'grid flex-none place-items-center rounded-full border border-border bg-card text-foreground edge-lit transition-[transform,background-color,border-color] duration-150 ease-out hover:border-border-strong hover:bg-muted active:scale-[.96]'
 const SIZE: Record<Size, string> = { md: 'size-[42px]', sm: 'size-[34px]' }
 
 export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,7 +14,7 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
   size?: Size
 }
 
-/** Round white icon button (gear, close, remove). */
+/** Round icon button on a raised surface (gear, close, remove). */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
   { size = 'md', className, type = 'button', ...props },
   ref,

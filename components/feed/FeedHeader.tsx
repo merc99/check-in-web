@@ -1,15 +1,11 @@
 'use client'
 
-import { Flame, Users } from 'lucide-react'
-import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
-import Link from 'next/link'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { CrewDot } from '@/components/checkin/CrewBlock'
-import { CrewSurface } from '@/components/checkin/CrewSurface'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
-import { HoloBanner } from '@/components/fx/loops'
 import { cn } from '@/lib/utils'
-import { HUE_CLASS, type Hue } from '@/lib/colors'
+import type { Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
 import { prefersReducedMotion, useScrolledPast } from '@/lib/motion'
 
@@ -26,10 +22,9 @@ export interface FeedHeaderCrew {
 }
 
 /**
- * The crew you're looking at, as a banner in the crew's color with its own cover pattern: its emoji,
- * the date, the big name (tap to switch crews), a line of facts and, on phones, who's in today
- * (`today`, a TodayStrip). Past 70px of scroll it collapses into a tinted sticky bar with the crew's
- * dot and name. Both open the crew switcher; the gear opens crew settings.
+ * The crew you're looking at, as a quiet header (Rivals-style): the crew's color as a dot, the name
+ * (tap to switch crews), a muted line of facts, the gear and, on phones, who's in today (`today`, a
+ * TodayStrip). Past 70px of scroll it collapses into a sticky bar. Both open the crew switcher.
  */
 export function FeedHeader({
   group, onSwitch, today, onSwipe, position,
@@ -44,19 +39,15 @@ export function FeedHeader({
 }) {
   const collapsed = useScrolledPast(70)
   const swipe = useBannerSwipe(group.id, onSwipe)
-  const date = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
-  const hue = HUE_CLASS[group.color]
 
   return (
     <>
       <header
-        // Takes no space until you scroll (the banner below holds the gear); then it's the tinted bar.
+        // Takes no space until you scroll; then it's a quiet sticky bar with the crew's dot and name.
         className={cn(
-          'sticky top-0 z-20 -mx-5 -mb-[66px] flex h-[66px] items-center gap-3 border-b px-5 transition-[background-color,border-color,opacity] duration-200',
-          collapsed ? cn('border-border opacity-100 backdrop-blur-xl', hue.soft) : 'pointer-events-none border-transparent bg-transparent opacity-0',
+          'sticky top-0 z-20 -mx-5 -mb-[64px] flex h-16 items-center gap-3 border-b px-5 transition-[background-color,border-color,opacity] duration-200',
+          collapsed ? 'border-border bg-background/85 opacity-100 backdrop-blur-xl' : 'pointer-events-none border-transparent bg-transparent opacity-0',
         )}
-        // Over the page, the tint needs the page behind it so it stays opaque enough to read.
-        style={collapsed ? ({ backgroundColor: `color-mix(in srgb, ${hue.cssVar} 14%, var(--background))` } as CSSProperties) : undefined}
       >
         <button
           type="button"
@@ -65,81 +56,70 @@ export function FeedHeader({
           tabIndex={collapsed ? 0 : -1}
           aria-hidden={!collapsed}
           className={cn(
-            'inline-flex min-w-0 items-center gap-2 px-1 py-[6px] font-display text-[17px] transition-[opacity,transform] duration-200 ease-out',
+            'inline-flex min-w-0 items-center gap-2 px-1 py-2 text-[16px] font-medium transition-[opacity,transform] duration-200 ease-out',
             collapsed ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
           )}
         >
-          <CrewDot color={group.color} />
+          <CrewDot color={group.color} className="size-[10px] border-0" />
           <span className="truncate">{group.name}</span>
-          <ChevronIcon size={16} className="flex-none" />
+          <ChevronIcon size={16} className="flex-none text-muted-foreground" />
         </button>
         <span className="flex-1" />
         {collapsed && (
           <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
-            <GearIcon size={19} />
+            <GearIcon size={18} />
           </IconLink>
         )}
       </header>
 
-      {/* The banner, kept compact so the feed leads: the crew's own surface with a slow holographic
-          gradient, the name (tap to switch crews), one line of facts and the gear. */}
-      {/* The wrapper takes the swipe (touch only; pan-y keeps the page scrolling up and down). */}
-      <div ref={swipe} className={cn('mb-4 mt-4', onSwipe && 'touch-pan-y')}>
-      <CrewSurface hue={group.color} className="rounded-xl px-4 py-[14px] sm:px-5 sm:py-4">
-        {/* A slow holographic gradient in the crew's hue (fx/HoloBanner, the banner's one loop). */}
-        <HoloBanner />
-        <div className="relative flex items-center gap-3">
+      {/* The crew you're looking at, kept quiet so the feed leads: the crew's color as a dot, the name
+          (tap to switch crews), one muted line of facts and the gear. The wrapper takes the swipe
+          (touch only; pan-y keeps the page scrolling up and down). */}
+      <div ref={swipe} className={cn('mb-4 pt-5', onSwipe && 'touch-pan-y')}>
+        <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <h1>
               <button
                 type="button"
                 onClick={onSwitch}
                 aria-haspopup="dialog"
-                className="group hit-44 inline-flex max-w-full items-center gap-1 text-left font-display text-[24px] font-extrabold leading-[1.1] tracking-tighter sm:text-[28px]"
+                className="group hit-44 inline-flex max-w-full items-center gap-2 text-left text-[24px] font-medium leading-[1.15] tracking-tighter sm:text-[28px]"
               >
+                <CrewDot color={group.color} className="size-[10px] border-0" />
                 <span className="truncate">{group.name}</span>
                 <ChevronIcon
                   size={18}
-                  className="flex-none opacity-55 transition-[transform,opacity] duration-150 ease-out group-hover:translate-y-px group-hover:opacity-90"
+                  className="flex-none text-muted-foreground transition-[transform,color] duration-150 ease-out group-hover:translate-y-px group-hover:text-foreground"
                 />
               </button>
             </h1>
-            <p className="mt-[2px] flex flex-wrap items-center gap-x-3 gap-y-[2px] text-[12.5px] font-semibold">
-              <span className="opacity-70">{date}</span>
-              <span className="inline-flex items-center gap-[5px] opacity-75">
-                <Users size={14} strokeWidth={2} aria-hidden="true" />
-                <span>
-                  <span className="tnum">{group.memberCount}</span> members
-                </span>
+            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
+              <span>
+                <span className="tnum">{group.memberCount}</span> members
               </span>
               {group.streak > 1 && (
-                <span className="inline-flex items-center gap-[5px]">
-                  <Flame size={14} strokeWidth={2.25} aria-hidden="true" />
+                <>
+                  <span aria-hidden="true">·</span>
                   <span>
-                    <span className="tnum">{group.streak}</span>-day crew streak
+                    <span className="tnum text-foreground">{group.streak}</span>-day crew streak
                   </span>
-                </span>
+                </>
               )}
               {/* Which crew this is, on phones (a swipe moves along them). */}
               {onSwipe && position && position.count > 1 && (
-                <span className="inline-flex items-center gap-[5px] lg:hidden" aria-label={`Crew ${position.index + 1} of ${position.count}. Swipe the banner to switch.`}>
+                <span className="ml-1 inline-flex items-center gap-1 lg:hidden" aria-label={`Crew ${position.index + 1} of ${position.count}. Swipe to switch.`}>
                   {Array.from({ length: position.count }, (_, i) => (
-                    <span key={i} className={cn('h-[6px] rounded-full transition-[width,background-color] duration-200 ease-out', i === position.index ? 'w-4 bg-on-color' : 'w-[6px] bg-black/20')} />
+                    <span key={i} className={cn('h-[6px] rounded-full transition-[width,background-color] duration-200 ease-out', i === position.index ? 'w-4 bg-foreground' : 'w-[6px] bg-border-strong')} />
                   ))}
                 </span>
               )}
             </p>
           </div>
-          <Link
-            href={`/group-settings/${group.id}`}
-            aria-label="Crew settings"
-            className="grid size-10 flex-none place-items-center rounded-full bg-black/10 transition-colors duration-150 ease-out hover:bg-black/20"
-          >
+          <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
             <GearIcon size={18} />
-          </Link>
+          </IconLink>
         </div>
         {today}
-      </CrewSurface>
       </div>
     </>
   )

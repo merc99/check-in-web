@@ -5,7 +5,7 @@ export function Card({ size = 'md', className, ...props }: HTMLAttributes<HTMLDi
   return (
     <div
       className={cn(
-        'border border-border bg-card shadow-card',
+        'border border-border bg-card edge-lit',
         size === 'lg' ? 'rounded-lg p-5' : 'rounded-lg p-4',
         className,
       )}

@@ -7,14 +7,19 @@ const SIZE: Record<Size, string> = {
   m: 'px-3 py-[5px] text-[13px]',
   l: 'px-4 py-[9px] text-[15px]',
 }
-const base = 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border font-medium leading-tight shadow-xs'
+const base = 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border font-normal leading-tight'
 
-/** Static chip, filled with the tag's deterministic color (or `color`, e.g. a crew's). */
+/** Static chip: a quiet pill with a small dot in the tag's deterministic color (or `color`, e.g. a crew's). */
 export function TagChip({
   name, size = 's', color, className,
 }: { name: string; size?: Size; color?: Hue; className?: string }) {
   const c = HUE_CLASS[color ?? getTagHue(name)]
-  return <span className={cn(base, SIZE[size], c.soft, c.ink, className)}>{name}</span>
+  return (
+    <span className={cn(base, SIZE[size], 'bg-muted text-muted-foreground', className)}>
+      <span aria-hidden="true" className={cn('size-1.5 flex-none rounded-full', c.solid)} />
+      {name}
+    </span>
+  )
 }
 
 /** Dashed "Add “name”" chip shown while typing a tag that doesn't exist yet. */
@@ -25,7 +30,7 @@ export function AddChip({ name, onAdd, size = 'm' }: { name: string; onAdd: () =
       type="button"
       onClick={onAdd}
       className={cn(
-        base, SIZE[size], c.soft, c.ink, 'border-dashed',
+        base, SIZE[size], 'border-dashed border-border-strong bg-transparent text-muted-foreground',
         'transition-[transform,box-shadow] duration-150 ease-out active:scale-[.96]',
       )}
     >
@@ -37,7 +42,7 @@ export function AddChip({ name, onAdd, size = 'm' }: { name: string; onAdd: () =
   )
 }
 
-/** Selectable chip: white with a color dot, fills with the color when selected. */
+/** Selectable chip: a quiet pill with a color dot; selected = a lighter, lit pill with a check-in-mint ring. */
 export function ToggleChip({
   label, color, selected, onToggle, size = 'm',
 }: { label: string; color?: Hue; selected: boolean; onToggle: () => void; size?: Size }) {
@@ -49,11 +54,11 @@ export function ToggleChip({
       onClick={onToggle}
       className={cn(
         base, SIZE[size], 'hit-44',
-        'transition-[transform,box-shadow,background-color] duration-200 ease-spring active:translate-y-px active:scale-[.96] active:shadow-none',
-        selected ? cn(c.soft, c.ink, 'animate-bump') : 'bg-card text-foreground',
+        'transition-[transform,background-color,border-color,color] duration-200 ease-spring active:scale-[.96]',
+        selected ? 'animate-bump border-border-strong bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground',
       )}
     >
-      {!selected && <span className={cn('size-2.5 rounded-full border border-border', c.solid)} />}
+      <span aria-hidden="true" className={cn('size-2 rounded-full', c.solid)} />
       {label}
     </button>
   )

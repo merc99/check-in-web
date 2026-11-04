@@ -329,16 +329,16 @@ export default function FeedPage() {
       ))}
 
       {g.pinnedMessage && (
-        // A note pinned to the crew, in the crew's tint: it reads as a note, not another post.
-        <div className={cn('mt-4 flex items-start gap-[10px] rounded-lg px-4 py-3 text-[14.5px] font-medium', HUE_CLASS[g.color].soft, HUE_CLASS[g.color].ink)}>
-          <PinIcon size={17} className="mt-[2px] flex-none rotate-[20deg]" />
+        // A note pinned to the crew: a quiet row, the pin in muted ink.
+        <div className="mt-3 flex items-start gap-3 rounded-lg border bg-card px-4 py-3 text-[14px] edge-lit">
+          <PinIcon size={16} className="mt-[2px] flex-none text-muted-foreground" />
           <p>{g.pinnedMessage}</p>
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="px-2 py-10 text-center">
-          <h2 className="font-display text-[26px] leading-none">Quiet so far.</h2>
+          <h2 className="text-[22px] font-medium leading-none">Quiet so far</h2>
           <p className="mt-2 text-muted-foreground">Be the first one in today.</p>
         </div>
       ) : (
@@ -351,7 +351,7 @@ export default function FeedPage() {
             return (
               <Fragment key={item.id}>
                 {divider && (
-                  <h2 className={cn('flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border', first ? 'mt-8' : 'mt-6')}>
+                  <h2 className={cn('px-1 text-[13px] font-normal leading-none tracking-normal text-muted-foreground', first ? 'mt-6' : 'mt-4')}>
                     {label}
                   </h2>
                 )}

@@ -2,7 +2,6 @@
 
 import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { HUE_CLASS } from '@/lib/colors'
 import type { FeedItem } from '@/lib/data'
 import { HOUR, timeAgo } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -10,7 +9,6 @@ import { useNow } from '@/lib/useNow'
 import { Avatar } from './Avatar'
 import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
-import { SheenOnce } from '@/components/fx/loops'
 import { SessionDetails } from './SessionDetails'
 import { TierCard } from './TierCard'
 import { CheerButton } from './CheerButton'
@@ -81,17 +79,12 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
     <article
       onPointerUp={onPointerUp}
       className={cn(
-        'relative touch-manipulation select-none rounded-lg border border-border bg-card p-4 shadow-card lg:p-5',
-        // Yours carry a faint mint wash, so your own posts are easy to spot in the scroll.
-        item.isMine && 'border-primary/30 bg-[linear-gradient(135deg,var(--primary-soft),var(--card)_55%)]',
-        // A mouse over a post lifts it a little (the interactive-card spec); touch has no hover.
-        'transition-[transform,box-shadow,border-color] duration-150 ease-out',
-        '[@media(hover:hover)]:hover:-translate-y-px [@media(hover:hover)]:hover:border-border-strong [@media(hover:hover)]:hover:shadow-raised',
+        'relative touch-manipulation select-none rounded-xl border border-border bg-card p-4 edge-lit lg:p-5',
+        // A mouse over a post brightens its edge; touch has no hover.
+        'transition-[border-color] duration-150 ease-out [@media(hover:hover)]:hover:border-border-strong',
         entering && 'animate-enter',
       )}
     >
-      {/* The author's color down the left edge (mint for you), so a scroll of posts isn't one gray. */}
-      <span aria-hidden="true" className={cn('absolute bottom-4 left-0 top-4 w-[3px] rounded-r-full', item.isMine ? 'bg-primary' : HUE_CLASS[item.user.color].solid)} />
       <div className="flex items-center gap-3">
         {onPersonTap && !item.isMine ? (
           <button
@@ -106,18 +99,19 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
           avatar
         )}
         <p className="min-w-0 flex-1">
-          <span className="font-bold">{item.isMine ? 'You' : item.user.name}</span>
-          <span className="ml-[6px] text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
+          <span className="font-medium">{item.isMine ? 'You' : item.user.name}</span>
+          <span className="ml-2 text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
         </p>
         {justIn && (
-          <span className="ml-auto rounded-full bg-primary-soft px-2 text-primary-ink py-[5px] text-[12px] font-bold leading-none shadow-xs">
+          <span className="ml-auto inline-flex items-center gap-1.5 text-[12px] text-primary-ink">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
             Just in
           </span>
         )}
       </div>
 
       <div className="-mt-1 pl-[52px]">
-        {item.note && <p className="text-base leading-[1.45] lg:text-[17px]">{item.note}</p>}
+        {item.note && <p className="text-[15px] leading-[1.5] lg:text-base">{item.note}</p>}
         <SessionDetails details={item.details} skill={item.skill} source={item.source} className={item.note ? 'mt-2' : undefined} />
         {item.photoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -133,7 +127,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         {/* A milestone post: this session reached a tier. The tier card makes it stand out in the scroll. */}
         {item.milestone && (
           <div className="mt-3">
-            <p className="mb-2 text-[13px] font-semibold">
+            <p className="mb-2 text-[13px] text-muted-foreground">
               {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
             </p>
             <TierCard tier={item.milestone.tier} skill={item.skill} crewName={crewName ?? ''} color={crewColor ?? item.user.color} sessions={item.milestone.sessions} verified={item.milestone.vouches?.verified} />
@@ -202,8 +196,6 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         )}
       </div>
 
-      {/* A card that just arrived gets one pass of the holo sheen (fx/SheenOnce). */}
-      {entering && <SheenOnce />}
 
       {burst > 0 && (
         <span key={burst} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 animate-burst opacity-0">
@@ -228,19 +220,19 @@ function VouchLine({
   const names = v.people.map((p) => p.name)
   if (v.verified) {
     return (
-      <p className="mt-2 inline-flex items-center gap-[6px] text-[13px] font-semibold text-primary-ink">
+      <p className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary-ink">
         <BadgeCheck size={16} strokeWidth={2} aria-hidden="true" /> Verified
         <span className="font-normal text-muted-foreground">vouched by {names.slice(0, 3).join(', ')}{names.length > 3 ? ` and ${names.length - 3} more` : ''}</span>
       </p>
     )
   }
   if (isMine) {
-    return <p className="mt-2 text-[13px] text-muted-foreground">{2 - v.count} more vouch{2 - v.count === 1 ? '' : 'es'} from your crew to verify it.</p>
+    return <p className="mt-2 text-[13px] text-muted-foreground">{2 - v.count} more vouch{2 - v.count === 1 ? '' : 'es'} from your crew to verify it</p>
   }
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
       {v.byMe ? (
-        <span className="inline-flex items-center gap-[6px] font-semibold text-primary-ink">
+        <span className="inline-flex items-center gap-1.5 font-medium text-primary-ink">
           <BadgeCheck size={16} strokeWidth={2} aria-hidden="true" /> You vouched
         </span>
       ) : (

@@ -10,7 +10,7 @@ const SIZE: Record<Size, string> = {
   xl: 'size-16 rounded-lg text-[28px]', // new crew preview
 }
 
-/** The tilted square with a crew's emoji (or its first letter). `white` for use on top of the crew color. */
+/** The crew's medal: a rounded square in a soft tint of its hue with its emoji (or first letter). */
 export function CrewBlock({
   name, color, emoji, size = 'md', white, className,
 }: { name: string; color: Hue; emoji?: string | null; size?: Size; white?: boolean; className?: string }) {
@@ -18,8 +18,8 @@ export function CrewBlock({
     <span
       aria-hidden="true"
       className={cn(
-        'grid flex-none rotate-[-4deg] place-items-center border border-border font-display leading-none shadow-xs transition-transform duration-200 ease-out',
-        white ? 'bg-card' : HUE_CLASS[color].solid,
+        'grid flex-none place-items-center font-medium leading-none edge-lit transition-transform duration-200 ease-out',
+        white ? 'border border-border bg-card' : cn(HUE_CLASS[color].soft, HUE_CLASS[color].ink),
         SIZE[size],
         className,
       )}
@@ -32,6 +32,6 @@ export function CrewBlock({
 /** Small round crew color dot. */
 export function CrewDot({ color, className }: { color: Hue; className?: string }) {
   return (
-    <span aria-hidden="true" className={cn('size-[14px] flex-none rounded-full border border-border', HUE_CLASS[color].solid, className)} />
+    <span aria-hidden="true" className={cn('size-3 flex-none rounded-full', HUE_CLASS[color].solid, className)} />
   )
 }
