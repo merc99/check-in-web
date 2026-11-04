@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from 'react'
 import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
-import { CrewTint, TintMark, engraved, tintWell } from '@/components/checkin/CrewTint'
+import { CrewTint, engraved, tintWell } from '@/components/checkin/CrewTint'
 import { IconLink } from '@/components/checkin/IconButton'
 import { ChevronIcon, GearIcon, PinIcon } from '@/components/checkin/icons'
 import { cn } from '@/lib/utils'
@@ -76,12 +76,11 @@ export function FeedHeader({
       </header>
 
       {/* The crew you're looking at, as its own card (Ben, Nov 2026: make it obvious which crew this is):
-          a matte printed card with the crew's foil down the edge and its streak pressed in, its emoji on a solid tile, the
+          a matte printed card, its emoji on a solid tile, the
           name (tap to switch crews), one line of facts and the gear. The wrapper takes the swipe
           (touch only; pan-y keeps the page scrolling up and down). */}
       <div ref={swipe} className={cn('mb-4 pt-5', onSwipe && 'touch-pan-y')}>
         <CrewTint hue={group.color} className="rounded-xl p-4 lg:p-5">
-        {group.streak > 1 && <TintMark>{group.streak}</TintMark>}
         <div className="relative flex items-center gap-3 lg:gap-4">
           <CrewBlock name={group.name} color={group.color} emoji={group.emoji} size="lg" className={cn(HUE_CLASS[group.color].solid, 'text-on-color lg:size-16 lg:text-[28px]')} />
           <div className="min-w-0 flex-1">

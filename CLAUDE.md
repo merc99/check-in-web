@@ -155,7 +155,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
-| `CrewTint` card (matte grain, foil strip, engraved name, pressed numeral; holo foil from Seasoned) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
+| `CrewTint` card (matte grain, crisp hairline, engraved name) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
 | `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
 | `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
@@ -206,7 +206,7 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   screens in the clean UI pass (the feed header, Explore covers and crew-look preview are neutral now); kept for
   the kitchen sink and as a reference.
 - **FeedHeader:** the crew you're in as its own card (Ben, Nov 2026: make the crew obvious, crews look different):
-  a matte `CrewTint` card with the crew's foil strip and its streak pressed in, its emoji on a solid hue tile,
+  a matte `CrewTint` card, its emoji on a solid hue tile,
   the engraved name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the
   round gear, the crew's pinned note in a recessed well, then the TodayStrip on phones.
 - **Join requests** (`components/feed/JoinRequests.tsx`, owners only): a dashed row in the "In today" card
@@ -216,10 +216,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
 - **CrewTint** (`components/checkin/CrewTint.tsx`, Ben, Nov 2026: no gradient wash or glow; crisp, matte, shiny in a
   few places, after a printed ticket): a flat matte card with fine grain (paper in light, graphite in dark), a crisp
-  hairline and a small sharp drop; the color is a ribbed foil strip in the hue down the right edge (holographic from
-  Seasoned up). Helpers: `engraved` (recessed silver lettering: the crew name on the header, your name on You),
-  `TintMark` (a big numeral pressed in: the crew streak on the header, the session count on milestone posts),
-  `tintWell` (a recessed well: the pinned note, your numbers). `glow` tints the hairline with the hue. Only on the
+  hairline and a small sharp drop; the color stays on the crew's tile (no foil band or pressed-in number: Ben, Nov 2026).
+  Helpers: `engraved` (recessed silver lettering: the crew name on the header, your name on You), `tintWell` (a recessed well: the pinned note, your numbers). `glow` (and `holo`) tints the hairline with the hue. Only on the
   feed header, the crew switcher, milestone posts and `YouHero`; no `CrewCover` patterns on them.
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.

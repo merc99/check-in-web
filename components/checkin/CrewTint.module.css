@@ -1,14 +1,10 @@
 /* A crew's card, made to feel like a printed thing you could hold (Ben, Nov 2026: no gradient wash or
    glow; crisp, matte, shiny only in a few places, after a printed ticket). A flat matte surface with a
    fine grain (paper in light, graphite in dark), a crisp hairline and a small sharp drop. The crew's
-   color lives in a ribbed foil strip down the right edge (holographic from Seasoned up) and on the
-   crew's own tile. `.engraved` is recessed silver lettering, `.mark` a big numeral pressed into the
-   card. Set --hue on the element (HUE_CLASS[color].cssVar). */
+   color lives on the crew's own tile (Ben, Nov 2026: no foil band, no pressed-in number).
+   `.engraved` is recessed silver lettering, `.well` a recessed well. Set --hue on the element (HUE_CLASS[color].cssVar). */
 .tint {
   --surface: color-mix(in oklab, var(--hue) 3%, color-mix(in oklab, var(--card) 62%, var(--background)));
-  --foil-light: color-mix(in oklab, var(--hue) 28%, white);
-  --foil-mid: color-mix(in oklab, var(--hue) 70%, white);
-  --foil-deep: var(--hue);
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -21,9 +17,6 @@
 }
 :global(.dark) .tint {
   --surface: color-mix(in oklab, var(--hue) 4%, color-mix(in oklab, var(--card) 94%, white));
-  --foil-light: color-mix(in oklab, var(--hue) 35%, white);
-  --foil-mid: color-mix(in oklab, var(--hue) 80%, white);
-  --foil-deep: color-mix(in oklab, var(--hue) 75%, black);
   border-color: color-mix(in oklab, white 9%, transparent);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
@@ -44,34 +37,9 @@
 }
 :global(.dark) .tint::after { opacity: .22; mix-blend-mode: soft-light; }
 
-/* The foil: a thin ribbed strip in the crew's color down the right edge, catching the light. */
-.tint::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 5px;
-  width: 7px;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(180deg, color-mix(in oklab, white 35%, transparent) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, var(--foil-mid) 0%, var(--foil-light) 22%, var(--foil-deep) 48%, var(--foil-light) 70%, var(--foil-mid) 100%);
-  box-shadow:
-    inset 1px 0 0 color-mix(in oklab, white 55%, transparent),
-    inset -1px 0 0 color-mix(in oklab, black 22%, transparent);
-}
-
 /* The big moments (milestone posts, your card): the same card, its edge a touch of the hue. */
 .glow { border-color: color-mix(in oklab, var(--hue) 34%, transparent); }
 :global(.dark) .glow { border-color: color-mix(in oklab, var(--hue) 30%, transparent); }
-
-/* Seasoned and up: the foil turns holographic (still; nothing moves). */
-.holo::before {
-  background:
-    repeating-linear-gradient(180deg, color-mix(in oklab, white 40%, transparent) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, var(--sky), var(--grape) 25%, var(--rose) 50%, var(--lemon) 75%, var(--leaf));
-}
 
 /* Recessed silver lettering: a brushed silver fill, shaded at the top edge, lit at the bottom. */
 .engraved {
@@ -96,31 +64,6 @@
     drop-shadow(0 1px 0 color-mix(in oklab, white 9%, transparent));
 }
 
-/* A big numeral pressed into the card, bottom right, behind the content. */
-.mark {
-  position: absolute;
-  right: 22px;
-  bottom: -0.2em;
-  z-index: -1;
-  pointer-events: none;
-  user-select: none;
-  font-size: 132px;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.06em;
-  font-variant-numeric: tabular-nums;
-  color: color-mix(in oklab, black 3.5%, transparent);
-  text-shadow:
-    0 1px 0 color-mix(in oklab, white 80%, transparent),
-    0 -1px 0 color-mix(in oklab, black 4%, transparent);
-}
-:global(.dark) .mark {
-  color: color-mix(in oklab, white 2.5%, transparent);
-  text-shadow:
-    0 -1px 0 color-mix(in oklab, black 28%, transparent),
-    0 1px 0 color-mix(in oklab, white 4%, transparent);
-}
-
 /* A recessed well on the card (the pinned note, your numbers). */
 .well {
   background: color-mix(in oklab, black 4%, transparent);
@@ -135,6 +78,3 @@
     0 1px 0 color-mix(in oklab, white 6%, transparent);
 }
 
-@media (max-width: 380px) {
-  .mark { font-size: 104px; }
-}
