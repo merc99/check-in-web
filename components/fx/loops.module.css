@@ -4,19 +4,31 @@
 
 @property --fx-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 
-/* ── SheenLoop: a holographic sheen gliding across a surface ── */
+/* ── SheenLoop: a soft iridescent band drifting across a surface, then resting (invite tickets) ──
+   A narrow rose → white → sky band, blurred at its edges, crosses in the first 45% of the cycle and
+   waits off-surface for the rest, so it reads as light catching foil rather than a rainbow wash.
+   It sits under the content (the ticket's content is z-index 2). */
 .sheen {
   position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
   mix-blend-mode: screen;
   opacity: var(--fx-sheen-strength);
-  background-image: linear-gradient(115deg, transparent 15%, rgb(255 120 220), rgb(120 220 255), rgb(255 240 120), transparent 85%);
-  background-size: 300% 300%;
-  animation: sheen var(--fx-sheen-speed) linear infinite;
+  background-image: linear-gradient(105deg,
+    transparent 38%,
+    color-mix(in oklab, var(--rose) 55%, transparent) 45%,
+    color-mix(in oklab, white 70%, transparent) 50%,
+    color-mix(in oklab, var(--sky) 55%, transparent) 55%,
+    transparent 62%);
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  animation: sheen var(--fx-sheen-speed) var(--ease-in-out, ease-in-out) infinite;
   animation-play-state: var(--fx-play, running);
 }
 /* Screen washes out a light canvas; soft-light keeps the colors visible without fogging the ticket. */
-:global(html:not(.dark)) .sheen { mix-blend-mode: soft-light; opacity: calc(var(--fx-sheen-strength) * 1.6); }
-@keyframes sheen { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+:global(html:not(.dark)) .sheen { mix-blend-mode: soft-light; opacity: calc(var(--fx-sheen-strength) * 1.4); }
+@keyframes sheen {
+  0% { background-position: 100% 0; }
+  45%, 100% { background-position: 0% 0; }
+}
 
 /* ── AuroraFrame: a turning multicolor edge with a soft glow ── */
 .aurora { position: relative; isolation: isolate; } /* give it the child's radius via className */
