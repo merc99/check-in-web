@@ -91,7 +91,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
   1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
-  crews in two columns) and You (the stat bento, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
+  crews in two columns) and You (the stat bento, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 

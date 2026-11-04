@@ -6,7 +6,7 @@ import { Button } from '@/components/checkin/Button'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CheckIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
-import { Sheet } from '@/components/checkin/Sheet'
+import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { StatCard } from '@/components/checkin/StatCard'
 import { getExploreDetails, useQuery } from '@/lib/data'
 
@@ -31,7 +31,15 @@ export function CrewDetailSheet({
   const d = detail.data
 
   return (
-    <Sheet open={!!crewId} onClose={onClose} label={d?.name ?? 'Crew'}>
+    <ResponsiveSheet
+      open={!!crewId}
+      onOpenChange={(next) => {
+        if (!next) onClose()
+      }}
+      title={d?.name ?? 'Crew'}
+      titleHidden
+      detents={[0.6, 0.92]}
+    >
       {d && (
         <>
           <div className="mb-5 flex items-center gap-4">
@@ -87,6 +95,6 @@ export function CrewDetailSheet({
           </div>
         </>
       )}
-    </Sheet>
+    </ResponsiveSheet>
   )
 }

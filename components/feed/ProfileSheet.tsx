@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Avatar } from '@/components/checkin/Avatar'
-import { Sheet } from '@/components/checkin/Sheet'
+import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { StatCard } from '@/components/checkin/StatCard'
 import { Binder } from '@/components/checkin/Binder'
 import { getBinder, getUserProfile, useQuery } from '@/lib/data'
@@ -19,7 +19,15 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
   const binder = useQuery(() => (shownId ? getBinder(shownId) : Promise.resolve(null)), [shownId], ['check_ins', 'group_members', 'vouches', 'profiles'])
 
   return (
-    <Sheet open={!!userId} onClose={onClose} label={p ? p.person.name : 'Profile'}>
+    <ResponsiveSheet
+      open={!!userId}
+      onOpenChange={(next) => {
+        if (!next) onClose()
+      }}
+      title={p ? p.person.name : 'Profile'}
+      titleHidden
+      detents={[0.6, 0.92]}
+    >
       {p && (
         <div className="flex flex-col gap-4 text-center">
           <div className="flex justify-center pt-2">
@@ -45,6 +53,6 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
           )}
         </div>
       )}
-    </Sheet>
+    </ResponsiveSheet>
   )
 }

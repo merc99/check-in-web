@@ -23,7 +23,7 @@ import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
 import { cn } from '@/lib/utils'
 import { Segmented } from '@/components/checkin/Segmented'
-import { Sheet } from '@/components/checkin/Sheet'
+import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { TabBar, type TabKey } from '@/components/checkin/TabBar'
 import { useToast } from '@/components/checkin/Toast'
 import { AVATAR_HUES } from '@/lib/colors'
@@ -311,13 +311,18 @@ export default function KitchenSink() {
         <DataCheck />
       </Section>
 
-      <Sheet
+      <ResponsiveSheet
         open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
+        onOpenChange={(next) => {
+          if (!next) setSheetOpen(false)
+        }}
         title="Check in"
-        aside={<TagChip name="5am Lifters" size="m" />}
+        detents={[0.6]}
       >
         <div className="flex flex-col gap-4">
+          <div>
+            <TagChip name="5am Lifters" size="m" />
+          </div>
           <FormField label="Note" optional>
             <Textarea placeholder="How’d it go?" maxLength={280} value={note} onChange={(e) => setNote(e.target.value)} />
             <p className="tnum mt-[6px] text-right text-xs text-muted-foreground">{note.length} / 280</p>
@@ -342,7 +347,7 @@ export default function KitchenSink() {
             </Button>
           </div>
         </div>
-      </Sheet>
+      </ResponsiveSheet>
 
       {/* Arc bottom-sheet: peek (45%) and full (92%) heights, flick to move or dismiss. */}
       <BottomSheet

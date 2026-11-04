@@ -5,7 +5,7 @@ import { Button } from '@/components/checkin/Button'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
-import { Sheet } from '@/components/checkin/Sheet'
+import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { cn } from '@/lib/utils'
 import type { GroupSummary } from '@/lib/data'
 
@@ -20,7 +20,14 @@ export function CrewSwitcherSheet({
 }) {
   const router = useRouter()
   return (
-    <Sheet open={open} onClose={onClose} title="Your crews">
+    <ResponsiveSheet
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose()
+      }}
+      title="Your crews"
+      detents={[0.6, 0.92]}
+    >
       <div className="flex flex-col gap-4">
         <List>
           {groups.map((g) => {
@@ -50,6 +57,6 @@ export function CrewSwitcherSheet({
           <PlusIcon size={18} /> Start or join a crew
         </Button>
       </div>
-    </Sheet>
+    </ResponsiveSheet>
   )
 }
