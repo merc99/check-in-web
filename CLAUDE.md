@@ -14,7 +14,7 @@ When this file and the prototype disagree, this file wins.
 - Next.js (latest stable, App Router), React 19, TypeScript, `@/*` alias
 - Tailwind CSS v4, configured CSS-first in `app/globals.css` (there is no `tailwind.config.ts`)
 - shadcn/ui CLI (`components.json`), `tw-animate-css`, `clsx` + `tailwind-merge` (`cn` in `lib/utils.ts`)
-- `next-themes` (light / dark / system), `lucide-react` icons, fonts via `next/font/google` (Geist, Bricolage Grotesque) and `next/font/local` (Satoshi Black, the wordmark only)
+- `next-themes` (light / dark / system), `lucide-react` icons, fonts via `next/font/google` (Geist, Geist Mono) and `next/font/local` (Satoshi Black, the wordmark only)
 - Data: an in-memory demo (`lib/mock/`), shaped like the Supabase schema. No backend on `master`.
 
 ## Skills and references (read these)
@@ -42,30 +42,41 @@ When this file and the prototype disagree, this file wins.
 - `/kitchen-sink` shows every `components/ui` and `components/checkin` piece in every state. Add new pieces there too.
 - Any file adapted from a catalog site starts with `// Pattern: <site> / <component> (adapted to Check-in tokens)`.
 
-## Visual system: modern, playful, light + dark
+## Visual system: calm and exact, light + dark
+Clean UI pass (Nov 2026, `docs/ideas/clean-ui-direction.md`, Ben's references + the unslop skill): flat graphite
+surfaces, hairlines and a lit top edge, pills, one bright button per screen, mint only where it means showing up,
+big medium-weight numbers with small muted units, mono for small figures. Color lives in content (avatars, photos,
+tier cards, chart marks, dots); the glossy and holographic effects are kept for real moments only.
+
 Every value is a CSS variable in `app/globals.css` (`:root` = light, `.dark` = dark). Names follow **shadcn's standard**,
 plus a few Check-in extras, so registry components inherit the theme.
 
 - **Never** write hex, `rgb()`, or Tailwind palette colors in components. The theme removes the default palette
   (`--color-*: initial`), so `bg-zinc-100` renders nothing. Imported components: grep for palette classes and map them.
 - **Never** build class names at runtime (`bg-${hue}`). Use `HUE_CLASS` from `lib/colors.ts`.
-- **Surfaces:** `bg-background` (canvas) → `bg-card` (cards, lists, L1) → `bg-muted` (inputs, tracks, hover, L2) →
-  overlays `bg-popover` + `shadow-overlay`. Lists are L1 surfaces with hairline dividers.
+- **Surfaces:** graphite ramp in both modes. `bg-sidebar` (desktop crew rail) → `bg-background` (canvas) → `bg-card`
+  (cards, lists, L1) → `bg-muted` (inputs, tracks, active pills, L2) → overlays `bg-popover` + `shadow-overlay`.
+  Lists are L1 surfaces with hairline dividers. Depth in dark mode is the surface step plus `edge-lit` (a lit top
+  edge), not drop shadows. `hatch` marks "not yet" (future days, unfilled segments).
 - **Text:** `text-foreground`, `text-muted-foreground`, `text-subtle-foreground`; `text-on-color` on solid crew hues.
 - **Lines:** `border` (default color is `--border`) everywhere; `border-border-strong` for inputs, secondary buttons, hover.
-- **Brand accent = `primary` (mint).** `bg-primary text-primary-foreground` for primary buttons and active states,
-  `text-primary-ink` for links and mint text, `bg-primary-soft` for tinted highlights, `ring` for focus. About 10% of a screen.
+- **Brand accent = `primary` (mint)**, a few percent of a screen: the check-in action (`variant="brand"`), "in" states
+  (the tally, check badges), your own chart line or bar, `text-primary-ink` for links and mint text, `bg-primary-soft`
+  for a delta pill, `ring` for focus. The default primary button is off-white on dark, near-black on light.
   Note: shadcn's `accent` token is a neutral hover fill, not the brand color.
 - **Destructive:** `bg-destructive-soft text-destructive-ink` (soft) or `bg-destructive text-white` (solid, rare).
-- **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color per the playful layer.
-  `bg-{hue}-soft text-{hue}-ink` for tints; solid `bg-{hue}` only for avatars, dots and small badges.
+- **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
+  avatars, dots, chart marks and small badges; `bg-{hue}-soft text-{hue}-ink` for the crew medal (`CrewBlock`) and
+  a cover without a photo. Never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
   Mint is not a crew or avatar hue (it's `primary`); demo data that used mint now uses leaf.
-- **Shadows:** `shadow-xs`, `shadow-sm` / `shadow-card` (L1), `shadow-raised` (hover / lifted), `shadow-overlay`
-  (sheets, menus), `shadow-you` (the signed-in user's avatar ring). Soft in light mode, edge-lit in dark.
-- **Radii:** `rounded-md` 10 (inputs, small controls), `rounded-lg` 16 (cards), `rounded-xl` 22 (large cards, sheets),
-  `rounded-full` (buttons, chips, avatars).
-- **Type:** `font-display` (Bricolage Grotesque 600–800) for titles, crew names, big numbers, with `tracking-tighter`
-  (titles) or `tracking-tightest` (numbers 40px+). `font-sans` (Geist) for everything else. Changing numbers get `tnum`.
+- **Shadows:** resting cards have none in dark (`edge-lit` only) and a 1px soft one in light. `shadow-raised` for
+  floating things (FAB, dock), `shadow-overlay` (sheets, menus), `shadow-you` (the signed-in user's avatar ring).
+- **Radii:** `rounded-md` 10 (inputs, small controls), `rounded-lg` 16 (small cards), `rounded-xl` 20 (cards, posts,
+  sheets), `rounded-full` (buttons, tabs, chips, avatars). Nested radius = outer minus padding.
+- **Type:** Geist for everything, weights 400 and 500 (600 rarely; `font-bold`/`extrabold` are capped at 600 in the
+  theme). Hierarchy from size and color. `font-display` is now Geist medium (kept as a name for titles and big
+  numbers). `font-mono` (Geist Mono) for small figures, meta, counts and chart axes. Big numbers: medium, `tnum`,
+  `tracking-tightest` from 40px, with a small muted unit ("2/5", "14 days"). No uppercase tracked labels.
 - **Logo:** `BrandMark` / `LogoMark` (components/checkin/BrandMark.tsx): the red → yellow → green gauge with a check, and
   the wordmark "check-in" in Satoshi Black (`font-wordmark`, `app/fonts/`), lowercase. Only the wordmark uses it. `size="lg"` adds "stay consistent with
   people." (the signed-out welcome screen at `/`). Don't redraw it elsewhere.
@@ -78,14 +89,14 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
 ### shadcn primitive specs (apply after `shadcn add`)
-- **button:** `rounded-full font-semibold`, sizes `sm` h-9 px-4 text-[13px], `default` h-12 px-6, `lg` h-14 px-8,
-  `icon` size-11. Variants: `default` = `bg-primary text-primary-foreground shadow-card` + faint top highlight
-  (`bg-[linear-gradient(rgb(255_255_255/.18),transparent)]`); `secondary` = `bg-card border border-border-strong
-  shadow-card hover:bg-muted`; `outline` = same as secondary without shadow; `ghost` = `text-muted-foreground
+- **button:** `rounded-full font-medium`, sizes `sm` h-9 px-4 text-[13px], `default` h-12 px-6, `lg` h-14 px-8,
+  `icon` size-11. Variants: `default` = `bg-foreground text-background edge-lit` (the one bright button);
+  `brand` = mint, the check-in only; `secondary` = `bg-muted border edge-lit`; `outline` = transparent with
+  `border-border-strong`; `ghost` = `text-muted-foreground
   hover:text-foreground hover:bg-muted`; `destructive` = `bg-destructive-soft text-destructive-ink`; `link` =
   `text-primary-ink underline-offset-4`. Press: `active:scale-[.97]`, 150ms ease-out.
-- **card:** `rounded-lg border bg-card shadow-card`; padding 16 (20 for large); interactive cards lift
-  (`hover:-translate-y-px hover:border-border-strong hover:shadow-raised`).
+- **card:** `rounded-lg border bg-card edge-lit` (`rounded-xl` for posts and stat cards); padding 16 (20 for large);
+  interactive cards brighten their edge on hover (`hover:border-border-strong`) and press down; no lift.
 - **input / textarea:** `h-12 rounded-md border-border-strong bg-card`, focus = 3px `ring-primary/25` + `border-primary`.
 - **sheet:** bottom side, `rounded-t-xl shadow-overlay`, drag handle, scrim `bg-black/40`. Prefer Arc `bottom-sheet`
   if it gives drag-to-dismiss with velocity.
@@ -107,14 +118,14 @@ are the `--fx-*` tokens in `app/globals.css`; JS timings are `components/fx/conf
 changing any of them, in light and dark, on a phone and desktop.
 
 **Budget.** Everyday screens stay calm: an effect answers a touch, then rests. Bold effects are for real moments only.
-Loops are scoped to exactly one place each (three: the ticket sheen, the aurora frame, the banner's holo gradient). Nothing else idles. Never add a second effect to a surface that has one.
+One loop remains, scoped to one place: the invite ticket's sheen. Nothing else idles. Never add a second effect to a surface that has one.
+Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for reference, not used on screens):
+`AuroraFrame`, `HoloBanner`, `Gloss` / `GlossPill` / `GlassInset` panels, `SheenOnce` on posts, `crew-glow`, `CrewSurface` banners.
 
 | Effect | Tier | Allowed only on |
 |---|---|---|
 | `Foil` + `FoilLight` (tilt, white sheen; one sweep on tap) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
 | `SheenLoop` (holo sheen, loops) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
-| `AuroraFrame` (turning multicolor edge, soft glow) | scoped loop | `CrewHero`, only while the whole crew is in today |
-| `HoloBanner` (slow drifting hue tones + a rose/sky/lemon foil sheen) | scoped loop | The feed's crew banner only |
 | `burstFrom` (canvas particles, crew hue + mint) | moment | After a check-in, from the button used (FAB or rail button) |
 | `flyArc` + `squash` (arc, tilt, land) | moment / calm | The day's first check-in (+1 to the streak: rail on desktop, You tab on phones); reactions landing on their chip |
 | `RevealCard` (shake, beam, hue flood, burst) | moment | When a check-in unlocks an achievement. Nowhere else |
@@ -122,13 +133,11 @@ Loops are scoped to exactly one place each (three: the ticket sheen, the aurora 
 | `HoldButton` (hold to confirm, no sheet) | calm | Destructive actions only: delete a crew or your account, leave a crew, remove a member |
 | Toast stack (frosted, batched) | calm | Confirmations and live news; up to three, 4.2s, tap to dismiss |
 | Frosted glass (`--fx-glass` + blur, opaque fallback) | calm | The tab dock and toasts |
-| `Gloss` + `GlossPill` + `GlassInset` (glossy hue panel, mmo-style) | calm (static) | `CrewHero`, the You stat cards, the crew leaderboard, the Explore ring's cards (each in its crew's color) |
-| `Sparkline` (draws in once) | calm | Inside a `Gloss`: the crew's last 14 days, your last 12 weeks |
-| `SheenOnce` (one holo pass) | calm | A feed post as it arrives (yours or a crewmate's) |
+| `Sparkline` (draws in once, left to right) | calm | The crew's last 14 days, your last 12 weeks (in mint) |
 | Arrival burst (`burstFrom`, small) | live activity | A crewmate's sticker in the hero when they check in |
 | Whole-crew burst (`burstFrom`, once) + "all in" pop | moment | Phones: the TodayStrip, when the last member checks in while you watch (not on load or a crew switch) |
 | `animate-handwave` (👋 pops and wiggles) | delight | A crewmate's sticker after you wave at them |
-| Banner swipe (follows the finger, slides out/in 150/200ms) | calm | Phones: the feed banner, to move between your crews |
+| Header swipe (follows the finger, slides out/in 150/200ms) | calm | Phones: the feed's crew header, to move between your crews |
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
 | Tier card materials (paper, enamel, `Foil`, holo film, aurora edge on hover only) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
@@ -136,7 +145,7 @@ Loops are scoped to exactly one place each (three: the ticket sheen, the aurora 
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Cheer press (pop, small burst, rolling count) | delight | The Cheer button on milestone posts |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
-| Hover lift / press | calm | Post cards, Explore crew cards, leaderboard rows, ring chart legend, heatmap and streak squares |
+| Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
@@ -147,33 +156,39 @@ refraction, light rings as default borders, the full-screen joy takeover.
 ## Product components (`components/checkin/`)
 Build these with the primitives and the sources in `ui-references/check-in-map.md`:
 - **GlassTabBar:** `bg-card/75 backdrop-blur-xl border shadow-raised rounded-full`, opaque fallback via
-  `@supports not (backdrop-filter: blur(1px))`; active tab = `bg-foreground text-background` pill sliding (200ms).
+  `@supports not (backdrop-filter: blur(1px))`; active tab = a raised `bg-muted edge-lit` pill sliding (200ms).
 - **Crew look** (`lib/crewStyle.ts`): each crew has a color, an `emoji` (on its `CrewBlock`, else the first letter)
   and a cover `pattern` (`CrewCover`: dots, stripes, waves, grid, confetti, plain). Owners pick all three in crew
   settings (`components/crew/CrewLook.tsx`). Banners and Explore cards wear the cover, so no two crews look alike.
-- **TodayStrip** (phones): who's in today folded into the feed banner, one row of stickers + "n/total"; tapping it
-  opens the brand line, the 14-day sparkline and the bar. The full `CrewHero` shows only in the desktop rail.
-- **CrewHero** (signature, desktop rail): `rounded-xl` card, single-hue gradient (`{hue}-soft` → transparent) over `bg-card`,
-  big `font-display` "n/total" in `RollingCount`, an `AuroraFrame` while the whole crew is in, "in today", brand-voice line, avatar row (faded + dashed ring until checked
-  in, then a mint check badge pops on), segmented progress bar in the crew hue.
-- **PostCard:** L1 card with the author's color down the left edge (yours: mint edge + faint mint wash); avatar, name + relative time (plain text), note, interactive `TagChip`s, `Reactions` (emoji
-  chips from `lib/reactions.ts`, ❤️ first; yours are mint; the smiley opens the picker); own card gets a mint
-  "Just in" badge for an hour; double-tap = heart burst and adds your ❤️.
+- **TodayStrip** (phones): who's in today as a plain card under the crew header, one row of stickers + "n/total";
+  tapping it opens the brand line, the 14-day line, the challenge and the tally. `CrewHero` shows only in the desktop rail.
+- **The tally (signature):** one pill per member or day, mint when in, muted when open, hatched when still to come.
+  Who's in today (TodayStrip, CrewHero) and your week (`HeatmapGrid`). Nowhere else.
+- **CrewHero** (desktop rail): a plain `rounded-xl` card: "In today", big "n/total" in `RollingCount` ("all in" in
+  mint when everyone is), the brand-voice line, the last 14 days as a mint line, the stickers, the tally.
+- **PostCard:** a plain `rounded-xl` card (Rivals); avatar (yours has the mint ring), name + relative time, note, neutral `TagChip`s with a hue dot, `Reactions` (emoji
+  chips from `lib/reactions.ts`, ❤️ first; yours are mint; the smiley opens the picker); own card gets a quiet mint
+  "Just in" dot for an hour; double-tap = heart burst and adds your ❤️.
 - **AchievementCard:** unlocked ones are foil: filled with the achievement's hue, `text-on-color`, a dark enamel medal,
   white sheen that tilts toward the pointer. Locked ones stay dashed.
-- **HeatmapGrid:** 7 cells Mon–Sun; done = `bg-primary` + check; empty = `bg-muted`; future 40%; today = 2px ring;
-  `animate-cellin` staggered when the You tab opens.
+- **HeatmapGrid:** the week as the tally: 7 pills Mon–Sun; done = `bg-primary` + check; open = `bg-muted`; future =
+  `hatch` dashed; today = a ring; mono day letters; `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
 - **CrewSurface** (`components/checkin/CrewSurface.tsx`): a crew's own surface, its hue with depth (deeper toward the
   bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
   (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Used by the feed banner,
   Explore card covers and the crew-look preview.
-- **FeedHeader:** a compact crew banner (the feed leads) on a `CrewSurface` with `HoloBanner`: the name (display, extra
-  bold, 24/28px), one line of date, members and crew streak as plain text, the gear, the TodayStrip on phones. No pattern and no emoji on the
-  banner (Ben: the stripes and the emoji badge looked cheap). No glow, no pointer light. Scrolled, it collapses into a tinted sticky bar. The hero shows today, not the streak.
+- **FeedHeader:** a quiet header, no surface (Ben, Nov 2026: flat, the crew's color as a dot): the dot + name (medium,
+  24/28px, tap to switch), one muted line of members and crew streak, the round gear, the TodayStrip on phones. No
+  pattern, emoji or holo. Scrolled, it collapses into a neutral frosted sticky bar.
+- **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
+  then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
+- **You:** a bento (Data API, Crextio): an all-time hero card (the number, "+n vs last month" pill, the 12-week chart),
+  four number tiles (streak, best, this week, this month), then the week tally, skills, binder, recap, achievements,
+  recent (a hairline list) | the leaderboard (a hairline list, your bar mint) and the crew share (one stacked bar).
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
-- Feed background: `crew-glow` with `--crew` set to the active crew's hue variable (`HUE_CLASS[hue].cssVar`).
+- Feed background: plain `bg-background` (the old `crew-glow` wash is retired; the class is a no-op).
 - **MemberSticker:** a crewmate in "who's in today" (CrewHero, TodayStrip). In: their color + mint check. Not in yet:
   faded and dashed; a tap **waves** at them (`waveAt`, once per person per crew per day, toast "You waved at Sam. No
   pressure."), then a 👋 sits on their sticker. The demo answers about two waves in three with a check-in.
