@@ -187,8 +187,10 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   "Just in" dot for an hour; double-tap = heart burst and adds your ❤️.
 - **AchievementCard:** unlocked ones are foil: filled with the achievement's hue, `text-on-color`, a dark enamel medal,
   white sheen (a tap sweeps it; still under a mouse). Locked ones stay dashed.
-- **HeatmapGrid:** the week as the tally: 7 pills Mon–Sun; done = `bg-primary` + check; open = `bg-muted`; future =
-  `hatch` dashed; today = a ring; mono day letters; `animate-cellin` staggered when the You tab opens.
+- **HeatmapGrid:** the week as the tally: 7 tall pills Mon–Sun, the mono day letter above and the date below (today's
+  in full ink); done = `bg-primary` + check, and back-to-back days in are joined by a mint bridge (the streak you can
+  see); open = a quiet `bg-muted` well; future = faint `hatch`; today = a ring (a dot while still open);
+  `animate-cellin` staggered when the You tab opens. The feed rail's card: "n/7 days", then streak | all time under a hairline.
 - **LivePill**, **Ticket** (`Ticket.module.css`, Ben, Nov 2026): the crew's hue with depth, two notches cut clean
   through at the perforation (a mask; the shadow is a drop-shadow filter so it follows the cut), the code as letters
   pressed into the ticket (dark wells, inner shadow, a lit lip, bright letters), `animate-wave` on copy, and the

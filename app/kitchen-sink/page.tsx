@@ -301,7 +301,20 @@ export default function KitchenSink() {
         <TabBar active={tab} onSelect={setTab} />
       </Section>
 
-      <Section title="Heatmap" note="this week">
+      <Section title="Heatmap" note="a fuller week · this week">
+        <Card className="mb-3">
+          <HeatmapGrid
+            days={[
+              { label: 'M', done: true, date: 9 },
+              { label: 'T', done: true, date: 10 },
+              { label: 'W', done: true, date: 11 },
+              { label: 'T', done: false, date: 12 },
+              { label: 'F', done: true, date: 13 },
+              { label: 'S', done: true, today: true, date: 14 },
+              { label: 'S', done: false, future: true, date: 15 },
+            ]}
+          />
+        </Card>
         <Card>
           <HeatmapGrid key={heatRun} days={week} animate />
           <div className="mt-4 flex items-center justify-between gap-3">
