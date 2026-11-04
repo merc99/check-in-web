@@ -214,8 +214,10 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   list to accept or decline in place. Gone with the last request.
 - **Crew switcher** (`CrewSwitcherSheet`): each crew is a small copy of its header card (`CrewTint`, cover, emoji
   tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
-- **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue washed into a card, a hue edge and a brighter tone
-  top right; text stays light (dark) or dark (light). `glow` adds a soft hue halo, `holo` a still holo edge. Only on
+- **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue lit into a card: one soft light from the top in a
+  brighter tone of the hue, fading into the neutral card (no diagonal blobs, so clay never turns brown), a quiet hue
+  hairline and a lit top edge; text stays light (dark) or dark (light). `glow` moves the light to the medal (top left),
+  brighter and closer, with a soft halo under the card; `holo` a still holo edge. Only on
   the feed header and the crew switcher (plain), milestone posts (glow; holo from Seasoned up) and `YouHero` (glow).
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
