@@ -1,5 +1,5 @@
 .count { --roll-h: 1.4em; display: inline-flex; font-variant-numeric: tabular-nums; }
-.tight { --roll-h: 1em; }
+.tight { --roll-h: 1.2em; } /* Geist's digits sit low in a 1em box: a little air keeps neighbours hidden */
 .digits { display: inline-flex; }
 .col { display: inline-block; height: var(--roll-h); overflow: hidden; line-height: var(--roll-h); }
 .strip { display: flex; flex-direction: column; transition: transform var(--roll-ms, 220ms) var(--fx-spring); }

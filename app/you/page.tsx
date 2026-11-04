@@ -82,16 +82,27 @@ export default function YouPage() {
   if (!me.data || !stats.data) return <main className="min-h-dvh px-5" />
   const { profile, person } = me.data
   const unlocked = achievements.data?.filter((a) => a.unlocked).length ?? 0
+  const topSkill = skills.data?.reduce<(typeof skills.data)[number] | null>(
+    (best, s) => (s.tier && (!best?.tier || tierOf(s.tier).at > tierOf(best.tier).at) ? s : best),
+    null,
+  )
 
   return (
-    // Desktop: the wide layout, a dashboard of glossy stat cards and two columns under them.
+    // Desktop: the wide layout, a bento of stat cards and two columns under them.
     <main data-layout="wide" className="px-5 pb-[150px] lg:mx-auto lg:w-full lg:max-w-[1040px] lg:px-8 lg:pb-16">
       <section className="flex items-center gap-5 pb-2 pt-8">
-        <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you className="rotate-[-4deg]" />
+        <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you />
         <div className="min-w-0 flex-1">
-          <h1 className="wrap-break-word font-display text-4xl leading-[.95]">{person.name}</h1>
-          {profile.handle && <p className="mt-[6px] text-muted-foreground">@{profile.handle}</p>}
-          {profile.bio && <p className="mt-[6px]">{profile.bio}</p>}
+          <h1 className="wrap-break-word text-[28px] font-medium leading-tight">{person.name}</h1>
+          {profile.handle && <p className="mt-1 text-[14px] text-muted-foreground">@{profile.handle}</p>}
+          {/* Your top tier, like a level under the name (reference: the Steam profile). */}
+          {topSkill?.tier && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1 text-[12px] edge-lit">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+              {tierOf(topSkill.tier).name} <span className="text-muted-foreground">· {topSkill.crewName}</span>
+            </p>
+          )}
+          {profile.bio && <p className="mt-2 text-[14px]">{profile.bio}</p>}
           <Button size="sm" className="mt-3" onClick={() => router.push('/profile/edit')}>
             Edit profile
           </Button>
@@ -103,10 +114,10 @@ export default function YouPage() {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
       <div className="min-w-0">
 
-      <SectionTitle title="This week" />
+      <SectionTitle title="Your week" />
       <Card>
         <HeatmapGrid days={week} animate />
-        <p className="mt-[14px] text-[12.5px] text-muted-foreground">
+        <p className="mt-3 text-[13px] text-muted-foreground">
           {stats.data.checkedInToday ? 'You’re in for today.' : 'Today’s still open. No rush.'}
         </p>
       </Card>
@@ -169,19 +180,19 @@ export default function YouPage() {
       {recent.data && recent.data.length > 0 && (
         <>
           <SectionTitle title="Recent check-ins" />
-          <div className="flex flex-col gap-[10px]">
+          <List>
             {recent.data.map((c) => (
-              <div key={c.id} className="rounded-lg border border-border bg-card px-4 py-[14px]">
+              <div key={c.id} className="px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold">
-                    <CrewDot color={c.group.color} />
+                  <span className="flex min-w-0 items-center gap-2 text-[13px] text-muted-foreground">
+                    <CrewDot color={c.group.color} className="size-2" />
                     <span className="truncate">{c.group.name}</span>
                   </span>
-                  <span className="flex-none text-[12.5px] text-muted-foreground">
+                  <span className="flex-none font-mono text-[12px] text-subtle-foreground">
                     {timeAgo(c.createdAt) === 'now' ? 'just now' : `${timeAgo(c.createdAt)} ago`}
                   </span>
                 </div>
-                {c.note && <p className="mt-[6px]">{c.note}</p>}
+                {c.note && <p className="mt-1 text-[15px]">{c.note}</p>}
                 {c.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {c.tags.map((t) => (
@@ -191,7 +202,7 @@ export default function YouPage() {
                 )}
               </div>
             ))}
-          </div>
+          </List>
         </>
       )}
 
@@ -212,9 +223,9 @@ export default function YouPage() {
           <div key={g.id} className={listRow}>
             <CrewBlock name={g.name} color={g.color} emoji={g.emoji} size="list" />
             <span className="min-w-0 flex-1">
-              <b>{g.name}</b>
+              <span className="font-medium">{g.name}</span>
               <br />
-              <span className="text-[12.5px] text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground">
                 <span className="tnum">{g.inToday}</span> of <span className="tnum">{g.memberCount}</span> in today
               </span>
             </span>
@@ -237,28 +248,28 @@ export default function YouPage() {
       <SectionTitle title="Settings" />
       <Card className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
-          <p className="font-bold">Theme</p>
+          <p className="font-medium">Theme</p>
           <div className="w-[220px]">
             <ThemeToggle />
           </div>
         </div>
         <div className="flex items-center gap-4 border-t pt-4">
           <div className="min-w-0 flex-1">
-            <p className="font-bold">Sounds</p>
+            <p className="font-medium">Sounds</p>
             <p className="mt-1 text-[13px] text-muted-foreground">Small sounds for check-ins, reactions and milestones.</p>
           </div>
           <Switch checked={soundOn} onChange={setSoundOn} label="Sounds" />
         </div>
         <div className="flex items-center gap-4 border-t pt-4">
           <div className="min-w-0 flex-1">
-            <p className="font-bold">Strava</p>
+            <p className="font-medium">Strava</p>
             <p className="mt-1 text-[13px] text-muted-foreground">Add a recent run, walk or ride when you check in to a fitness crew. Demo: sample activities, no account.</p>
           </div>
           <Switch checked={strava} onChange={setStrava} label="Strava" />
         </div>
         <div className="flex items-center gap-4 border-t pt-4">
           <div className="min-w-0 flex-1">
-            <p className="font-bold">Foil frame</p>
+            <p className="font-medium">Foil frame</p>
             <p className="mt-1 text-[13px] text-muted-foreground">
               {perkUnlocked ? 'A perk for reaching Committed: a foil ring on your avatar.' : 'Unlocks at Committed (50 sessions) in any skill.'}
             </p>

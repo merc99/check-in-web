@@ -43,11 +43,11 @@
 }
 .pillSolid { padding: 4px 10px; opacity: 1; background: var(--on-color); color: color-mix(in srgb, var(--hue) 70%, white); }
 
-/* Sparkline: draws itself in once. */
-.line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.1s var(--ease-out) .15s forwards; }
+/* Sparkline: draws itself in once, left to right (a clip reveal: dash tricks break with non-scaling strokes). */
+.reveal { clip-path: inset(-12px 100% -12px -12px); animation: draw 1.1s var(--ease-out) .15s forwards; }
 .area { opacity: 0; animation: fadeIn .6s var(--ease-out) .7s forwards; }
-@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes draw { to { clip-path: inset(-12px -12px -12px -12px); } }
 @keyframes fadeIn { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .line, .area { animation: none; stroke-dashoffset: 0; opacity: 1; }
+  .reveal, .area { animation: none; clip-path: none; opacity: 1; }
 }

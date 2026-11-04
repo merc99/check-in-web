@@ -21,8 +21,8 @@ export function weekDays(isDone: (day: Date) => boolean, today = new Date()): He
 }
 
 /**
- * Seven cells, Mon–Sun. Checked = mint + check, open = peach-deep, future = dimmed, today = ink outline.
- * `animate` pops the checked cells in, staggered. Change the component's `key` to replay it.
+ * The week as a tally (the signature): seven pills, Mon–Sun. In = mint with a check, open = muted,
+ * still to come = hatched, today = a ring. `animate` pops the checked pills in, staggered.
  */
 export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: boolean }) {
   return (
@@ -32,10 +32,9 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
           <div
             title={`${DAY_NAMES[i] ?? d.label}: ${d.done ? 'checked in' : d.future ? 'still to come' : 'open'}`}
             className={cn(
-              'grid aspect-square place-items-center rounded-md border transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5',
-              d.done ? 'border-transparent bg-primary text-primary-foreground shadow-xs' : 'border-border bg-muted',
-              d.today && 'outline-solid outline-[2.5px] outline-offset-2 outline-foreground',
-              d.future && 'opacity-45',
+              'grid h-11 place-items-center rounded-full border',
+              d.done ? 'border-transparent bg-primary text-primary-foreground' : d.future ? 'hatch border-dashed border-border-strong' : 'border-border bg-muted',
+              d.today && 'outline-solid outline-2 outline-offset-2 outline-foreground/60',
               animate && d.done && 'animate-cellin',
             )}
             style={animate && d.done ? { animationDelay: `${i * 70 + 150}ms` } : undefined}
@@ -45,7 +44,7 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
               {DAY_NAMES[i] ?? d.label}: {d.done ? 'checked in' : d.future ? 'still to come' : 'open'}
             </span>
           </div>
-          <div aria-hidden="true" className="mt-2 text-center text-[12px] font-bold text-muted-foreground">
+          <div aria-hidden="true" className="mt-2 text-center font-mono text-[12px] text-muted-foreground">
             {d.label}
           </div>
         </div>

@@ -88,7 +88,7 @@ export function Sparkline({
         setActive((i) => Math.max(0, Math.min(values.length - 1, (i ?? values.length - 1) + (e.key === 'ArrowRight' ? 1 : -1))))
       }}
     >
-      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="block size-full overflow-visible" aria-hidden="true">
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={cn(styles.reveal, 'block size-full overflow-visible')} aria-hidden="true">
         <defs>
           <linearGradient id={`a${id}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="currentColor" stopOpacity=".35" />
@@ -104,12 +104,12 @@ export function Sparkline({
           <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 w-px bg-current opacity-35" style={{ left: left(p[0]) }} />
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute size-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current shadow-[0_0_0_3px_rgb(255_255_255/.85)]"
+            className="pointer-events-none absolute size-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current shadow-[0_0_0_3px_var(--card)]"
             style={{ left: left(p[0]), top: top(p[1]) }}
           />
           <span
             role="status"
-            className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-on-color px-2 py-1 text-[12px] font-bold text-white shadow-raised"
+            className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap rounded-md border bg-popover px-2 py-1 font-mono text-[12px] text-popover-foreground shadow-overlay"
             style={{ left: `clamp(48px, ${left(p[0])}, calc(100% - 48px))`, top: `calc(${top(p[1])} - 34px)` }}
           >
             {tip}
