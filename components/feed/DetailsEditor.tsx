@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react'
 import { useId, useState } from 'react'
+import { RollingCounter } from '@/components/bencho/RollingCounter'
 import { Input } from '@/components/checkin/FormField'
 import { DETAIL_FIELDS, type CheckInDetails, type SkillKind } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
@@ -43,29 +44,20 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
       )}
 
       {fields.includes('minutes') && (
-        <div>
-          <label htmlFor={ids.minutes} className="mb-2 block text-[13px] font-medium">Time</label>
+        <div role="group" aria-labelledby={ids.minutes}>
+          <p id={ids.minutes} className="mb-2 text-[13px] font-medium">Time</p>
+          {/* Quick picks set the counter; the counter fine-tunes in 5-minute steps (hold or drag to go faster). */}
           <div className="flex flex-wrap items-center gap-2">
             {MINUTES.map((m) => (
               <Choice key={m} on={value.minutes === m} onClick={() => set({ minutes: value.minutes === m ? undefined : m })}>
                 {m} min
               </Choice>
             ))}
-            <span className="inline-flex items-center gap-2">
-              <Input
-                id={ids.minutes}
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={1440}
-                value={value.minutes && !MINUTES.includes(value.minutes) ? value.minutes : ''}
-                onChange={(e) => set({ minutes: num(e.target.value) })}
-                placeholder="Other"
-                className="h-9 w-[88px] py-1"
-              />
-              <span className="text-[13px] text-muted-foreground">min</span>
-            </span>
           </div>
+          <span className="mt-3 inline-flex items-center gap-3">
+            <RollingCounter value={value.minutes ?? 0} min={0} max={600} step={5} label="Minutes" corner={14} onChange={(v) => set({ minutes: v || undefined })} />
+            <span className="text-[13px] text-muted-foreground">min</span>
+          </span>
         </div>
       )}
 
@@ -96,17 +88,12 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
       )}
 
       {fields.includes('pages') && (
-        <div>
-          <label htmlFor={ids.pages} className="mb-2 block text-[13px] font-medium">Pages</label>
-          <Input
-            id={ids.pages}
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={value.pages ?? ''}
-            onChange={(e) => set({ pages: num(e.target.value) })}
-            className="h-10 w-[110px] py-1"
-          />
+        <div role="group" aria-labelledby={ids.pages}>
+          <p id={ids.pages} className="mb-2 text-[13px] font-medium">Pages</p>
+          <span className="inline-flex items-center gap-3">
+            <RollingCounter value={value.pages ?? 0} min={0} max={2000} label="Pages" corner={14} onChange={(v) => set({ pages: v || undefined })} />
+            <span className="text-[13px] text-muted-foreground">pages</span>
+          </span>
         </div>
       )}
 

@@ -858,6 +858,7 @@
 /* Check-in: a face is an initial on the person's colour */
 .pik-initial { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 999px; color: var(--on-color); font-size: 12px; font-weight: 500; }
 .pik-av.pik-initial { font-size: 14px; }
+.pik-row .pik-av.pik-initial { display: grid; place-items: center; }
 
 /* with no faces the rail collapses to nothing but the pill's gap
    still sits in front of the word; pull it back so the text is
@@ -893,7 +894,7 @@
   box-sizing: border-box;
   padding: 8px;
   background: var(--card);
-  box-shadow: 0 0 0 1px var(--border), var(--shadow-overlay);
+  box-shadow: 0 0 0 1px var(--border), var(--elev-overlay);
   /* ── it unfolds from the PILL'S corner ────────────────────
      Top left, not the middle: the pill starts at this same
      left edge, so the card opens down and out from under it
@@ -1950,3 +1951,31 @@
 .task-spin { transform-origin: 6px 6px; animation: task-spin 900ms linear infinite; }
 @keyframes task-spin { to { rotate: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .task-spin { animation: none; } }
+
+/* ═════ Create menu, rail mode (Check-in) ═════ */
+/* The desktop crew rail's +: a 42px square in the layout, with the
+   shape, the pill and the panel pinned to its top-left corner so the
+   menu unfolds down and to the right, over the panel beside it (the
+   + sits just under the crews, near the top of the rail). */
+.crt-stage[data-rail] {
+  width: 42px; height: 42px;
+  --pill-h: 42px;
+  z-index: 30;
+}
+.crt-stage[data-rail] .crt-body,
+.crt-stage[data-rail] .crt-pill,
+.crt-stage[data-rail] .crt-panel {
+  inset: 0 auto auto 0;
+  margin: 0;
+}
+.crt-stage[data-rail] .crt-pill { gap: 0; color: var(--muted-foreground); transition: color 150ms ease-out, opacity 160ms ease; }
+.crt-stage[data-rail] .crt-pill:hover { color: var(--foreground); }
+.crt-stage[data-rail] .crt-pill:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 14px; }
+.crt-stage[data-rail]:not([data-open]) .crt-body { box-shadow: 0 0 0 1px var(--border-strong); }
+.crt-stage[data-rail][data-open] .crt-body { box-shadow: 0 0 0 1px var(--border), var(--elev-overlay); }
+
+/* ═════ Assignees, inline (Check-in) ═════ */
+/* In the app it reserves no box: the list floats over what follows,
+   as wide as the shelf's, and scrolls past six people. */
+.pik[data-inline] { display: inline-block; z-index: 20; }
+.pik[data-inline] .pik-card { right: auto; width: 264px; max-height: 300px; overflow-y: auto; }

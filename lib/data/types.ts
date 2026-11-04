@@ -79,6 +79,8 @@ export interface CheckIn {
   source: CheckInSource
   /** Proof photo (demo: an image picked on this device, held in memory). */
   photo_url: string | null
+  /** Crewmates who did this session with them ("with Maya"). Optional; members of the same crew only. */
+  with_user_ids?: UUID[]
   created_at: Timestamp
   deleted_at: Timestamp | null
 }
@@ -225,6 +227,8 @@ export interface FeedItem {
   milestone: { tier: TierKey; sessions: number; rarity: number; vouches: VouchInfo | null; cheers: { count: number; byMe: boolean; people: Person[] } } | null
   /** Proof photo, if any. */
   photoUrl: string | null
+  /** Crewmates tagged as doing this session with them. */
+  with: Person[]
 }
 
 /** Who vouched for a tier. `null` on tiers that don't take vouches (below Committed). */
@@ -330,6 +334,8 @@ export interface CheckInInput {
   tags?: string[]
   details?: CheckInDetails | null
   source?: CheckInSource
+  /** Crewmates who did it with you (user ids, same crew). */
+  with?: UUID[]
 }
 
 export interface NewGroupInput {

@@ -8,7 +8,7 @@ import { recapText, tidyNote, type Suggestion } from './writer'
 // The demo AI as the screens use it: the writer's output, delivered like a model's. A short
 // "reading" pause, then the recap streams in word by word. Everything runs in the browser.
 
-const wait = (ms: number, signal?: AbortSignal) =>
+export const wait = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
     if (signal?.aborted) return reject(new DOMException('Aborted', 'AbortError'))
     const t = window.setTimeout(resolve, ms)

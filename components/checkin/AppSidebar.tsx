@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { CreateMenu } from '@/components/bencho/CreateMenu'
 import { BrandMark } from '@/components/checkin/BrandMark'
 import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
-import { GearIcon, PlusIcon } from '@/components/checkin/icons'
+import { GearIcon } from '@/components/checkin/icons'
 import { TABS } from '@/components/checkin/TabBar'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
@@ -12,7 +13,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Desktop navigation (lg and up), reference: Halmatec. A narrow rail of crew medals on the far left
- * (pick one to open it in the feed; + starts or joins one), then a quiet panel: the logo, the three
+ * (pick one to open it in the feed; + opens a menu to start, join or browse), then a quiet panel: the logo, the three
  * tabs and the crew you're on. Phones use the bottom tab bar.
  */
 export function AppSidebar() {
@@ -63,14 +64,8 @@ export function AppSidebar() {
             )
           })}
         </ul>
-        <Link
-          href="/new-group"
-          aria-label="Start or join a crew"
-          title="Start or join a crew"
-          className="grid size-[42px] place-items-center rounded-[14px] border border-dashed border-border-strong text-muted-foreground transition-colors duration-150 ease-out hover:border-foreground/40 hover:text-foreground"
-        >
-          <PlusIcon size={18} />
-        </Link>
+        {/* + opens the create menu (Bencho): start a crew, join with a code, or browse. */}
+        <CreateMenu variant="rail" />
       </nav>
 
       {/* The panel */}

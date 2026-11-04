@@ -100,6 +100,11 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         )}
         <p className="min-w-0 flex-1">
           <span className="font-medium">{item.isMine ? 'You' : item.user.name}</span>
+          {item.with.length > 0 && (
+            <span className="text-muted-foreground">
+              {' '}with <span className="font-medium text-foreground">{listNames(item.with.map((p) => p.name))}</span>
+            </span>
+          )}
           <span className="ml-2 text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
         </p>
         {justIn && (
@@ -245,4 +250,10 @@ function VouchLine({
       <span>{v.count ? `${v.count} of 2 vouches` : 'Two vouches verify it'}</span>
     </div>
   )
+}
+
+/** "Maya", "Maya and Priya", "Maya, Priya and Dre". */
+function listNames(names: string[]) {
+  if (names.length < 3) return names.join(' and ')
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
 }

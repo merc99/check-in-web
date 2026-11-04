@@ -36,7 +36,9 @@ When this file and the prototype disagree, this file wins.
 - `components/arc/`: Arc installs (motion components). Restyle via tokens, not by forking unless needed.
 - `components/bencho/`: Bencho components (MIT, bencho.dev/licence), their CSS in `app/bencho.css` (imported by
   globals.css), Bencho tokens mapped to ours. On screens: `LiquidToggle` (inside `Switch`), `RollingCounter` (New crew,
-  max size), `StackedBars` (You, "Your days" via `components/you/CrewDays.tsx`). The rest live on the kitchen sink's
+  max size; session time and pages in `DetailsEditor`), `StackedBars` (You, "Your days" via
+  `components/you/CrewDays.tsx`), `CreateMenu variant="rail"` (the desktop rail's +), `Assignees inline` ("With" in
+  the check-in sheet). The rest live on the kitchen sink's
   Bencho shelf only. Keep their comments; lint exceptions sit at the top of each file with a reason.
 - `components/checkin/`: Check-in product components (`TagChip`, `ToggleChip`, `CrewAvatar`, `ThemeToggle`, and the
   ones listed under *Product components*). Build once, reuse, never restyle inline.
@@ -151,9 +153,11 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
-| `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
+| `RollingCounter` (digits roll, drag or step) | calm | New crew, max size; session time and pages in the check-in sheet |
+| `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
+| `Assignees` (faces drop into the pill, list unfolds) | calm | "With" in the check-in sheet |
 | `StackedBars` (grow in once, scrub ring + tooltip) | calm | You, "Your days" by crew |
-| `TaskRun` (turning wedge on the active step, sub-lines fold) | live state | The crew recap while it writes; the wedge stops when the step ends |
+| `TaskRun` (turning wedge on the active step, sub-lines fold) | live state | The crew recap while it writes, and Tidy with AI; the wedge stops when the step ends |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
@@ -260,6 +264,9 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Cheers** (`cheers` table, `CheerButton`): one per person on a milestone post, separate from emoji reactions.
 - **Vouches** (`vouches` table): crewmates vouch for Committed-and-up tiers; two make it **Verified** (a mark on the
   card, who vouched on posts, the trophy case and the card's back). You can't vouch for yourself.
+- **With:** a check-in can name crewmates who did the session with you (`CheckIn.with_user_ids`, `FeedItem.with`;
+  same crew only, never yourself, up to six). Picked in the sheet ("Just me" when empty); posts read "You with Maya".
+  The demo crew sometimes tags a crewmate who's already in.
 - **Proof:** "Add photo" in the check-in sheet (demo: an object URL, kept on this device); it shows on the post.
 - **Share card** (`lib/shareCard.ts`): a 1080×1350 image drawn on a canvas (share sheet or download); the rarity
   line only when 40% or fewer members reach the tier.
@@ -280,8 +287,9 @@ brand voice; `lib/ai/demo.ts` delivers it like a model would (a short "reading" 
   `TaskRun` (read, count, pick quotes, write, then "Share with the crew" asks first), the text streams in with a caret
   during the write step, and "Copy to share" copies it. Each "Rewrite" uses different phrasing and quotes
   different notes. Labeled "Demo AI, written on your device from this week's check-ins". Data: `getCrewWeek`.
-- **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" suggests a tidier note and up to three
-  tags from the crew's own list; "Use this" / "Keep mine".
+- **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" runs a `TaskRun` (read your note, spot
+  the details, match your crew's tags, then "Use the tidy version" asks first) and suggests a tidier note and up to
+  three tags from the crew's own list; "Use this" / "Keep mine".
 - Ben chose to keep it a demo (Oct 2026). If a real model is ever wanted, replace the two functions in `demo.ts`
   with calls to a server route; the screens don't change.
 
