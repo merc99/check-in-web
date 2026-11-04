@@ -29,7 +29,7 @@ import { useToast } from '@/components/checkin/Toast'
 import { AVATAR_HUES } from '@/lib/colors'
 import { DataCheck } from './DataCheck'
 
-const VARIANTS = ['primary', 'dark', 'secondary', 'danger'] as const
+const VARIANTS = ['primary', 'brand', 'secondary', 'danger'] as const
 const TAGS = ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push', 'gouache', 'ink']
 const AVATAR_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const
 const NAMES = ['Maya', 'Dre', 'Priya', 'Sam', 'Theo']
@@ -88,7 +88,7 @@ export default function KitchenSink() {
               </Button>
             </div>
           ))}
-          <Button variant="primary" block>
+          <Button variant="brand" block>
             <CheckIcon size={18} /> Check in
           </Button>
           <Button block>
@@ -328,7 +328,7 @@ export default function KitchenSink() {
           </FormField>
           <div className="pt-3">
             <Button
-              variant="primary"
+              variant="brand"
               block
               onClick={() => {
                 setSheetOpen(false)

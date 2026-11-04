@@ -376,7 +376,7 @@ export default function FeedPage() {
 
       {desktop && (
         <aside aria-label="Today" className="sticky top-0 flex flex-col gap-4 self-start pt-[62px]">
-          <Button ref={railButton} variant={meIn ? 'secondary' : 'primary'} block onClick={openCheckIn}>
+          <Button ref={railButton} variant={meIn ? 'secondary' : 'brand'} block onClick={openCheckIn}>
             <CheckIcon size={18} /> {meIn ? 'You’re in for today' : 'Check in'}
           </Button>
           {hero}

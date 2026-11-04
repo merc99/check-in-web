@@ -23,7 +23,7 @@
 .medal {
   position: relative; display: grid; place-items: center; width: 104px; height: 104px; margin-bottom: 8px; border-radius: 9999px;
   border: 1px dashed var(--border-strong); background: var(--muted); color: var(--muted-foreground);
-  font-family: var(--font-bricolage), sans-serif; font-weight: 800; font-size: 36px;
+  font-family: var(--font-geist-sans), sans-serif; font-weight: 600; font-size: 36px;
 }
 .card[data-open] .medal { border: 0; background: var(--on-color); color: var(--hue); }
 .medal[data-shake] { animation: shake var(--fx-reveal-shake, .8s) ease-in-out; }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Bricolage_Grotesque, Geist } from 'next/font/google'
+import { Geist, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 import { ThemeProvider } from 'next-themes'
 import { AppSidebar } from '@/components/checkin/AppSidebar'
@@ -7,9 +7,9 @@ import { TabBarDock } from '@/components/checkin/TabBar'
 import { Providers } from './providers'
 import './globals.css'
 
-// Display: Bricolage Grotesque keeps the playful edge. Body: Geist for the clean, modern read.
-const display = Bricolage_Grotesque({ subsets: ['latin'], weight: ['500', '600', '700', '800'], variable: '--font-bricolage', display: 'swap' })
+// One family: Geist for everything, Geist Mono for small figures, meta and chart axes.
 const sans = Geist({ subsets: ['latin'], variable: '--font-geist-sans', display: 'swap' })
+const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' })
 // Wordmark: Satoshi Black (Fontshare, free for commercial use), only for "check-in" in the logo.
 const wordmark = localFont({ src: './fonts/Satoshi-Black.woff2', weight: '900', variable: '--font-satoshi', display: 'swap' })
 
@@ -20,14 +20,14 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F1ECE2' },
-    { media: '(prefers-color-scheme: dark)', color: '#0B0B0C' },
+    { media: '(prefers-color-scheme: light)', color: '#F6F6F7' },
+    { media: '(prefers-color-scheme: dark)', color: '#141415' },
   ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${wordmark.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${wordmark.variable}`} suppressHydrationWarning>
       <body>
         {/* .dark goes on <html>. Dark by default; You → Settings can switch to light or follow the system. */}
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>

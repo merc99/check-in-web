@@ -16,25 +16,25 @@
   color-scheme: light;
   --radius: 16px;
 
-  --background: #F1ECE2;          /* warm paper canvas: cards and buttons sit up off it */
-  --foreground: #1C1B19;
-  --card: #FFFDF8;                /* warm white */
-  --card-foreground: #1C1B19;
-  --popover: #FFFDF8;
-  --popover-foreground: #1C1B19;
+  --background: #F6F6F7;          /* graphite: content carries the color, surfaces stay neutral */
+  --foreground: #171717;
+  --card: #FFFFFF;
+  --card-foreground: #171717;
+  --popover: #FFFFFF;
+  --popover-foreground: #171717;
 
   --primary: #34D399;             /* mint: the one interactive accent */
   --primary-foreground: #052E1C;
-  --secondary: #EBE5D9;
-  --secondary-foreground: #1C1B19;
-  --muted: #EBE5D9;               /* raised surfaces: inputs, tracks, hover */
-  --muted-foreground: #625E55;
-  --accent: #EBE5D9;              /* shadcn meaning: subtle hover fill. NOT the brand accent. */
-  --accent-foreground: #1C1B19;
+  --secondary: #F0F0F2;
+  --secondary-foreground: #171717;
+  --muted: #F0F0F2;               /* raised surfaces: inputs, tracks, hover */
+  --muted-foreground: #525252;
+  --accent: #F0F0F2;              /* shadcn meaning: subtle hover fill. NOT the brand accent. */
+  --accent-foreground: #171717;
   --destructive: #EF4444;
 
-  --border: rgb(70 52 25 / 0.11);
-  --input: rgb(70 52 25 / 0.2);
+  --border: rgb(23 23 23 / 0.08);
+  --input: rgb(23 23 23 / 0.14);
   --ring: #34D399;
 
   --chart-1: #34D399;
@@ -44,8 +44,8 @@
   --chart-5: #F472B6;
 
   /* Check-in extras */
-  --border-strong: rgb(70 52 25 / 0.2);
-  --subtle-foreground: #9A9387;
+  --border-strong: rgb(23 23 23 / 0.14);
+  --subtle-foreground: #737373;
   --on-color: #1C1B19;            /* text on solid crew hues, both modes */
   --primary-ink: #047857;         /* mint as readable text / links */
   --primary-soft: rgb(52 211 153 / 0.16);
@@ -62,11 +62,13 @@
   --clay: #FB923C;   --clay-soft: rgb(251 146 60 / 0.14);   --clay-ink: #C2410C;
   --indigo: #818CF8; --indigo-soft: rgb(129 140 248 / 0.16); --indigo-ink: #4338CA;
 
-  /* Elevation: soft and diffused, alpha < 0.08 in light mode */
-  --elev-xs: 0 1px 2px rgb(28 27 25 / 0.04);
-  --elev-card: 0 1px 2px rgb(28 27 25 / 0.04), 0 4px 16px -4px rgb(28 27 25 / 0.06);
-  --elev-raised: 0 2px 4px rgb(28 27 25 / 0.05), 0 12px 32px -8px rgb(28 27 25 / 0.07);
-  --elev-overlay: 0 8px 24px rgb(28 27 25 / 0.07), 0 24px 64px -16px rgb(28 27 25 / 0.07);
+  /* Elevation: neutral, soft and small in light mode */
+  --elev-xs: 0 1px 2px rgb(0 0 0 / 0.04);
+  --elev-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --elev-raised: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --elev-overlay: 0 8px 24px rgb(0 0 0 / 0.08), 0 24px 64px -16px rgb(0 0 0 / 0.1);
+  /* The lit top edge on buttons, active tabs and pills (the references' "light, not lines") */
+  --edge-lit: inset 0 1px 0 rgb(255 255 255 / 0.6);
 
   /* Arc bridge: Arc components (components/arc/) read these names. Each points at a Check-in
      token, so dark mode follows .dark with no second copy. Arc's --text-sm / --text-lg are left
@@ -77,7 +79,7 @@
   --text-secondary: var(--muted-foreground);
   --text-muted: var(--subtle-foreground);
   --shadow-floating: var(--elev-overlay);
-  --radius-surface: 22px;          /* rounded-xl: sheets */
+  --radius-surface: 20px;          /* rounded-xl: sheets */
   --radius-pill: 9999px;
   --font-body: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --tracking-body: normal;
@@ -104,24 +106,24 @@
 /* ---------- Dark ---------- */
 .dark {
   color-scheme: dark;
-  --background: #0B0B0C;
-  --foreground: #F5F5F4;
-  --card: #141416;
-  --card-foreground: #F5F5F4;
-  --popover: #1C1C1F;
-  --popover-foreground: #F5F5F4;
-  --secondary: #1C1C1F;
-  --secondary-foreground: #F5F5F4;
-  --muted: #1C1C1F;
-  --muted-foreground: #A1A1AA;
-  --accent: #1C1C1F;
-  --accent-foreground: #F5F5F4;
+  --background: #141415;
+  --foreground: #EDEDED;
+  --card: #1A1A1C;
+  --card-foreground: #EDEDED;
+  --popover: #232325;
+  --popover-foreground: #EDEDED;
+  --secondary: #232325;
+  --secondary-foreground: #EDEDED;
+  --muted: #232325;
+  --muted-foreground: #A1A1A6;
+  --accent: #232325;
+  --accent-foreground: #EDEDED;
 
   --border: rgb(255 255 255 / 0.08);
-  --input: rgb(255 255 255 / 0.14);
+  --input: rgb(255 255 255 / 0.12);
 
-  --border-strong: rgb(255 255 255 / 0.14);
-  --subtle-foreground: #71717A;
+  --border-strong: rgb(255 255 255 / 0.12);
+  --subtle-foreground: #85858B;
   --primary-ink: #6EE7B7;
   --primary-soft: rgb(52 211 153 / 0.18);
   --destructive-soft: rgb(239 68 68 / 0.18);
@@ -136,10 +138,11 @@
   --clay-soft: rgb(251 146 60 / 0.18);   --clay-ink: #FDC59A;
   --indigo-soft: rgb(129 140 248 / 0.2); --indigo-ink: #C3C9FB;
 
-  /* Edge lighting instead of glow stacks */
+  /* Dark: depth from surface steps and a lit top edge, no drop shadows on resting cards */
   --elev-xs: inset 0 1px 0 rgb(255 255 255 / 0.04);
-  --elev-card: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px -8px rgb(0 0 0 / 0.6);
-  --elev-raised: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 2px 4px rgb(0 0 0 / 0.5), 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --elev-card: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --elev-raised: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 12px 32px -16px rgb(0 0 0 / 0.7);
+  --edge-lit: inset 0 1px 0 rgb(255 255 255 / 0.08);
   --elev-overlay: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.8);
 }
 
@@ -198,8 +201,8 @@
   --radius-sm: 6px;
   --radius-md: 10px;              /* inputs, small controls */
   --radius-lg: var(--radius);     /* cards: 16px */
-  --radius-xl: 22px;              /* large cards, sheets */
-  --radius-2xl: 28px;
+  --radius-xl: 20px;              /* large cards, sheets */
+  --radius-2xl: 24px;
 
   --shadow-xs: var(--elev-xs);
   --shadow-sm: var(--elev-card);
@@ -209,10 +212,17 @@
   --shadow-you: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-wordmark: var(--font-satoshi), var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --tracking-tighter: -0.02em;
-  --tracking-tightest: -0.035em;
+  /* One family (Geist), medium weights; Geist Mono for small figures, meta and chart axes.
+     font-display is kept as a name for titles and big numbers, now Geist. */
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-wordmark: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  /* Heavy weights cap at 600 (references and unslop: hierarchy from size and color, not weight) */
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 600;
+  --tracking-tighter: -0.015em;
+  --tracking-tightest: -0.03em;
   --container-app: 640px;         /* max-w-app */
 }
 
@@ -263,16 +273,20 @@
     @apply bg-background font-sans text-foreground antialiased;
     font-size: 15px;
     line-height: 1.5;
-    font-feature-settings: "cv11", "ss01";
     -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3 { @apply font-display tracking-tighter; }
-  /* Project: display type defaults to 700 (spec: Bricolage 600–800); a font-* weight class still overrides. */
-  .font-display { font-weight: 700; }
+  /* Display type defaults to medium; a font-* weight class still overrides (capped at 600). */
+  .font-display { font-weight: 500; }
   :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }
 
 @utility tnum { font-variant-numeric: tabular-nums; }
+@utility edge-lit { box-shadow: var(--edge-lit); }
+/* "Not yet" segments (charts, tallies, progress): fine diagonal hatching in the hairline color */
+@utility hatch {
+  background-image: repeating-linear-gradient(135deg, var(--border-strong) 0 1px, transparent 1px 5px);
+}
 /* Perk: the foil frame on your avatar (mastery, Committed). A static holo ring in the crew palette. */
 @utility foil-frame {
   background: conic-gradient(from 210deg, var(--rose), var(--lemon), var(--leaf), var(--sky), var(--grape), var(--rose));
@@ -294,8 +308,7 @@
 
 /* Crew glow: soft radial wash at the top of the feed. Set --crew (a hue variable) on a parent. */
 @layer components {
-  .crew-glow { background-image: radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--crew) 22%, transparent), transparent 70%); }
-  .dark .crew-glow { background-image: radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--crew) 16%, transparent), transparent 70%); }
+  .crew-glow { background-image: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

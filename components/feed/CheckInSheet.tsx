@@ -307,7 +307,7 @@ export function CheckInSheet({
 
         <div className="flex justify-center pt-3">
           <Button
-            variant="primary"
+            variant="brand"
             onClick={submit}
             disabled={stamping}
             aria-label={stamping ? 'Checking in' : undefined}

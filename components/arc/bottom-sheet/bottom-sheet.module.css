@@ -50,7 +50,7 @@
 .headRow { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
 .headText { min-width: 0; }
 /* Check-in: sheet titles are display type (Bricolage 700, 28px), like the other sheets. */
-.title { margin: 0; font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.title { margin: 0; font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; font-size: 24px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; }
 .description { margin: 6px 0 0; color: var(--text-secondary); font-size: 14px; line-height: var(--leading-body); } /* Check-in: fixed size, see globals.css bridge note */
 
 /* Check-in: the 32px button keeps its look but gets a 44px touch target. */
