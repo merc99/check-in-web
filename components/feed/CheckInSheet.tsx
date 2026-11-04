@@ -92,17 +92,22 @@ export function CheckInSheet({
   const tidyAbort = useRef<AbortController | null>(null)
   const { state: tidyRun, emit } = useTaskRun(TIDY_STEPS)
 
-  // Start fresh each time the sheet opens (adjusting state during render, not in an effect).
+  // A closed sheet keeps its draft (a flick or a tap outside shouldn't lose a written note); it starts
+  // fresh after a check-in posts or for another crew. Adjusting state during render, not in an effect.
   const [wasOpen, setWasOpen] = useState(open)
+  const [draftFor, setDraftFor] = useState<string | null>(null)
   if (open !== wasOpen) {
     setWasOpen(open)
     if (open) {
-      setNote('')
-      setQuery('')
-      setAdded([])
-      setSelected(new Set())
       setStamping(false)
       setTidy(null)
+      setQuery('')
+    }
+    if (open && draftFor !== group.name) {
+      setDraftFor(group.name)
+      setNote('')
+      setAdded([])
+      setSelected(new Set())
       setDetails({})
       setDetailsOpen(false)
       setStravaOpen(false)
@@ -181,6 +186,7 @@ export function CheckInSheet({
   const submit = () => {
     if (stamping) return
     setStamping(true)
+    setDraftFor(null) // Posted: the next check-in starts fresh.
     try {
       navigator.vibrate?.(18)
     } catch {

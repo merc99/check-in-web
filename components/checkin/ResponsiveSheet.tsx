@@ -19,11 +19,13 @@ export interface ResponsiveSheetProps {
 
 /**
  * Arc's bottom sheet on phones, a centered dialog on desktop (lg and up). Same title, content and
- * open state either way; both close on Escape, trap focus and return it to the trigger.
+ * open state either way; both close on Escape, trap focus and return it to the trigger, and the
+ * browser's back (or a phone's back gesture) closes the sheet instead of leaving the page.
  */
 export function ResponsiveSheet({ open, onOpenChange, title, titleHidden, description, detents, children }: ResponsiveSheetProps) {
   const desktop = useDesktop()
   useReturnFocus(open)
+  useBackCloses(open, onOpenChange)
 
   if (!desktop) {
     return (
@@ -83,5 +85,70 @@ function useReturnFocus(open: boolean) {
       if (lost || performance.now() - started > 1500) window.clearInterval(t)
     }, 50)
     return () => window.clearInterval(t)
+  }, [open])
+}
+
+// Back closes the sheet: an open sheet adds one history entry (same URL), back pops it, and closing
+// the sheet any other way pops it for you, so the history ends where it started.
+let unwinding = false
+const queued: (() => void)[] = []
+let watching = false
+function watchUnwind() {
+  if (watching || typeof window === 'undefined') return
+  watching = true
+  window.addEventListener('popstate', () => {
+    if (!unwinding) return
+    unwinding = false
+    queued.splice(0).forEach((fn) => fn())
+  })
+}
+const whenSettled = (fn: () => void) => (unwinding ? queued.push(fn) : fn())
+
+/**
+ * Run a navigation after a sheet you just closed has removed its history entry. Use it when a button
+ * inside a sheet closes it and moves to another page, so the back entry isn't popped mid-navigation.
+ */
+export function afterSheetClose(fn: () => void) {
+  // The close commits (and its cleanup calls history.back) before this timer fires.
+  window.setTimeout(() => whenSettled(fn), 0)
+}
+
+function useBackCloses(open: boolean, onOpenChange: (open: boolean) => void) {
+  const change = useRef(onOpenChange)
+  useEffect(() => {
+    change.current = onOpenChange
+  })
+  useEffect(() => {
+    if (!open) return
+    watchUnwind()
+    const id = Math.random().toString(36).slice(2)
+    let pushed = false
+    let popped = false
+    let gone = false
+    const onPop = () => {
+      if (pushed && history.state?.__sheet !== id) {
+        popped = true
+        change.current(false)
+      }
+    }
+    // Deferred, so a closed-then-reopened sheet waits for the previous entry to go first
+    // (and dev's double effects push only once). Next's own state is kept so its router is unaffected.
+    const t = window.setTimeout(() =>
+      whenSettled(() => {
+        if (gone) return
+        history.pushState({ ...history.state, __sheet: id }, '')
+        pushed = true
+        window.addEventListener('popstate', onPop)
+      }),
+    )
+    return () => {
+      gone = true
+      window.clearTimeout(t)
+      window.removeEventListener('popstate', onPop)
+      if (pushed && !popped && history.state?.__sheet === id) {
+        unwinding = true
+        history.back()
+      }
+    }
   }, [open])
 }

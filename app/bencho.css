@@ -1835,6 +1835,9 @@
 
 /* the plot: absolutely placed columns, each segment its own rounded box */
 .stb-plot { position: relative; width: 100%; touch-action: none; cursor: crosshair; }
+/* Check-in: keyboard focus on the plot, and the spoken line for the bar it reads */
+.stb-plot { border-radius: 6px; outline-offset: 4px; }
+.stb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .stb-base {
   position: absolute;

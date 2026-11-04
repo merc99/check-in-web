@@ -89,12 +89,12 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
     removeMember(g.id, m.person.id).then(() => toast(`${m.person.name} removed`), fail)
   const destroy = () =>
     deleteGroup(g.id).then(() => {
-      router.push('/feed')
+      router.replace('/feed')
       toast('Crew deleted')
     }, fail)
   const leave = () =>
     leaveGroup(g.id).then(() => {
-      router.push('/feed')
+      router.replace('/feed')
       toast('You left the crew')
     }, fail)
 
