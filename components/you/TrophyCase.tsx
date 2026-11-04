@@ -20,14 +20,7 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
         <li key={s.groupId} className="rounded-lg border bg-card p-3 shadow-card">
           {s.tier ? (
             <>
-              <TierCard tier={s.tier} skill={s.skill} crewName={s.crewName} color={s.color} sessions={s.sessions} verified={s.vouches?.verified} />
-              {s.vouches && (
-                <p className={cn('px-1 pt-2 text-[13px]', s.vouches.verified ? 'font-medium text-primary-ink' : 'text-muted-foreground')}>
-                  {s.vouches.verified
-                    ? `Verified by ${s.vouches.people.map((p) => p.name).slice(0, 3).join(', ')}`
-                    : `${2 - s.vouches.count} more vouch${2 - s.vouches.count === 1 ? '' : 'es'} from your crew to verify it`}
-                </p>
-              )}
+              <TierCard tier={s.tier} skill={s.skill} crewName={s.crewName} color={s.color} sessions={s.sessions} />
             </>
           ) : (
             <p className="px-1 py-2 text-[14px] text-muted-foreground">No sessions in {s.crewName} yet. The first one gets you Started.</p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { BadgeCheck, Pin, PinOff, Share2 } from 'lucide-react'
+import { Pin, PinOff, Share2 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { Binder as BinderData, BinderCard } from '@/lib/data'
@@ -85,7 +85,6 @@ function FlipCard({
             color={c.color}
             sessions={t.at}
             serial={c.serial}
-            verified={c.vouches?.verified}
             portrait
           />
         </button>
@@ -103,11 +102,6 @@ function FlipCard({
               </div>
             ))}
           </dl>
-          {c.vouches?.verified && (
-            <p className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary-ink">
-              <BadgeCheck size={13} aria-hidden="true" /> Verified
-            </p>
-          )}
           <div className="mt-auto flex items-center gap-2">
             {isMe && onPin && (
               <Button size="icon" variant="ghost" className="hit-44 size-9" aria-label={pinned ? 'Unpin' : 'Pin to front'} title={pinned ? 'Unpin' : 'Pin to front'} onClick={() => onPin(pinned ? null : c.groupId)}>

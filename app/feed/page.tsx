@@ -34,7 +34,6 @@ import {
   getMyStats,
   getMySkills,
   getMasterCount,
-  vouch,
   onCheckIn,
   onHeart,
   react,
@@ -168,14 +167,7 @@ export default function FeedPage() {
     window.scrollTo({ top: 0 })
   }
 
-  // Mastery: vouch for a crewmate's tier, and share your own tier card as an image.
-  const vouchFor = (item: FeedItem, on: boolean) => {
-    if (!item.milestone) return
-    vouch(item.user.id, item.groupId, item.milestone.tier, on).then(
-      () => on && toast(`You vouched for ${item.user.name}’s ${tierOf(item.milestone!.tier).name}.`),
-      (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
-    )
-  }
+  // Mastery: share your own tier card as an image.
   const share = async ({ tier, sessions, rarity, serial }: { tier: TierKey; sessions: number; rarity?: number; serial?: number | null }) => {
     if (!g || !me.data) return
     try {
@@ -356,7 +348,6 @@ export default function FeedPage() {
                   onPersonTap={setProfileId}
                   crewName={g.name}
                   crewColor={g.color}
-                  onVouch={item.milestone?.vouches ? (on) => vouchFor(item, on) : undefined}
                   onShare={item.milestone && item.isMine ? () => share({ tier: item.milestone!.tier, sessions: item.milestone!.sessions, rarity: item.milestone!.rarity }) : undefined}
                 />
               </Fragment>
