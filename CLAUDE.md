@@ -76,7 +76,7 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
   avatars, dots, chart marks and small badges; `bg-{hue}-soft text-{hue}-ink` for the crew medal (`CrewBlock`) and
   a cover without a photo. Tinted cards (`CrewTint`, Ben, Nov 2026): the feed header and its copies in the crew switcher
-  wear the crew's hue; milestone posts wear the tier's hue; your card on You wears your own color. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
+  wear the crew's hue; milestone posts wear the tier's hue; your card on You wears your own color. Earned card finishes (progression) tint a post's edge in its author's color. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
   Mint is not a crew or avatar hue (it's `primary`); demo data that used mint now uses leaf.
 - **Shadows:** resting cards have none in dark (`edge-lit` only) and a 1px soft one in light. `shadow-raised` for
   floating things (FAB, dock), `shadow-overlay` (sheets, menus), `shadow-you` (the signed-in user's avatar ring).
@@ -151,7 +151,8 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
 | Tier card materials (paper, enamel, `Foil`, holo film, a still aurora edge; nothing moves on hover) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
-| Foil frame (static holo ring) | calm (static) | Your avatar, when the perk is on |
+| Frames (ring, foil, gilded, prism; static rings) | calm (static) | Avatars wearing an earned frame (progression) |
+| Card finishes (edge, tint, holo, gilded, aurora; static) | calm (static) | Everyday posts whose author wears one (progression), the look sheet, the kitchen sink |
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
@@ -238,8 +239,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **You** (revamp, Nov 2026): `YouHero` (`components/you/YouHero.tsx`), your own card as a `CrewTint` glow in your
   color with faint dots: avatar, name, handle, your top tier as a small `TierMedal`, bio, an edit pencil, and an ink
   strip of all time (biggest) | streak | best in `RollingCount`. Then "Your year" (`YearActivity`, with this month
-  against the last in its header), side by side with your card on desktop. Then the week tally, skills (`TrophyCase`: compact rows, a tier disc, a bar in the next tier's hue), binder,
-  recap, achievements, recent | the leaderboard and the crew share.
+  against the last in its header), side by side with your card on desktop. Then `RankCard` | `YourCard` and the rewards road (see *Progression*), then the week tally, skills
+  (`TrophyCase`: compact rows, a tier disc, a bar in the next tier's hue), binder, recap, badges (`BadgeWall`), recent | the leaderboard and the crew share.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: plain `bg-background` (the old `crew-glow` wash is retired; the class is a no-op).
@@ -294,8 +295,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Strava (mocked):** `CheckIn.source` (`manual` | `strava`). You → Settings → Strava, or "Connect Strava" in the
   sheet, turns on the demo (sample activities, `getStravaActivities`). Fitness crews get "Add from Strava"; posts say
   "From Strava" in plain text (no logo, no implied partnership). A real integration needs a backend.
-- **Perk:** the foil frame (`foil-frame` utility) on your avatar, unlocked at Committed, switched in Settings
-  (`lib/prefs.ts`, remembered in this browser). More perks: see the ideas doc.
+- **Perk:** retired as its own switch: the foil frame is now a progression reward (Frame, at Committed).
 - **Demo seed:** Ben at Committed in DIALED (61) and one session from Habit in Sketchbook Daily (9); Dre one from
   Committed (49), so his next check-in is a milestone post; Maya at Seasoned (152).
 
@@ -320,6 +320,34 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   in the trophy case. **Crew challenge** (`getCrewChallenge`, `ChallengeBar`): a monthly shared target a stretch
   above the crew's pace, on You, in the today panel and the desktop rail. Never a countdown.
 - **Demo:** the crew reacts to milestone posts within seconds (🙌 👏 🔥).
+
+## Progression (`lib/progression.ts`, Ben, Nov 2026: rank up by showing up, flex what you earn)
+The MMO layer over mastery. Your check-in card is the thing you flex; what goes on it is earned.
+- **XP** (never goes down, nothing expires, nothing is bought): 10 a session, +5 each for a photo, details or a
+  crewmate, +25 a badge, a tier 10 / 50 / 150 / 300 / 600 / 1,500. **Level** 1–50 from XP (`xpForLevel` =
+  20·L·(L−1)). **Ranks** by level: Newcomer 1, Regular 5, Mainstay 10, Pillar 20, Keystone 30, Legend 40, each
+  with a hue. No seasons, no countdowns, no prestige reset (brand voice).
+- **Rewards** (`REWARDS`), unlocked by a level or a tier: card finishes (Signature edge 3, Tinted 8, Holo at
+  Seasoned, Gilded 20, Aurora 35), frames (Ring 2, Foil at Committed, Gilded 15, Prism at Expert), and each new
+  rank as a stop on the road (nothing to wear). No titles (Ben, Nov 2026: they added little). **Badges** are every
+  achievement (account-wide `all.<key>` and per skill `<groupId>:<key>`); you show one.
+- **Loadout** (`Profile.loadout`: card, frame, badge). `setLoadout` only takes what's unlocked; anything else reads
+  as plain. `FeedItem.flex` carries the author's level, rank and loadout.
+- **On posts** (`PostCard`): only the frame on the avatar and the finish on the card (milestone posts keep the
+  tier's `CrewTint`); the post stays name, time and the session (Ben, Nov 2026: no level or badge on the card).
+  Tapping a crewmate's name or avatar opens `ProfileSheet`, which shows their level, rank and showcase badge.
+  Your avatar wears your frame everywhere (`useMyFrame`).
+- **On You**: `RankCard` (emblem, level, XP to the next in mint, XP this week, what the next level gives, "How
+  XP works") beside `YourCard` (your post as the crew sees it, "Change your look" opens `LoadoutSheet`: Card,
+  Frame, Badge; locked ones show dimmed with how to get them), then the **Rewards road** (every level that gives
+  something, earned in mint, the next with XP to go; arrows for a mouse, a drag glides and settles on a stop) and
+  the **Badge wall** (`BadgeWall`: filters, tap an earned badge to show it on your profile, progress on the rest).
+- **Check-in**: the toast says the XP ("You showed up. +15 XP, yours for good."); a new level adds a toast with
+  the rank and what it opened up.
+- **Art** (`components/checkin/Progression.tsx` + `.module.css`): placeholder hex emblems, badge coins, frames and
+  finishes in the house style. Ben's own art goes in `public/badges/` and `public/ranks/` and is listed in
+  `lib/art.ts` (by achievement key or rank); the components swap it in.
+- **Demo seed:** Ben level 9 (Regular, 120 XP from Mainstay), Maya 12 with a holo card, the rest 5–11.
 
 ## Demo AI (`lib/ai`)
 A demo only: **no model, no API key, no server calls.** `lib/ai/writer.ts` writes from the crew's own data in the

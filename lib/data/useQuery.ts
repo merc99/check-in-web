@@ -29,12 +29,29 @@ export function useQuery<T>(fetcher: () => Promise<T>, deps: DependencyList, tab
     fetcherRef.current = fetcher
   })
   const run = useRef(0)
+  // The last result, serialized: a refetch that comes back the same (most live changes are someone
+  // else's) keeps the old state, so nothing re-renders mid-swipe for no reason.
+  const last = useRef<string | null>(null)
 
   // State only changes when the promise settles, never synchronously.
   const load = useCallback(() => {
     const id = ++run.current
     fetcherRef.current().then(
-      (data) => id === run.current && setState({ data, error: undefined, settled: true }),
+      (data) => {
+        if (id !== run.current) return
+        let key: string | null = null
+        try {
+          key = JSON.stringify(data) ?? null
+        } catch {
+          // Not serializable: always take the new result.
+        }
+        if (key !== null && key === last.current) {
+          setState((s) => (s.settled && !s.error ? s : { data: s.data, error: undefined, settled: true }))
+          return
+        }
+        last.current = key
+        setState({ data, error: undefined, settled: true })
+      },
       (error: unknown) =>
         id === run.current &&
         setState((s) => ({ ...s, error: error instanceof Error ? error : new Error(String(error)), settled: true })),

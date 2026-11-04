@@ -1,6 +1,11 @@
 import { AVATAR_HUES, getTagHue, type Hue } from '@/lib/colors'
 import type {
   Achievement,
+  BadgeInfo,
+  Flex,
+  LoadoutPatch,
+  MyProgress,
+  RewardState,
   Change,
   CheckIn,
   CheckInInput,
@@ -42,6 +47,7 @@ import { addDays, bestStreak, currentStreak, localDate, startOfDay, type LocalDa
 import { cleanDetails, nextTier, tierFor, tierOf, tierReachedAt, TIERS, type TierKey } from '@/lib/mastery'
 import { bestMonthOf, skillAchievements, type SessionRow } from '@/lib/mastery-achievements'
 import { HEART, REACTIONS } from '@/lib/reactions'
+import { levelFor, MAX_LEVEL, rankFor, REWARDS, TIER_XP, unlockLabel, XP, xpForLevel, type Loadout, type Reward } from '@/lib/progression'
 import { db, emit, newId, nowIso, onChange, resetDb } from './db'
 import { ME_ID } from './seed'
 
@@ -168,6 +174,7 @@ function toFeedItem(c: CheckIn): FeedItem {
     milestone: milestoneOf(c),
     photoUrl: c.photo_url,
     with: (c.with_user_ids ?? []).map(personOf),
+    flex: flexOf(c.user_id),
   }
 }
 
@@ -681,10 +688,15 @@ export async function getMyRecentCheckIns(limit = 3): Promise<RecentCheckIn[]> {
 
 export async function getAchievements(): Promise<Achievement[]> {
   await settle()
-  const days = daysOf(ME_ID)
-  const total = checkInsOf((c) => c.user_id === ME_ID).length
+  return accountAchievements(ME_ID)
+}
+
+/** The account-wide achievements (the You shelf), for anyone. */
+function accountAchievements(userId: UUID): Achievement[] {
+  const days = daysOf(userId)
+  const total = checkInsOf((c) => c.user_id === userId).length
   const best = bestStreak(days)
-  const myGroups = alive(db().group_members).filter((m) => m.user_id === ME_ID).map((m) => m.group_id)
+  const myGroups = alive(db().group_members).filter((m) => m.user_id === userId).map((m) => m.group_id)
   const perfectDay = myGroups.some((gid) => {
     const members = new Set(membersOf(gid).map((m) => m.user_id))
     const byDay = new Map<string, Set<string>>()
@@ -704,12 +716,178 @@ export async function getAchievements(): Promise<Achievement[]> {
   })
   return [
     a('first', 'First check-in', 'You showed up', '1', 'rose', total >= 1),
-    a('starter', 'Crew starter', 'Started a crew', 'C', 'sky', alive(db().groups).some((g) => g.created_by === ME_ID)),
+    a('starter', 'Crew starter', 'Started a crew', 'C', 'sky', alive(db().groups).some((g) => g.created_by === userId)),
     a('forty', 'Forty deep', '40 check-ins', '40', 'lemon', total >= 40),
     a('week', 'Week one', '7 days in a row', '7', 'coral', best >= 7),
     a('fifty', 'Half century', '50 check-ins', '50', 'grape', total >= 50),
     a('perfect', 'Perfect day', 'Whole crew in, same day', '★', 'leaf', perfectDay),
   ]
+}
+
+// ─── Progression: XP, level, rank, rewards and what you wear ───
+
+interface ProgressCore {
+  xp: number
+  weekXp: number
+  sources: { label: string; xp: number }[]
+  level: number
+  badges: BadgeInfo[]
+  rewards: RewardState[]
+  loadout: Loadout
+}
+
+// Worked out once per person per change (every post in the feed asks for its author's flex).
+let coreCache = new WeakMap<object, Map<UUID, ProgressCore>>()
+onChange(() => {
+  coreCache = new WeakMap()
+})
+
+function progressCore(userId: UUID): ProgressCore {
+  const key = db() as object
+  let byUser = coreCache.get(key)
+  if (!byUser) coreCache.set(key, (byUser = new Map()))
+  const hit = byUser.get(userId)
+  if (hit) return hit
+
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  let sessionXp = 0
+  let extraXp = 0
+  let tierXp = 0
+  let achXp = 0
+  let weekXp = 0
+  const badges: BadgeInfo[] = []
+  const tiersReached = new Set<TierKey>()
+  const crews = alive(db().group_members)
+    .filter((m) => m.user_id === userId)
+    .map((m) => db().groups.find((g) => g.id === m.group_id && !g.deleted_at))
+    .filter((g): g is Group => !!g)
+
+  for (const g of crews) {
+    const rows = sessionsOf(userId, g.id)
+    rows.forEach((c, i) => {
+      const extra = (c.photo_url ? XP.photo : 0) + (c.with_user_ids?.length ? XP.withCrew : 0) + (c.details ? XP.details : 0)
+      const t = tierReachedAt(i + 1)
+      sessionXp += XP.session
+      extraXp += extra
+      if (t) tierXp += TIER_XP[t.key]
+      if (new Date(c.created_at).getTime() >= weekAgo) weekXp += XP.session + extra + (t ? TIER_XP[t.key] : 0)
+    })
+    for (const t of TIERS) if (rows.length >= t.at) tiersReached.add(t.key)
+    for (const a of skillAchievements(g.skill_kind, sessionRows(userId, g.id))) {
+      if (a.unlocked) achXp += XP.achievement
+      badges.push({ key: `${g.id}:${a.key}`, name: a.title, subtitle: a.subtitle, crewName: g.name, unlocked: a.unlocked, progress: a.progress })
+    }
+  }
+  for (const a of accountAchievements(userId)) {
+    if (a.unlocked) achXp += XP.achievement
+    badges.push({ key: `all.${a.key}`, name: a.title, subtitle: a.subtitle, crewName: null, unlocked: a.unlocked, progress: null })
+  }
+
+  const xp = sessionXp + extraXp + tierXp + achXp
+  const level = levelFor(xp)
+  // Achievement keys earned anywhere (a title from "Early bird" unlocks with it in any crew).
+  const earned = new Set(badges.filter((b) => b.unlocked).map((b) => (b.key.startsWith('all.') ? b.key.slice(4) : b.key.split(':')[1])))
+  const unlocked = (r: Reward) =>
+    r.unlock.kind === 'start'
+      ? true
+      : r.unlock.kind === 'level'
+        ? level >= r.unlock.level
+        : r.unlock.kind === 'tier'
+          ? tiersReached.has(r.unlock.tier)
+          : earned.has(r.unlock.key)
+  const rewards: RewardState[] = REWARDS.map((r) => ({
+    id: r.id,
+    slot: r.slot,
+    name: r.name,
+    blurb: r.blurb,
+    value: r.value,
+    unlocked: unlocked(r),
+    how: unlockLabel(r.unlock),
+    level: r.unlock.kind === 'level' ? r.unlock.level : null,
+  }))
+
+  // Only what's unlocked shows: a pick that isn't earned (yet) falls back to plain.
+  const want = profile(userId).loadout
+  const has = (slot: RewardState['slot'], value: string | null) => !!value && rewards.some((r) => r.slot === slot && r.value === value && r.unlocked)
+  const loadout: Loadout = {
+    card: has('card', want.card) ? want.card : null,
+    frame: has('frame', want.frame) ? want.frame : null,
+    badge: want.badge && badges.some((b) => b.key === want.badge && b.unlocked) ? want.badge : null,
+  }
+
+  const sources = [
+    { label: 'Sessions', xp: sessionXp },
+    { label: 'Photos, details and crewmates', xp: extraXp },
+    { label: 'Tiers reached', xp: tierXp },
+    { label: 'Badges earned', xp: achXp },
+  ].sort((a, b) => b.xp - a.xp)
+
+  const core = { xp, weekXp, sources, level, badges, rewards, loadout }
+  byUser.set(userId, core)
+  return core
+}
+
+function flexOf(userId: UUID): Flex {
+  const p = progressCore(userId)
+  const badge = p.loadout.badge ? (p.badges.find((b) => b.key === p.loadout.badge) ?? null) : null
+  return { level: p.level, rank: rankFor(p.level).key, badge, frame: p.loadout.frame, card: p.loadout.card }
+}
+
+const badgeProgress = (b: BadgeInfo) => (b.progress ? b.progress.n / b.progress.of : 0)
+
+/** Your XP, level and rank, every reward and badge, and what you wear. */
+export async function getMyProgress(): Promise<MyProgress> {
+  await settle()
+  const p = progressCore(ME_ID)
+  const top = p.level >= MAX_LEVEL
+  return {
+    xp: p.xp,
+    level: p.level,
+    rank: rankFor(p.level).key,
+    levelFrom: xpForLevel(p.level),
+    levelTo: top ? xpForLevel(p.level) : xpForLevel(p.level + 1),
+    weekXp: p.weekXp,
+    sources: p.sources,
+    rewards: p.rewards,
+    badges: [...p.badges].sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || badgeProgress(b) - badgeProgress(a)),
+    loadout: p.loadout,
+  }
+}
+
+/** A crewmate's level and what they wear (their profile sheet). */
+export async function getFlexOf(userId: UUID): Promise<Flex> {
+  await settle()
+  return flexOf(userId)
+}
+
+/** Put on (or take off, with null) a reward. Only what you've unlocked. */
+export async function setLoadout(patch: LoadoutPatch): Promise<void> {
+  await settle()
+  const core = progressCore(ME_ID)
+  const p = profile(ME_ID)
+  const next: Loadout = { ...p.loadout }
+  if (patch.card !== undefined) next.card = checked('card', patch.card, core)
+  if (patch.frame !== undefined) next.frame = checked('frame', patch.frame, core)
+  if (patch.badge !== undefined) {
+    if (patch.badge && !core.badges.some((b) => b.key === patch.badge && b.unlocked)) throw new Error('That badge isn’t earned yet.')
+    next.badge = patch.badge
+  }
+  p.loadout = next
+  emit({ table: 'profiles', type: 'UPDATE', row: p })
+}
+
+function checked<T extends string>(slot: RewardState['slot'], v: T | null, core: ProgressCore): T | null {
+  if (v && !core.rewards.some((r) => r.slot === slot && r.value === v && r.unlocked)) throw new Error('That one isn’t unlocked yet.')
+  return v
+}
+
+/** Your frame right now, read synchronously (your avatar wears it everywhere). */
+export function peekMyFrame(): Loadout['frame'] {
+  try {
+    return progressCore(ME_ID).loadout.frame
+  } catch {
+    return null
+  }
 }
 
 export async function getUserProfile(userId: UUID): Promise<PublicProfile> {

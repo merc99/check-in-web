@@ -31,6 +31,8 @@ import { AVATAR_HUES } from '@/lib/colors'
 import { JoinRequests } from '@/components/feed/JoinRequests'
 import { BenchoShelf } from './BenchoShelf'
 import { DataCheck } from './DataCheck'
+import { BadgeDisc, cardFinish, RankEmblem } from '@/components/checkin/Progression'
+import { BADGE_LOOK, RANKS, type CardFinish, type FrameKey } from '@/lib/progression'
 
 const VARIANTS = ['primary', 'brand', 'secondary', 'danger'] as const
 const TAGS = ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push', 'gouache', 'ink']
@@ -330,6 +332,44 @@ export default function KitchenSink() {
 
       <Section title="Year activity" note="the year · top crews · hover or arrow keys">
         <YearActivity {...yearDemo} className="max-w-[340px]" />
+      </Section>
+
+      <Section title="Progression" note="rank emblems · badges · frames · card finishes">
+        <div className="flex flex-wrap items-end gap-4">
+          {RANKS.map((r) => (
+            <span key={r.key} className="flex flex-col items-center gap-1.5">
+              <RankEmblem level={r.from} rank={r.key} size="lg" />
+              <span className="text-[12px] text-muted-foreground">{r.name}</span>
+            </span>
+          ))}
+          <span className="flex items-end gap-2">
+            <RankEmblem level={9} size="md" />
+            <RankEmblem level={9} size="sm" />
+            <RankEmblem level={9} size="xs" />
+          </span>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {Object.keys(BADGE_LOOK).map((k) => (
+            <BadgeDisc key={k} badgeKey={k} size="md" />
+          ))}
+          <BadgeDisc badgeKey="early" locked size="md" />
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-5">
+          {([null, 'ring', 'foil', 'gilded', 'prism'] as (FrameKey | null)[]).map((f) => (
+            <Avatar key={f ?? 'none'} name="Ben" color="rose" size="lg" frame={f} />
+          ))}
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {(['edge', 'tint', 'holo', 'gilded', 'aurora'] as CardFinish[]).map((f) => {
+            const c = cardFinish(f, 'sky')
+            return (
+              <div key={f} className={cn('rounded-xl border bg-card p-4 edge-lit', c.className)} style={c.style}>
+                <p className="relative font-medium">{f}</p>
+                <p className="relative text-[13px] text-muted-foreground">A post wearing the {f} finish.</p>
+              </div>
+            )
+          })}
+        </div>
       </Section>
 
       <Section title="Overlays" note="sheet · arc sheet · toast · live pill">

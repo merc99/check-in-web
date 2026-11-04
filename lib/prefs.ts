@@ -47,6 +47,4 @@ export function usePref(key: string, fallback = false): [boolean, (on: boolean) 
 export const PREF = {
   /** The demo's Strava connection (no account; sample activities). */
   strava: 'checkin.strava',
-  /** Perk: the foil frame on your avatar (unlocked at Committed). */
-  foilFrame: 'checkin.perk.foilFrame',
 } as const

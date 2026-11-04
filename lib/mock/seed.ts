@@ -4,6 +4,7 @@ import { TIERS, type CheckInDetails, type CheckInSource, type SkillKind } from '
 import type { CheckIn, Group, GroupMember, Profile, Reaction, Tables, Tag, Vouch } from '@/lib/data/types'
 import { addDays, DAY, HOUR, localDate, MINUTE, startOfDay } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
+import { EMPTY_LOADOUT, type Loadout } from '@/lib/progression'
 
 const SEED_EMOJI = ['💪', '🔥', '👏', '🙌', '🙏', '😅']
 
@@ -51,6 +52,20 @@ const PEOPLE: PersonSeed[] = [
   { id: 'u14', name: 'Noor', color: 'lemon', joined: 190, streak: 19, total: 95 },
   { id: 'u15', name: 'Cal', color: 'grape', joined: 8, streak: 1, total: 9 },
 ]
+
+/**
+ * What the crew wears on their check-in cards (progression), so the feed has some flex on day one.
+ * Only rewards each person can plausibly have; the API drops anything they haven't unlocked.
+ */
+const LOADOUTS: Record<string, Partial<Loadout>> = {
+  [ME_ID]: { card: 'edge', frame: 'foil', badge: 'g1:week' },
+  u1: { card: 'holo', frame: 'foil', badge: 'g1:hundred' },
+  u2: { card: 'edge', frame: 'ring', badge: 'g1:ten' },
+  u3: { card: 'tint', frame: 'foil', badge: 'g1:quarter' },
+  u4: { frame: 'ring' },
+  u5: { card: 'edge', badge: 'g2:ten' },
+  u6: { frame: 'ring', badge: 'g2:first' },
+}
 
 interface GroupSeed {
   id: string
@@ -148,6 +163,7 @@ export function createSeed(now: Date = new Date()): Tables {
     avatar_color: p.color,
     timezone: 'UTC',
     pinned_group_id: null,
+    loadout: { ...EMPTY_LOADOUT, ...LOADOUTS[p.id] },
     created_at: daysAgo(p.joined),
     deleted_at: null,
   }))

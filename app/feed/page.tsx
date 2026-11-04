@@ -31,6 +31,7 @@ import {
   getGroup,
   getJoinRequests,
   getMe,
+  getMyProgress,
   getMyStats,
   getMySkills,
   getMasterCount,
@@ -46,6 +47,7 @@ import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
 import { tierOf, type TierKey } from '@/lib/mastery'
+import { rankFor } from '@/lib/progression'
 import { shareCard } from '@/lib/shareCard'
 import { useDesktop } from '@/lib/viewport'
 import { cn } from '@/lib/utils'
@@ -187,9 +189,11 @@ export default function FeedPage() {
     if (!g) return
     const firstToday = !stats.data?.checkedInToday
     const unlockedBefore = new Set(achievements.data?.filter((a) => a.unlocked).map((a) => a.key))
+    const before = await getMyProgress().catch(() => null)
     try {
       const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags, details: draft.details, source: draft.source, photoUrl: draft.photoUrl, with: draft.with })
-      const [after, earned] = await Promise.all([getMyStats(), getAchievements()])
+      const [after, earned, progress] = await Promise.all([getMyStats(), getAchievements(), getMyProgress()])
+      const gained = before ? progress.xp - before.xp : 0
       setCheckInOpen(false)
       // The celebration (fx, D2): a burst from whichever check-in button is on screen
       // (the FAB on phones, the rail button on desktop), in the crew's hue with mint.
@@ -212,7 +216,19 @@ export default function FeedPage() {
         const c = { tier: tierUp.key, skill: g.skillKind, crewName: g.name, color: g.color, sessions: item.milestone.sessions, rarity: sp?.rarity, serial: tierUp.key === 'master' ? masters : null }
         window.setTimeout(() => setCeremony(c), 700)
       } else if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
-      else toast(firstToday && after.streak === 7 ? 'Week one. Seven days in a row.' : 'You showed up. That one’s yours for good.')
+      else toast(firstToday && after.streak === 7 ? 'Week one. Seven days in a row.' : gained > 0 ? `You showed up. +${gained} XP, yours for good.` : 'You showed up. That one’s yours for good.')
+      // Progression: a new level says what it opened up (wear it from You).
+      if (before && progress.level > before.level) {
+        const opened = progress.rewards.filter((r) => r.unlocked && !before.rewards.find((b) => b.id === r.id)?.unlocked)
+        const rank = rankFor(progress.level)
+        window.setTimeout(
+          () =>
+            toast(
+              `Level ${progress.level}${rank.from === progress.level ? `. You’re a ${rank.name} now` : ''}.${opened.length ? ` New: ${opened.map((r) => r.name).join(', ')}. Wear it from You.` : ''}`,
+            ),
+          900,
+        )
+      }
     } catch (e) {
       setCheckInOpen(false)
       toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.')
