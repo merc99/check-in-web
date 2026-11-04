@@ -367,18 +367,25 @@ export default function FeedPage() {
             <ChallengeBar groupId={g.id} color={g.color} />
           </Card>
           <Card>
-            <div className="mb-[14px] flex items-baseline justify-between gap-3">
+            <div className="mb-4 flex items-baseline justify-between gap-3">
               <h2 className="text-[15px] font-medium leading-none">Your week</h2>
-              {stats.data && <small className="tnum font-mono text-[12px] text-muted-foreground">{stats.data.total} all time</small>}
+              <small className="font-mono text-[12px] text-muted-foreground">
+                <span className="tnum text-foreground">{week.filter((d) => d.done).length}</span>/7 days
+              </small>
             </div>
             <HeatmapGrid days={week} />
             {stats.data && (
-              <p className="mt-3 text-[13px] text-muted-foreground">
-                <span data-fx-streak="" className="inline-block font-medium text-foreground">
-                  <RollingCount n={stats.data.streak} label={`${stats.data.streak}`} />
-                </span>
-                -day streak, best <span className="tnum">{stats.data.best}</span>
-              </p>
+              <div className="mt-4 flex items-baseline justify-between gap-3 border-t pt-3 text-[13px] text-muted-foreground">
+                <p>
+                  <span data-fx-streak="" className="inline-block font-medium text-foreground">
+                    <RollingCount n={stats.data.streak} label={`${stats.data.streak}`} />
+                  </span>
+                  -day streak, best <span className="tnum">{stats.data.best}</span>
+                </p>
+                <small className="font-mono text-[12px]">
+                  <span className="tnum text-foreground">{stats.data.total}</span> all time
+                </small>
+              </div>
             )}
           </Card>
         </aside>
