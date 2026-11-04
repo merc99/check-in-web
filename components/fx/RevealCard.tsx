@@ -66,7 +66,7 @@ export function RevealCard({ achievement: a, onClose }: { achievement: Achieveme
           <span className={styles.glyph}>{open ? a.glyph : '?'}</span>
         </div>
         <p className="font-display text-[28px] leading-none tracking-tighter">{open ? a.title : 'You unlocked something'}</p>
-        <p className="text-[14.5px] font-medium" aria-live="polite">
+        <p className="text-[14px] font-medium" aria-live="polite">
           {open ? `${a.subtitle}. That one’s yours for good.` : 'Tap to see what you earned.'}
         </p>
         <Button ref={action} size="sm" variant={open ? 'dark' : 'primary'} className="mt-3" onClick={open ? onClose : reveal}>

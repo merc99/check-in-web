@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { BackIcon } from './icons'
 
 const base =
-  'inline-flex items-center gap-[6px] px-1 py-2 font-bold underline decoration-[1.5px] underline-offset-[3px]'
+  'inline-flex items-center gap-[6px] px-1 py-2 font-medium underline decoration-[1.5px] underline-offset-[3px]'
 
 /** Underlined text action ("Skip", "Remove photo"). `danger` for destructive ones. */
 export const TextButton = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { danger?: boolean }>(

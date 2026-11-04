@@ -209,7 +209,7 @@ export default function FeedPage() {
       // The day's first check-in moves the streak (fx, E1): +1 lands on it (rail on desktop, You tab on phones).
       const streak = Array.from(document.querySelectorAll('[data-fx-streak]')).find((el) => el.getClientRects().length > 0)
       if (firstToday && trigger && streak) {
-        flyArc({ from: trigger, to: streak, text: '+1', className: 'font-display text-[22px] font-extrabold text-primary-ink' })
+        flyArc({ from: trigger, to: streak, text: '+1', className: 'font-display text-[22px] font-medium text-primary-ink' })
       }
       // A milestone (fx, F2) gets the reveal card; otherwise one toast says it counted.
       const fresh = earned.find((a) => a.unlocked && !unlockedBefore.has(a.key))

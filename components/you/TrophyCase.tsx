@@ -22,7 +22,7 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
             <>
               <TierCard tier={s.tier} skill={s.skill} crewName={s.crewName} color={s.color} sessions={s.sessions} verified={s.vouches?.verified} />
               {s.vouches && (
-                <p className={cn('px-1 pt-2 text-[13px]', s.vouches.verified ? 'font-semibold text-primary-ink' : 'text-muted-foreground')}>
+                <p className={cn('px-1 pt-2 text-[13px]', s.vouches.verified ? 'font-medium text-primary-ink' : 'text-muted-foreground')}>
                   {s.vouches.verified
                     ? `Verified by ${s.vouches.people.map((p) => p.name).slice(0, 3).join(', ')}`
                     : `${2 - s.vouches.count} more vouch${2 - s.vouches.count === 1 ? '' : 'es'} from your crew to verify it`}
@@ -40,13 +40,13 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
     </ul>
     {/* Perks: what showing up unlocks. Cosmetic and social, a thank-you, never the reason to show up. */}
     <div className="mt-3 rounded-lg border bg-card p-4 shadow-card">
-      <p className="text-[13px] font-semibold">Perks</p>
+      <p className="text-[13px] font-medium">Perks</p>
       <ul className="mt-2 flex flex-col gap-2 text-[14px]">
         <li className="flex items-center gap-3">
           <span aria-hidden="true" className={cn('size-5 flex-none rounded-full', committed ? 'foil-frame' : 'border border-dashed border-border-strong')} />
           <span className="min-w-0 flex-1">
             Foil frame for your avatar
-            <span className="block text-[12.5px] text-muted-foreground">
+            <span className="block text-[13px] text-muted-foreground">
               {committed ? 'Unlocked. Turn it on in Settings.' : 'Reach Committed (50 sessions) in any skill.'}
             </span>
           </span>
@@ -55,7 +55,7 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
           <span aria-hidden="true" className="size-5 flex-none rounded-full border border-dashed border-border-strong" />
           <span className="min-w-0 flex-1">
             A holo finish for your posts
-            <span className="block text-[12.5px]">Coming at Seasoned (150 sessions).</span>
+            <span className="block text-[13px]">Coming at Seasoned (150 sessions).</span>
           </span>
         </li>
       </ul>
@@ -73,7 +73,7 @@ function NextTier({ skill: s }: { skill: SkillProgress }) {
     <div className="px-1 pb-1 pt-3">
       <div className="flex items-baseline justify-between gap-3 text-[13px]">
         <span>
-          <span className="tnum font-semibold">{next.toGo}</span> more session{next.toGo === 1 ? '' : 's'} to <span className="font-semibold">{t.name}</span>
+          <span className="tnum font-medium">{next.toGo}</span> more session{next.toGo === 1 ? '' : 's'} to <span className="font-medium">{t.name}</span>
         </span>
         <span className="tnum text-muted-foreground">
           {s.sessions} / {t.at}

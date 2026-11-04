@@ -179,7 +179,7 @@ export function CheckInSheet({
 
         {suggestion && (
           <div aria-live="polite" className="-mt-2 animate-rise rounded-md border border-primary/30 bg-primary-soft/40 p-3">
-            <p className="flex items-center gap-[6px] text-[12px] font-semibold text-primary-ink">
+            <p className="flex items-center gap-[6px] text-[12px] font-medium text-primary-ink">
               <Sparkles size={13} strokeWidth={1.75} aria-hidden="true" /> Suggestion
             </p>
             <p className="mt-1 text-[15px] leading-[1.45]">{suggestion.note}</p>
@@ -206,7 +206,7 @@ export function CheckInSheet({
         {detailsOpen ? (
           <div className="rounded-md border bg-muted/50 p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-[13px] font-semibold">
+              <p className="text-[13px] font-medium">
                 Details <span className="font-normal text-muted-foreground">{stravaId ? 'from Strava' : 'optional'}</span>
               </p>
               <span className="-mr-2 flex">
@@ -302,7 +302,7 @@ export function CheckInSheet({
             <ToggleChip key={t} label={t} selected={selected.has(t)} onToggle={() => toggle(t)} />
           ))}
           {canAdd && <AddChip name={q} onAdd={add} />}
-          {!visible.length && !canAdd && <p className="text-[12.5px] text-muted-foreground">No tags yet. Type one to add it.</p>}
+          {!visible.length && !canAdd && <p className="text-[13px] text-muted-foreground">No tags yet. Type one to add it.</p>}
         </div>
 
         <div className="flex justify-center pt-3">

@@ -34,12 +34,12 @@ export function ProfileSheet({ userId, onClose }: { userId: string | null; onClo
           </div>
           {binder.data && binder.data.cards.length > 0 && (
             <div className="text-left">
-              <p className="mb-2 text-[13px] font-semibold">Top cards</p>
+              <p className="mb-2 text-[13px] font-medium">Top cards</p>
               <Binder binder={binder.data} compact />
             </div>
           )}
           {p.sharedGroups.length > 0 && (
-            <p className="text-[13.5px] text-muted-foreground">
+            <p className="text-[14px] text-muted-foreground">
               You’re both in {p.sharedGroups.map((g) => g.name).join(' and ')}.
             </p>
           )}

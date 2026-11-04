@@ -31,7 +31,7 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
     <div className="flex flex-col gap-4">
       {fields.includes('activity') && (
         <div role="group" aria-labelledby={ids.activity}>
-          <p id={ids.activity} className="mb-2 text-[13px] font-semibold">Activity</p>
+          <p id={ids.activity} className="mb-2 text-[13px] font-medium">Activity</p>
           <div className="flex flex-wrap gap-2">
             {ACTIVITIES.map((a) => (
               <Choice key={a} on={value.activity === a} onClick={() => set({ activity: value.activity === a ? undefined : a })}>
@@ -44,7 +44,7 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
 
       {fields.includes('minutes') && (
         <div>
-          <label htmlFor={ids.minutes} className="mb-2 block text-[13px] font-semibold">Time</label>
+          <label htmlFor={ids.minutes} className="mb-2 block text-[13px] font-medium">Time</label>
           <div className="flex flex-wrap items-center gap-2">
             {MINUTES.map((m) => (
               <Choice key={m} on={value.minutes === m} onClick={() => set({ minutes: value.minutes === m ? undefined : m })}>
@@ -71,7 +71,7 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
 
       {fields.includes('distanceKm') && (
         <div>
-          <label htmlFor={ids.distance} className="mb-2 block text-[13px] font-semibold">Distance</label>
+          <label htmlFor={ids.distance} className="mb-2 block text-[13px] font-medium">Distance</label>
           <span className="inline-flex items-center gap-2">
             <Input
               id={ids.distance}
@@ -90,14 +90,14 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
 
       {fields.includes('book') && (
         <div>
-          <label htmlFor={ids.book} className="mb-2 block text-[13px] font-semibold">Book</label>
+          <label htmlFor={ids.book} className="mb-2 block text-[13px] font-medium">Book</label>
           <Input id={ids.book} value={value.book ?? ''} maxLength={80} onChange={(e) => set({ book: e.target.value })} />
         </div>
       )}
 
       {fields.includes('pages') && (
         <div>
-          <label htmlFor={ids.pages} className="mb-2 block text-[13px] font-semibold">Pages</label>
+          <label htmlFor={ids.pages} className="mb-2 block text-[13px] font-medium">Pages</label>
           <Input
             id={ids.pages}
             type="number"
@@ -112,7 +112,7 @@ export function DetailsEditor({ skill, value, onChange }: { skill: SkillKind; va
 
       {fields.includes('items') && (
         <div>
-          <label htmlFor={ids.items} className="mb-2 block text-[13px] font-semibold">
+          <label htmlFor={ids.items} className="mb-2 block text-[13px] font-medium">
             {skill === 'music' ? 'What you worked on' : 'Pieces'}
           </label>
           {!!value.items?.length && (
@@ -159,7 +159,7 @@ function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; c
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        'hit-44 inline-flex h-9 items-center rounded-full border px-3 text-[13px] font-semibold transition-[background-color,border-color,transform] duration-150 ease-out active:scale-[.96]',
+        'hit-44 inline-flex h-9 items-center rounded-full border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 ease-out active:scale-[.96]',
         on ? 'border-primary bg-primary-soft text-primary-ink' : 'border-border-strong bg-card hover:bg-muted',
       )}
     >

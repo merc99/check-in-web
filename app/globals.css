@@ -285,6 +285,8 @@
 }
 
 @utility tnum { font-variant-numeric: tabular-nums; }
+@layer base { b, strong { font-weight: 500; } }
+
 @utility edge-lit { box-shadow: var(--edge-lit); }
 /* "Not yet" segments (charts, tallies, progress): fine diagonal hatching in the hairline color */
 @utility hatch {

@@ -116,11 +116,11 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
         className="mt-5"
         top={
           <div className="px-5 pb-[18px] pt-5">
-            <p className="text-sm font-bold">Invite code</p>
+            <p className="text-sm font-medium">Invite code</p>
             <button type="button" onClick={copyCode} aria-label={`Copy invite code ${g.slug.split('').join(' ')}`} className="mt-3 block rounded-[10px]">
               <CodeTiles code={g.slug} wave={wave} />
             </button>
-            <p className="mt-[10px] text-[12.5px] font-medium">Tap the code to copy it.</p>
+            <p className="mt-[10px] text-[13px] font-medium">Tap the code to copy it.</p>
           </div>
         }
         bottom={
@@ -150,7 +150,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
                   aria-pressed={on}
                   onClick={() => !on && updateGroup(g.id, { skill_kind: k }).then(() => toast(`${g.name} practises ${SKILL_LABEL[k].toLowerCase()}`), fail)}
                   className={cn(
-                    'hit-44 inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-semibold transition-colors duration-150 ease-out',
+                    'hit-44 inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-medium transition-colors duration-150 ease-out',
                     on ? 'border-foreground bg-foreground text-background' : 'border-border-strong bg-card hover:bg-muted',
                   )}
                 >
@@ -163,7 +163,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
           <SectionTitle title="Who can find it" />
           <Card className="flex items-center gap-4">
             <div className="min-w-0 flex-1">
-              <p className="font-bold">Show in Explore</p>
+              <p className="font-medium">Show in Explore</p>
               <p className="mt-1 text-[13px] text-muted-foreground">
                 {g.isPublic ? 'Anyone can find this crew and ask to join.' : 'Invite code only. Nobody finds it by browsing.'}
               </p>
@@ -204,16 +204,16 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
                 type="button"
                 onClick={() => setProfileId(m.person.id)}
                 aria-label={`View ${m.person.name}`}
-                className="rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
+                className="rounded-full transition-transform duration-150 ease-out active:scale-[.96]"
               >
                 <Avatar name={m.person.name} color={m.person.color} photoUrl={m.person.photoUrl} size="sm" />
               </button>
             )}
             <span className="min-w-0 flex-1">
-              <b>{m.isMe ? 'You' : m.person.name}</b>
+              <span className="font-medium">{m.isMe ? 'You' : m.person.name}</span>
               {m.isCreator && <span className="text-xs text-muted-foreground"> started this crew</span>}
               <br />
-              <span className={cn('inline-flex items-center gap-1 text-[12.5px]', m.inToday ? 'font-bold text-leaf-ink' : 'font-medium text-muted-foreground')}>
+              <span className={cn('inline-flex items-center gap-1 text-[13px]', m.inToday ? 'text-primary-ink' : 'font-medium text-muted-foreground')}>
                 {m.inToday ? (
                   <>
                     <CheckIcon size={13} /> In today
@@ -243,7 +243,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
       <SectionTitle title="Tags" />
       <Card>
         <div className="flex flex-wrap gap-2">
-          {g.tags.length ? g.tags.map((t) => <TagChip key={t.id} name={t.name} />) : <span className="text-[12.5px] text-muted-foreground">No tags yet.</span>}
+          {g.tags.length ? g.tags.map((t) => <TagChip key={t.id} name={t.name} />) : <span className="text-[13px] text-muted-foreground">No tags yet.</span>}
         </div>
         <Button size="sm" className="mt-4" onClick={() => router.push(`/manage-tags/${g.id}`)}>
           Manage tags

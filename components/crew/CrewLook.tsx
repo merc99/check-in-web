@@ -70,7 +70,7 @@ export function CrewLook({ name, value, onChange }: { name: string; value: CrewL
                   <span className={cn('relative block h-11', hue.solid)}>
                     <CrewCover pattern={p} className="text-on-color opacity-25" fade={false} />
                   </span>
-                  <span className="block px-2 py-[6px] text-[12.5px] font-semibold">{PATTERN_LABEL[p]}</span>
+                  <span className="block px-2 py-[6px] text-[13px] font-medium">{PATTERN_LABEL[p]}</span>
                 </button>
               )
             })}

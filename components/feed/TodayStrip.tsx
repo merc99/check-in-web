@@ -131,7 +131,7 @@ export function TodayStrip({
           )}
           {/* This month's crew challenge: optional, behind the tap like the rest of the details. */}
           <ChallengeBar groupId={groupId} color={color} className="mt-2 rounded-md bg-muted px-3 py-2" />
-          <div aria-hidden="true" className="mt-3 flex gap-[5px] px-1 pb-1">
+          <div aria-hidden="true" className="mt-3 flex gap-1 px-1 pb-1">
             {members.map((m, i) => (
               <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
                 <span className={cn('absolute inset-0 origin-left bg-primary transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />

@@ -154,7 +154,7 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
           onPointerCancel={onPointerEnd}
           className="-mx-5 grid h-7 cursor-grab touch-none place-items-center active:cursor-grabbing lg:hidden"
         >
-          <span className="h-[5px] w-11 rounded-full bg-border-strong" />
+          <span className="h-1 w-11 rounded-full bg-border-strong" />
         </div>
         {title && (
           <div className="mb-5 flex items-center gap-3">

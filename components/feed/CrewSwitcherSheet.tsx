@@ -37,7 +37,7 @@ export function CrewSwitcherSheet({
                 <span className="min-w-0 flex-1">
                   <b>{g.name}</b>
                   <br />
-                  <span className="tnum text-[12.5px] text-muted-foreground">
+                  <span className="tnum text-[13px] text-muted-foreground">
                     {g.inToday} of {g.memberCount} in today
                   </span>
                 </span>

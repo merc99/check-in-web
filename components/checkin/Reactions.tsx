@@ -427,7 +427,7 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
           className="absolute bottom-full z-30 mb-2 w-[200px] animate-rise rounded-lg border bg-popover p-3 text-popover-foreground shadow-overlay"
           style={{ left: who.left }}
         >
-          <p className="flex items-center gap-2 text-[13px] font-semibold">
+          <p className="flex items-center gap-2 text-[13px] font-medium">
             <span className="text-[16px] leading-none">{whoChip.emoji}</span>
             {labelOf(whoChip.emoji)}
           </p>
@@ -435,7 +435,7 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
             {whoChip.people.slice(0, 6).map((p) => (
               <li key={p.id} className="flex items-center gap-2 text-[13px]">
                 <Avatar name={p.name} color={p.color} photoUrl={p.photoUrl} size="xs" you={p.isMe} />
-                <span className={cn('truncate', p.isMe && 'font-semibold')}>{p.isMe ? 'You' : p.name}</span>
+                <span className={cn('truncate', p.isMe && 'font-medium')}>{p.isMe ? 'You' : p.name}</span>
               </li>
             ))}
           </ul>

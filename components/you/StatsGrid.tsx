@@ -36,7 +36,7 @@ export function StatsGrid({ stats, insights }: { stats: MyStats; insights?: MyIn
           <h2 className="text-[14px] font-normal tracking-normal text-muted-foreground">All time</h2>
           {insights && (
             change > 0 ? (
-              <span className="rounded-full bg-primary-soft px-2 py-[3px] font-mono text-[12px] text-primary-ink">+{change} vs last month</span>
+              <span className="rounded-full bg-primary-soft px-2 py-1 font-mono text-[12px] text-primary-ink">+{change} vs last month</span>
             ) : (
               <span className="font-mono text-[12px] text-muted-foreground">
                 <span className="tnum">{insights.thisMonth}</span> this month

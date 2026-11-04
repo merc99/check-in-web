@@ -74,7 +74,7 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
             className="text-center"
             top={
               <div className="px-5 pb-6 pt-8">
-                <p className="font-bold">You’re invited to join</p>
+                <p className="font-medium">You’re invited to join</p>
                 <h1 className="mt-3 wrap-break-word font-display text-[42px] leading-[.95]">{p.name}</h1>
                 <div className="mt-5 flex justify-center">
                   {p.preview.map((m, i) => (
@@ -84,7 +84,7 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
               </div>
             }
             bottom={
-              <div className="flex items-center justify-center gap-[10px] px-5 py-[14px] font-bold">
+              <div className="flex items-center justify-center gap-[10px] px-5 py-[14px] font-medium">
                 <CapacityDots filled={p.memberCount} max={p.maxMembers} />
                 <span>
                   <span className="tnum">{p.memberCount}</span> of <span className="tnum">{p.maxMembers}</span> members

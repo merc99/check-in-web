@@ -22,7 +22,7 @@ export function FormField({ label, optional, hint, error, as = 'label', classNam
     <>
       <span
         id={id}
-        className="mb-2 flex justify-between text-[13px] font-semibold text-foreground"
+        className="mb-2 flex justify-between text-[13px] font-medium text-foreground"
       >
         {label}
         {optional && (
@@ -35,7 +35,7 @@ export function FormField({ label, optional, hint, error, as = 'label', classNam
           {error}
         </p>
       ) : (
-        hint && <p className="mt-2 text-[12.5px] text-muted-foreground">{hint}</p>
+        hint && <p className="mt-2 text-[13px] text-muted-foreground">{hint}</p>
       )}
     </>
   )
@@ -49,7 +49,7 @@ export function FormField({ label, optional, hint, error, as = 'label', classNam
 }
 
 const FIELD =
-  'w-full rounded-md border border-border bg-card px-[14px] py-[13px] text-base shadow-card outline-hidden transition-shadow duration-150 placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/25'
+  'w-full rounded-md border border-border bg-card px-4 py-3 text-base shadow-card outline-hidden transition-shadow duration-150 placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/25'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className, ...props },

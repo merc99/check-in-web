@@ -63,7 +63,7 @@ export function LivePill({ notice, show, onTap }: { notice: LiveNotice | null; s
           aria-hidden={!show}
           className={cn(
             'pointer-events-auto flex max-w-full items-center gap-[10px] whitespace-nowrap rounded-full border border-border bg-card',
-            'py-[5px] pl-[5px] pr-4 text-[13.5px] font-medium shadow-card',
+            'py-[5px] pl-[5px] pr-4 text-[14px] font-medium shadow-card',
             'transition-transform duration-200 ease-out',
             show ? 'translate-y-0' : 'translate-y-[-90px]',
           )}
