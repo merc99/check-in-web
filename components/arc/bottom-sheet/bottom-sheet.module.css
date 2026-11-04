@@ -55,7 +55,7 @@
 
 /* Check-in: the 32px button keeps its look but gets a 44px touch target. */
 .close::before { position: absolute; inset: -6px; content: ""; }
-.close { position: relative; display: grid; flex: none; width: 2rem; height: 2rem; place-items: center; margin-top: -2px; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface-muted); color: var(--text-secondary); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.close { position: relative; display: grid; flex: none; width: 2rem; height: 2rem; place-items: center; margin-top: -2px; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface-muted); color: var(--text-secondary); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .close:hover { color: var(--foreground); border-color: var(--border-strong); } }
 .close:active { color: var(--foreground); }
 
