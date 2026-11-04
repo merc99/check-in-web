@@ -155,7 +155,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
-| `CrewTint` card (matte grain, crisp hairline, engraved name) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
+| `CrewTint` card (clean hue tint, one still sheen, lit edge, soft glow, engraved name; holo hairline from Seasoned) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
 | `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
 | `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
@@ -214,11 +214,13 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   list to accept or decline in place. Gone with the last request.
 - **Crew switcher** (`CrewSwitcherSheet`): each crew is a small copy of its header card (`CrewTint`, cover, emoji
   tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
-- **CrewTint** (`components/checkin/CrewTint.tsx`, Ben, Nov 2026: no gradient wash or glow; crisp, matte, shiny in a
-  few places, after a printed ticket): a flat matte card with fine grain (paper in light, graphite in dark), a crisp
-  hairline and a small sharp drop; the color stays on the crew's tile (no foil band or pressed-in number: Ben, Nov 2026).
-  Helpers: `engraved` (recessed silver lettering: the crew name on the header, your name on You), `tintWell` (a recessed well: the pinned note, your numbers). `glow` (and `holo`) tints the hairline with the hue. Only on the
-  feed header, the crew switcher, milestone posts and `YouHero`; no `CrewCover` patterns on them.
+- **CrewTint** (`components/checkin/CrewTint.tsx`, Ben, Nov 2026: bright and obvious, sleek, a little metallic,
+  not overdone): a clear, even tint of a brighter tone of the hue (on a lifted base in dark mode, so warm hues stay
+  colorful), one soft diagonal sheen like light across brushed metal, a lit metallic top edge, a hue hairline, a
+  soft glow of the hue underneath and a fine grain. `glow` is a touch brighter with a wider halo (milestone posts,
+  `YouHero`); `holo` adds a still holo hairline (Seasoned and up). Helpers: `engraved` (recessed silver lettering:
+  the crew name on the header, your name on You) and `tintWell` (a recessed well: the pinned note, your numbers).
+  Only on the feed header, the crew switcher, milestone posts and `YouHero`; no `CrewCover` patterns on them.
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
 - **You** (revamp, Nov 2026): `YouHero` (`components/you/YouHero.tsx`), your own card as a `CrewTint` glow in your
@@ -271,7 +273,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
   edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card in the **tier's**
-  color (`TIER_HUE`: Started leaf, Habit sky, Committed clay, Seasoned indigo, Expert grape, Master lemon) with a
+  color (`TIER_HUE`: Started leaf, Habit sky, Committed coral, Seasoned indigo, Expert grape, Master lemon) with a
   lighter glow wash (a still holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
   DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px disc
   (`TierBadge.module.css`) in the tier's own palette with a white icon: green sprout, sky calendar, fire flame (lemon →

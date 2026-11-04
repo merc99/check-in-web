@@ -7,12 +7,12 @@ export type CrewTintLevel = 'plain' | 'glow' | 'holo'
 
 /**
  * A crew's card as a printed, matte thing (the feed header, the crew switcher, milestone posts, your
- * card on You): flat surface with grain, a crisp hairline. `glow` and `holo` give the edge a touch of
- * the hue for big moments.
+ * card on You): a clean tint of the hue, one metallic sheen, a lit top edge, a soft glow.
+ * `glow` is brighter for big moments; `holo` adds a still holo hairline (Seasoned and up).
  */
 export function crewTint(hue: Hue, level: CrewTintLevel = 'plain') {
   return {
-    className: cn(styles.tint, level !== 'plain' && styles.glow),
+    className: cn(styles.tint, level !== 'plain' && styles.glow, level === 'holo' && styles.holo),
     style: { '--hue': HUE_CLASS[hue].cssVar } as CSSProperties,
   }
 }

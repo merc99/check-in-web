@@ -1,30 +1,46 @@
-/* A crew's card, made to feel like a printed thing you could hold (Ben, Nov 2026: no gradient wash or
-   glow; crisp, matte, shiny only in a few places, after a printed ticket). A flat matte surface with a
-   fine grain (paper in light, graphite in dark), a crisp hairline and a small sharp drop. The crew's
-   color lives on the crew's own tile (Ben, Nov 2026: no foil band, no pressed-in number).
-   `.engraved` is recessed silver lettering, `.well` a recessed well. Set --hue on the element (HUE_CLASS[color].cssVar). */
+/* A crew's card in its own color, clean and a little metallic (Ben, Nov 2026: bright and obvious, sleek,
+   don't overdo it). A clear, even tint of a brighter tone of the hue (so clay reads orange, not brown),
+   one soft diagonal sheen like light across brushed metal, a lit metallic top edge, a hue hairline and a
+   soft glow of the hue underneath. A fine grain keeps it from looking plastic. `glow` is a touch
+   brighter with a wider halo; `holo` adds a still holo hairline (Seasoned and up).
+   `.engraved` is recessed silver lettering, `.well` a recessed well. Set --hue on the element. */
 .tint {
-  --surface: color-mix(in oklab, var(--hue) 3%, color-mix(in oklab, var(--card) 62%, var(--background)));
+  --wash: var(--hue);
+  --fill: 13%;
+  --fill-low: 7%;
+  --halo: 22%;
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
-  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--wash) 42%, transparent);
+  background:
+    linear-gradient(118deg, transparent 28%, color-mix(in oklab, white 55%, transparent) 46%, transparent 64%),
+    linear-gradient(180deg, color-mix(in oklab, var(--wash) var(--fill), var(--card)) 0%, color-mix(in oklab, var(--wash) var(--fill-low), var(--card)) 100%);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 90%, transparent),
-    0 1px 2px color-mix(in oklab, black 8%, transparent),
-    0 10px 24px -18px color-mix(in oklab, black 30%, transparent);
+    0 1px 2px color-mix(in oklab, black 6%, transparent),
+    0 10px 28px -16px color-mix(in oklab, var(--hue) var(--halo), transparent);
+}
+@supports (color: oklch(from red l c h)) {
+  .tint { --wash: oklch(from var(--hue) max(l, 0.74) min(calc(c * 1.4), 0.24) h); }
 }
 :global(.dark) .tint {
-  --surface: color-mix(in oklab, var(--hue) 4%, color-mix(in oklab, var(--card) 94%, white));
-  border-color: color-mix(in oklab, white 9%, transparent);
+  /* A lifted base, so warm hues read as color, not brown. */
+  --base: color-mix(in oklab, var(--card) 90%, white);
+  --fill: 24%;
+  --fill-low: 17%;
+  --halo: 30%;
+  border-color: color-mix(in oklab, var(--wash) 40%, transparent);
+  background:
+    linear-gradient(118deg, transparent 28%, color-mix(in oklab, white 6%, transparent) 46%, transparent 64%),
+    linear-gradient(180deg, color-mix(in oklab, var(--wash) var(--fill), var(--base)) 0%, color-mix(in oklab, var(--wash) var(--fill-low), var(--base)) 100%);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
-    0 1px 0 color-mix(in oklab, black 60%, transparent),
-    0 12px 28px -20px color-mix(in oklab, black 80%, transparent);
+    inset 0 1px 0 color-mix(in oklab, var(--wash) 60%, white),
+    inset 0 -1px 0 color-mix(in oklab, black 25%, transparent),
+    0 12px 32px -16px color-mix(in oklab, var(--hue) var(--halo), transparent);
 }
 
-/* Matte: a fine grain over the surface, under everything on it. */
+/* A fine grain over the surface, under everything on it. */
 .tint::after {
   content: "";
   position: absolute;
@@ -32,14 +48,30 @@
   z-index: -1;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: .09;
+  opacity: .06;
   mix-blend-mode: multiply;
 }
-:global(.dark) .tint::after { opacity: .22; mix-blend-mode: soft-light; }
+:global(.dark) .tint::after { opacity: .14; mix-blend-mode: soft-light; }
 
-/* The big moments (milestone posts, your card): the same card, its edge a touch of the hue. */
-.glow { border-color: color-mix(in oklab, var(--hue) 34%, transparent); }
-:global(.dark) .glow { border-color: color-mix(in oklab, var(--hue) 30%, transparent); }
+/* The big moments (milestone posts, your card): a touch brighter, a wider halo. */
+.glow { --fill: 16%; --fill-low: 9%; --halo: 34%; }
+:global(.dark) .glow { --fill: 30%; --fill-low: 19%; --halo: 42%; }
+
+/* Seasoned and up: a still holo hairline around the card. */
+.holo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: conic-gradient(from 210deg, var(--wash), var(--grape), var(--rose), var(--lemon), var(--leaf), var(--wash));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: .75;
+}
 
 /* Recessed silver lettering: a brushed silver fill, shaded at the top edge, lit at the bottom. */
 .engraved {
