@@ -38,7 +38,7 @@ When this file and the prototype disagree, this file wins.
   globals.css), Bencho tokens mapped to ours. On screens: `LiquidToggle` (inside `Switch`), `RollingCounter` (New crew,
   max size; session time and pages in `DetailsEditor`), `StackedBars` (You, "Your days" via
   `components/you/CrewDays.tsx`), `CreateMenu variant="rail"` (the desktop rail's +), `Assignees inline` ("With" in
-  the check-in sheet). The rest live on the kitchen sink's
+  the check-in sheet). `MagneticSelect` (crew covers as a cluster) and the rest live on the kitchen sink's
   Bencho shelf only. Keep their comments; lint exceptions sit at the top of each file with a reason.
 - `components/checkin/`: Check-in product components (`TagChip`, `ToggleChip`, `CrewAvatar`, `ThemeToggle`, and the
   ones listed under *Product components*). Build once, reuse, never restyle inline.
