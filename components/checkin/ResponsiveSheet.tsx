@@ -10,6 +10,8 @@ export interface ResponsiveSheetProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** Hide the title visually (still read by screen readers), for sheets whose content has its own heading. */
+  titleHidden?: boolean
   /** Resting heights for the phone sheet, as fractions of the viewport (Arc `detents`). */
   detents?: number[]
   children: ReactNode
@@ -19,13 +21,13 @@ export interface ResponsiveSheetProps {
  * Arc's bottom sheet on phones, a centered dialog on desktop (lg and up). Same title, content and
  * open state either way; both close on Escape, trap focus and return it to the trigger.
  */
-export function ResponsiveSheet({ open, onOpenChange, title, description, detents, children }: ResponsiveSheetProps) {
+export function ResponsiveSheet({ open, onOpenChange, title, titleHidden, description, detents, children }: ResponsiveSheetProps) {
   const desktop = useDesktop()
   useReturnFocus(open)
 
   if (!desktop) {
     return (
-      <BottomSheet open={open} onOpenChange={onOpenChange} title={title} description={description} detents={detents}>
+      <BottomSheet open={open} onOpenChange={onOpenChange} title={title} titleHidden={titleHidden} description={description} detents={detents}>
         {children}
       </BottomSheet>
     )
@@ -37,7 +39,7 @@ export function ResponsiveSheet({ open, onOpenChange, title, description, detent
         className="max-h-[85dvh] gap-0 overflow-y-auto overscroll-contain p-6 sm:max-w-[480px]"
         {...(description ? {} : { 'aria-describedby': undefined })}
       >
-        <DialogTitle className="mb-5 pr-10 font-display text-[28px] font-medium leading-none tracking-tighter">{title}</DialogTitle>
+        <DialogTitle className={titleHidden ? 'sr-only' : 'mb-5 pr-10 font-display text-[28px] font-medium leading-none tracking-tighter'}>{title}</DialogTitle>
         {description && <DialogDescription className="-mt-3 mb-5">{description}</DialogDescription>}
         {children}
       </DialogContent>

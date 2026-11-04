@@ -96,8 +96,10 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
   /** Counts openings, so a close that lands after a reopen leaves the new pill alone. */
   const opens = useRef(0)
   /** Who left a reaction: open for one chip's emoji (long-press, right-click, hover or the menu key). */
-  const [who, setWho] = useState<{ e: string; left: number; hover: boolean } | null>(null)
+  const [who, setWho] = useState<{ e: string; left: number; hover: boolean; instant?: boolean } | null>(null)
   const longPress = useRef({ timer: 0, fired: false, x: 0, y: 0 })
+  /** Until this time (ms), resting the mouse on another chip shows its "who" at once, unanimated. */
+  const warmUntil = useRef(0)
 
   const chipEmoji = (e: string) => row.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(e)}"] [data-emoji]`) ?? null
 
@@ -240,9 +242,9 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
   }
 
   // ── who left it: hold a chip (touch), right-click it, rest the mouse on it, or the menu key ──
-  const showWho = (el: HTMLElement, e: string, hover = false) => {
+  const showWho = (el: HTMLElement, e: string, hover = false, instant = false) => {
     const max = (row.current?.clientWidth ?? 260) - 200
-    setWho({ e, left: Math.max(0, Math.min(el.offsetLeft, max)), hover })
+    setWho({ e, left: Math.max(0, Math.min(el.offsetLeft, max)), hover, instant })
   }
   const chipDown = (ev: PointerEvent<HTMLButtonElement>, e: string) => {
     window.clearTimeout(longPress.current.timer)
@@ -268,11 +270,15 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
     if (ev.pointerType !== 'mouse') return
     const el = ev.currentTarget
     window.clearTimeout(longPress.current.timer)
+    // Already reading who reacted: the next chip answers at once.
+    if (ev.timeStamp < warmUntil.current) return showWho(el, e, true, true)
     longPress.current.timer = window.setTimeout(() => showWho(el, e, true), 500)
   }
   const chipLeave = (ev: PointerEvent<HTMLButtonElement>) => {
     window.clearTimeout(longPress.current.timer)
-    if (ev.pointerType === 'mouse') setWho((w) => (w?.hover ? null : w))
+    if (ev.pointerType !== 'mouse') return
+    if (who?.hover) warmUntil.current = ev.timeStamp + 300
+    setWho((w) => (w?.hover ? null : w))
   }
 
   // Close it on any press elsewhere, Escape or a scroll.
@@ -424,7 +430,10 @@ export function Reactions({ chips, onReact, className }: ReactionsProps) {
           id={whoId}
           data-who=""
           role="tooltip"
-          className="absolute bottom-full z-30 mb-2 w-[200px] animate-rise rounded-lg border bg-popover p-3 text-popover-foreground shadow-overlay"
+          className={cn(
+            'absolute bottom-full z-30 mb-2 w-[200px] origin-bottom-left rounded-lg border bg-popover p-3 text-popover-foreground shadow-overlay',
+            !who.instant && 'animate-pop',
+          )}
           style={{ left: who.left }}
         >
           <p className="flex items-center gap-2 text-[13px] font-medium">

@@ -1,4 +1,4 @@
-// Pattern: Arc / bottom-sheet (adapted to Check-in tokens). Logic is Arc's, unchanged; styling lives in bottom-sheet.module.css.
+// Pattern: Arc / bottom-sheet (adapted to Check-in tokens). Logic is Arc's, unchanged except a titleHidden prop; styling lives in bottom-sheet.module.css.
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -22,6 +22,8 @@ export interface BottomSheetProps {
   onOpenChange?: (open: boolean) => void;
   title: string;
   description?: string;
+  /** Keep the title for screen readers but hide it visually (the content shows its own heading). */
+  titleHidden?: boolean;
   /** Resting heights as fractions of the viewport height. The sheet opens at `initialDetent` and never grows past the largest. */
   detents?: number[];
   /** Index into the sorted detents the sheet opens at. Defaults to the smallest. */
@@ -81,7 +83,7 @@ export function BottomSheet({ trigger, open: openProp, defaultOpen = false, onOp
   </DialogPrimitive.Root>;
 }
 
-function Sheet({ title, description, detents = [.45, .92], initialDetent = 0, onDetentChange, closeLabel = "Close", className, children, onDismiss }: Omit<BottomSheetProps, "trigger" | "open" | "defaultOpen" | "onOpenChange"> & { onDismiss: () => void }) {
+function Sheet({ title, titleHidden, description, detents = [.45, .92], initialDetent = 0, onDetentChange, closeLabel = "Close", className, children, onDismiss }: Omit<BottomSheetProps, "trigger" | "open" | "defaultOpen" | "onOpenChange"> & { onDismiss: () => void }) {
   const [isPresent, safeToRemove] = usePresence();
   const reduced = useReducedMotion() ?? false;
   const detentKey = detents.join(",");
@@ -368,7 +370,7 @@ function Sheet({ title, description, detents = [.45, .92], initialDetent = 0, on
           </button>
           <div className={styles.headRow}>
             <div className={styles.headText}>
-              <DialogPrimitive.Title className={styles.title}>{title}</DialogPrimitive.Title>
+              <DialogPrimitive.Title className={titleHidden ? styles.srOnly : styles.title}>{title}</DialogPrimitive.Title>
               {description ? <DialogPrimitive.Description className={styles.description}>{description}</DialogPrimitive.Description> : null}
             </div>
             <DialogPrimitive.Close className={styles.close} aria-label={closeLabel}>
