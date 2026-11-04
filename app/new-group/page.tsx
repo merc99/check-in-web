@@ -49,7 +49,7 @@ export default function NewGroupPage() {
     try {
       const id = await createGroup({ name, color, maxMembers: max })
       setActiveId(id)
-      router.push(`/group-settings/${id}`)
+      router.replace(`/group-settings/${id}`)
       toast('Crew created. Share the code.')
     } catch (e) {
       fail(e)
@@ -64,7 +64,7 @@ export default function NewGroupPage() {
       const id = await joinGroupBySlug(code)
       const g = await getGroup(id)
       setActiveId(id)
-      router.push('/feed')
+      router.replace('/feed')
       toast(`You joined ${g.name}`)
     } catch (e) {
       fail(e)

@@ -5,7 +5,7 @@ import { Button } from '@/components/checkin/Button'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
-import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
+import { afterSheetClose, ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { cn } from '@/lib/utils'
 import type { GroupSummary } from '@/lib/data'
 
@@ -53,7 +53,13 @@ export function CrewSwitcherSheet({
             )
           })}
         </List>
-        <Button block onClick={() => router.push('/new-group')}>
+        <Button
+          block
+          onClick={() => {
+            onClose()
+            afterSheetClose(() => router.push('/new-group'))
+          }}
+        >
           <PlusIcon size={18} /> Start or join a crew
         </Button>
       </div>

@@ -213,8 +213,22 @@ export function StackedBars({
         ref={plot}
         className="stb-plot"
         style={{ height: CH + 1 }}
-        role="img"
-        aria-label={`${title}: ${fmt(total)} ${unit} over the last ${data.length} ${mode === "Day" ? "days" : "weeks"}`}
+        /* Check-in: readable from the keyboard too, like the sparkline (arrow keys, Home, End) */
+        tabIndex={0}
+        role="group"
+        aria-label={`${title}: ${fmt(total)} ${unit} over the last ${data.length} ${mode === "Day" ? "days" : "weeks"}. Use the left and right arrow keys to read each ${mode === "Day" ? "day" : "week"}.`}
+        onKeyDown={(e) => {
+          const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key as string];
+          if (e.key === "Escape") return setAt(null);
+          if (e.key === "Home" || e.key === "End") {
+            e.preventDefault();
+            return setAt(e.key === "Home" ? 0 : n - 1);
+          }
+          if (!step) return;
+          e.preventDefault();
+          setAt((i) => Math.max(0, Math.min(n - 1, (i ?? n - 1) + (i === null ? 0 : step))));
+        }}
+        onBlur={() => setAt(null)}
         onPointerDown={(e) => {
           try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* scripted */ }
           pick(e);
@@ -254,6 +268,13 @@ export function StackedBars({
           aria-hidden
           style={{ x: ringX, y: ringY, height: ringH, width: bw + 6 }}
         />
+
+        {/* Check-in: what the tooltip shows, said once per bar to screen readers */}
+        <span role="status" className="stb-sr">
+          {cur
+            ? `${cur.label}: ${fmt(totals[at!])} ${unit}${parts.length ? `. ${parts.map(({ v, k }) => `${series[k].name} ${fmt(v)}`).join(", ")}` : ". A rest day"}`
+            : ""}
+        </span>
 
         <motion.div className="stb-tip" style={{ x: tipX, width: TIP_W }} aria-hidden>
           {cur && (

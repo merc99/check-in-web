@@ -32,7 +32,7 @@ export default function InvitePage(props: { params: Promise<{ slug: string }> })
 
   const open = (id: string) => {
     setActiveId(id)
-    router.push('/feed')
+    router.replace('/feed')
   }
 
   const join = async () => {

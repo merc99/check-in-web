@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { CrewCard } from '@/components/explore/CrewCard'
 import { CrewDetailSheet } from '@/components/explore/CrewDetailSheet'
+import { afterSheetClose } from '@/components/checkin/ResponsiveSheet'
 import { FeaturedCrews } from '@/components/explore/FeaturedCrews'
 import { Button } from '@/components/checkin/Button'
 import { PageHead, SectionTitle } from '@/components/checkin/SectionTitle'
@@ -67,7 +68,7 @@ export default function ExplorePage() {
         onOpenFeed={(id) => {
           setActiveId(id)
           setOpenId(null)
-          router.push('/feed')
+          afterSheetClose(() => router.push('/feed'))
         }}
       />
     </main>

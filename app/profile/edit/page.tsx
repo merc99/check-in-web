@@ -16,7 +16,7 @@ export default function EditProfilePage() {
         lead="This is what your crew sees next to your check-ins."
         submitLabel="Save changes"
         onSaved={() => {
-          router.push('/you')
+          router.replace('/you')
           toast('Changes saved')
         }}
       />
