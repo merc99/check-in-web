@@ -94,8 +94,8 @@
      Where each effect may be used is in CLAUDE.md ("Effects"). */
   --fx-tilt: 10;                    /* Foil: degrees of tilt at the card's edge */
   --fx-foil-strength: 0.6;          /* Foil: sheen opacity under the pointer */
-  --fx-sheen-speed: 3.5s;           /* SheenLoop: one pass across the invite ticket */
-  --fx-sheen-strength: 0.35;        /* SheenLoop: how strong the rainbow is */
+  --fx-sheen-speed: 7s;             /* SheenLoop: one cycle (a pass across the ticket, then a rest) */
+  --fx-sheen-strength: 0.45;        /* SheenLoop: how bright the band is */
   --fx-aurora-speed: 5s;            /* AuroraFrame: one turn of the crew-complete frame */
   --fx-aurora-glow: 6px;            /* AuroraFrame: glow radius (the one glow allowed) */
   --fx-holo-drift: 16s;             /* HoloBanner: how slowly the hue tones drift on the crew banner */

@@ -135,7 +135,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Effect | Tier | Allowed only on |
 |---|---|---|
 | `Foil` + `FoilLight` (white sheen; one sweep on tap; no hover tilt or shine since Nov 2026) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
-| `SheenLoop` (holo sheen, loops) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
+| `SheenLoop` (a soft rose → white → sky band crosses, then rests; 7s cycle; under the content) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
 | `burstFrom` (canvas particles, crew hue + mint) | moment | After a check-in, from the button used (FAB or rail button) |
 | `flyArc` + `squash` (arc, tilt, land) | moment / calm | The day's first check-in (+1 to the streak: rail on desktop, You tab on phones); reactions landing on their chip |
 | `RevealCard` (shake, beam, hue flood, burst) | moment | When a check-in unlocks an achievement. Nowhere else |
@@ -189,7 +189,10 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   white sheen (a tap sweeps it; still under a mouse). Locked ones stay dashed.
 - **HeatmapGrid:** the week as the tally: 7 pills Mon–Sun; done = `bg-primary` + check; open = `bg-muted`; future =
   `hatch` dashed; today = a ring; mono day letters; `animate-cellin` staggered when the You tab opens.
-- **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
+- **LivePill**, **Ticket** (`Ticket.module.css`, Ben, Nov 2026): the crew's hue with depth, two notches cut clean
+  through at the perforation (a mask; the shadow is a drop-shadow filter so it follows the cut), the code as letters
+  pressed into the ticket (dark wells, inner shadow, a lit lip, bright letters), `animate-wave` on copy, and the
+  `SheenLoop` gliding under the content, never over the code.
 - **Switch**: renders Bencho's `LiquidToggle`; same API (`checked`, `onChange`, `label`, `disabled`).
 - **TaskRun** (`components/checkin/TaskRun.tsx`, after magpui's agent task list): a list driven by typed events
   (`useTaskRun().emit`): one active step with a turning lemon ring and a timer, sub-lines that fold when it ends, a mint
