@@ -101,10 +101,10 @@ export default function YouPage() {
       />
       {year.data && (
         <YearActivity
-          counts={year.data.counts}
+          byDay={year.data.byDay}
           crews={year.data.crews}
           month={insights.data}
-          className="mt-3 lg:aspect-auto lg:h-full"
+          className="mt-3 lg:h-full"
         />
       )}
       </div>

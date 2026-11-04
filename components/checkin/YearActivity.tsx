@@ -2,207 +2,280 @@
 'use client'
 
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { addDays, localDate } from '@/lib/dates'
 import { cn } from '@/lib/utils'
-import { ChevronIcon } from './icons'
 
 export interface ActivityCrew {
   id: string
   name: string
   color: Hue
   emoji?: string | null
-  /** Check-ins in this crew over the year. */
+  /** Check-ins in this crew this year. */
   count: number
 }
 
 const WEEKS = 31
 const EASE_SWAP = [0.22, 1, 0.36, 1] as const
 const EASE_TIP = [0.2, 0, 0, 1] as const
-/** Mint by how many check-ins a day holds: none, 1, 2, 3, 4+. */
-const LEVEL = ['bg-muted', 'bg-primary/25', 'bg-primary/45', 'bg-primary/70', 'bg-primary'] as const
+/** How strong a day reads by its check-ins: 1, 2, 3+. */
+const STRENGTH = ['', 'opacity-45', 'opacity-75', 'opacity-100'] as const
 const DAY = ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays']
+const DAY_LETTER = ['M', '', 'W', '', 'F', '', '']
+
+type Cell = { day: Date; key: string; future: boolean; total: number; byCrew: [string, number][] }
 
 /**
- * Your year in one small card (340:172, filling its column): the check-in count for the year over the last 31 weeks as a mint
- * grid, and your top three crews behind the round toggle. The card keeps its size while the two views
- * crossfade (280ms, the entering one rises 8px, rows stagger 35ms); hover or focus a day for a pale
- * tooltip. The grid is one tab stop: arrow keys move by day (up/down) and week (left/right).
+ * Your year in one card: the last 31 weeks as a grid, each day in the color of the crew you checked
+ * in with most (deeper with more check-ins), month names above and M/W/F down the side. Crew chips
+ * under it filter the grid (and the month bars) to one crew. A line under the grid tells the day you point at, tap or
+ * focus (date and crews), or sums up the stretch when nothing is picked. The grid is one tab stop:
+ * arrow keys move by week and day, Enter pins a day, Escape lets it go.
  */
 export function YearActivity({
-  counts, crews, month, today = new Date(), className,
+  byDay, crews, month, today = new Date(), className,
 }: {
-  /** Check-ins per day, keyed YYYY-MM-DD. */
-  counts: Record<string, number>
+  /** Check-ins per day (YYYY-MM-DD), per crew id. */
+  byDay: Record<string, Record<string, number>>
   crews: ActivityCrew[]
-  /** This month against the last, shown in the header ("+3 vs last month", else "4 this month"). */
+  /** This month against the last, in the header ("+3 vs last month", else "4 this month · 27 last"). */
   month?: { thisMonth: number; lastMonth: number }
   today?: Date
   className?: string
 }) {
   const reduce = useReducedMotion() ?? false
-  const [view, setView] = useState<'year' | 'crews'>('year')
-  const moved = useRef(false)
-  const toggleRef = useRef<HTMLButtonElement>(null)
-  const backRef = useRef<HTMLButtonElement>(null)
-
-  // Hand focus to the other view's control after a switch (not on first render).
-  useEffect(() => {
-    if (!moved.current) return
-    ;(view === 'crews' ? backRef : toggleRef).current?.focus()
-  }, [view])
-  const go = (v: 'year' | 'crews') => {
-    moved.current = true
-    setView(v)
-  }
+  const [crewId, setCrewId] = useState<string | null>(null)
+  const crewOf = useMemo(() => new Map(crews.map((c) => [c.id, c])), [crews])
+  const ranked = useMemo(() => [...crews].sort((a, b) => b.count - a.count), [crews])
+  const picked = crewId ? crewOf.get(crewId) ?? null : null
 
   const year = today.getFullYear()
-  const total = useMemo(
-    () => Object.entries(counts).reduce((n, [k, c]) => (k.startsWith(`${year}-`) ? n + c : n), 0),
-    [counts, year],
-  )
-  const top = useMemo(() => [...crews].sort((a, b) => b.count - a.count).slice(0, 3), [crews])
+  const total = picked ? picked.count : ranked.reduce((n, c) => n + c.count, 0)
+
+  // The grid's days, weekday rows by week columns, filtered to the picked crew.
+  const todayKey = localDate(today)
+  const dow = (today.getDay() + 6) % 7
+  const rows: Cell[][] = useMemo(() => {
+    const start = addDays(today, -dow - (WEEKS - 1) * 7)
+    return Array.from({ length: 7 }, (_, d) =>
+      Array.from({ length: WEEKS }, (_, w) => {
+        const day = addDays(start, w * 7 + d)
+        const key = localDate(day)
+        const all = Object.entries(byDay[key] ?? {}).filter(([id]) => !crewId || id === crewId)
+        all.sort((a, b) => b[1] - a[1])
+        return { day, key, future: key > todayKey, total: all.reduce((n, [, c]) => n + c, 0), byCrew: all }
+      }),
+    )
+    // today is keyed by its date.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [byDay, crewId, todayKey])
+
+  // Month names over the week each month starts in (the first column only when the next is far off).
+  const months = useMemo(() => {
+    const starts = rows[0].map((_, w) => rows.map((r) => r[w]).find((c) => c.day.getDate() === 1)?.day ?? null)
+    const next = starts.findIndex((d, i) => i > 0 && d)
+    return starts.map((d, i) => (i === 0 ? (next === -1 || next > 3 ? rows[0][0].day : null) : d))
+  }, [rows])
+
+  // The summary when no day is picked: days in and the weekday you show up most.
+  const summary = useMemo(() => {
+    const past = rows.flat().filter((c) => !c.future)
+    const daysIn = past.filter((c) => c.total > 0).length
+    const perDow = rows.map((r) => r.filter((c) => !c.future && c.total > 0).length)
+    const best = perDow.indexOf(Math.max(...perDow))
+    return { daysIn, of: past.length, best: daysIn ? DAY[best] : null }
+  }, [rows])
+
+  // Each month in view: its check-ins (filtered like the grid), for the bars under the day line.
+  const perMonth = useMemo(() => {
+    const out: { key: string; date: Date; count: number }[] = []
+    for (const c of rows.flatMap((r) => r).sort((a, b) => a.key.localeCompare(b.key))) {
+      const key = c.key.slice(0, 7)
+      let m = out[out.length - 1]
+      if (!m || m.key !== key) out.push((m = { key, date: c.day, count: 0 }))
+      m.count += c.total
+    }
+    return out
+  }, [rows])
+  const monthMax = Math.max(1, ...perMonth.map((m) => m.count))
+  const thisMonthKey = todayKey.slice(0, 7)
+
+  // Which day the detail line (and tooltip) is about: pointer or focus first, then a pinned day.
+  const [hover, setHover] = useState<[number, number] | null>(null)
+  const [pinned, setPinned] = useState<[number, number] | null>(null)
+  const shown = hover ?? pinned
+  const shownCell = shown ? rows[shown[0]]?.[shown[1]] : null
 
   const swap = {
-    initial: { opacity: 0, y: reduce ? 0 : 8 },
+    initial: { opacity: 0, y: reduce ? 0 : 4 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: 0 },
-    transition: { duration: reduce ? 0 : 0.28, ease: EASE_SWAP },
+    exit: { opacity: 0 },
+    transition: { duration: reduce ? 0 : 0.18, ease: EASE_SWAP },
   }
 
   return (
-    <section
-      aria-label="Your year"
-      className={cn('relative aspect-[340/172] w-full min-h-[172px] rounded-[18px] border bg-card edge-lit', className)}
-    >
-      <AnimatePresence initial={false}>
-        {view === 'year' ? (
-          <motion.div key="year" {...swap} className="absolute inset-0 flex flex-col p-[14px]">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-[14px] font-medium leading-none">
-                <span className="tnum">{total.toLocaleString()}</span> check-ins in {year}
-              </h3>
-              {month &&
-                (month.thisMonth > month.lastMonth ? (
-                  <span className="flex-none rounded-full bg-primary-soft px-2 py-0.5 font-mono text-[11px] text-primary-ink">
-                    +{month.thisMonth - month.lastMonth} vs last month
-                  </span>
-                ) : (
-                  <span className="flex-none font-mono text-[11px] text-muted-foreground">
-                    <span className="tnum text-foreground">{month.thisMonth}</span> this month ·{' '}
-                    <span className="tnum">{month.lastMonth}</span> last
-                  </span>
-                ))}
-            </div>
-            <YearGrid counts={counts} today={today} />
-            <div className="mt-auto flex h-10 items-center justify-between gap-2 rounded-[12px] bg-muted pl-3 pr-1.5">
-              <span className="truncate text-[12px] text-muted-foreground">Most check-ins in</span>
-              <span className="flex flex-none items-center gap-2">
-                <span className="flex" aria-hidden="true">
-                  {top.map((c, i) => (
-                    <span
-                      key={c.id}
-                      className={cn(
-                        'grid size-6 place-items-center rounded-full text-[12px] leading-none ring-2 ring-muted',
-                        HUE_CLASS[c.color].solid,
-                        i > 0 && '-ml-1.5',
-                      )}
-                    >
-                      {c.emoji ?? c.name.trim()[0]?.toUpperCase()}
-                    </span>
-                  ))}
+    <section aria-label="Your year" className={cn('flex flex-col rounded-[18px] border bg-card p-[14px] edge-lit', className)}>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="min-w-0 truncate text-[14px] font-medium leading-tight">
+          <span className="tnum">{total.toLocaleString()}</span> check-ins{picked ? ` in ${picked.name}` : ''} in {year}
+        </h3>
+        {month && !picked &&
+          (month.thisMonth > month.lastMonth ? (
+            <span className="flex-none rounded-full bg-primary-soft px-2 py-0.5 font-mono text-[11px] text-primary-ink">
+              +{month.thisMonth - month.lastMonth} vs last month
+            </span>
+          ) : (
+            <span className="flex-none font-mono text-[11px] text-muted-foreground">
+              <span className="tnum text-foreground">{month.thisMonth}</span> this month · <span className="tnum">{month.lastMonth}</span> in{' '}
+              {new Date(today.getFullYear(), today.getMonth() - 1, 1).toLocaleDateString(undefined, { month: 'short' })}
+            </span>
+          ))}
+      </div>
+
+      <YearGrid
+        rows={rows}
+        months={months}
+        crewOf={crewOf}
+        cursorStart={[dow, WEEKS - 1]}
+        hover={hover}
+        pinned={pinned}
+        onHover={setHover}
+        onPin={setPinned}
+        summaryText={`${summary.daysIn} of ${summary.of} days in over the last ${WEEKS} weeks.`}
+      />
+
+      {/* The day you're looking at, or the stretch at a glance. */}
+      <div className="relative mt-3 h-5" aria-live="polite">
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.p key={shownCell ? shownCell.key : `sum-${crewId ?? 'all'}`} {...swap} className="absolute inset-0 flex items-center gap-2 overflow-hidden whitespace-nowrap text-[12px] text-muted-foreground">
+            {shownCell ? (
+              <>
+                <span className="font-medium text-foreground">
+                  {shownCell.day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                 </span>
-                <button
-                  ref={toggleRef}
-                  type="button"
-                  onClick={() => go('crews')}
-                  aria-label="Show check-ins by crew"
-                  className="hit-44 grid size-7 place-items-center rounded-full border border-border-strong text-muted-foreground transition-[transform,color,border-color] duration-150 ease-out hover:border-foreground/40 hover:text-foreground active:scale-[.97]"
-                >
-                  <ChevronIcon size={14} />
-                </button>
+                {shownCell.byCrew.length === 0 ? (
+                  <span>{shownCell.future ? 'Still to come' : 'No check-ins'}</span>
+                ) : (
+                  shownCell.byCrew.map(([id, n]) => {
+                    const c = crewOf.get(id)
+                    if (!c) return null
+                    return (
+                      <span key={id} className="inline-flex min-w-0 items-center gap-1.5">
+                        <span aria-hidden="true" className={cn('size-2 flex-none rounded-full', HUE_CLASS[c.color].solid)} />
+                        <span className="truncate">{c.name}</span>
+                        {n > 1 && <span className="tnum font-mono text-[11px] text-subtle-foreground">×{n}</span>}
+                      </span>
+                    )
+                  })
+                )}
+              </>
+            ) : (
+              <>
+                <span>
+                  <span className="tnum font-medium text-foreground">{summary.daysIn}</span> days in, last {WEEKS} weeks
+                </span>
+                {summary.best && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span>{summary.best} are your day</span>
+                  </>
+                )}
+              </>
+            )}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+
+      {/* Month by month: one bar each, the current month in full ink. */}
+      <ol aria-label="Check-ins by month" className="mt-2.5 grid gap-1.5" style={{ gridTemplateColumns: `repeat(${perMonth.length}, minmax(0, 1fr))` }}>
+        {perMonth.map((m) => {
+          const now = m.key === thisMonthKey
+          const name = m.date.toLocaleDateString(undefined, { month: 'short' })
+          return (
+            <li key={m.key} className="flex min-w-0 flex-col items-center gap-1">
+              <span className="relative h-9 w-full overflow-hidden rounded-[6px] bg-muted">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute inset-0 origin-bottom rounded-[6px] transition-transform duration-200 ease-out',
+                    picked ? HUE_CLASS[picked.color].solid : 'bg-primary',
+                    !now && 'opacity-70',
+                  )}
+                  style={{ transform: `scaleY(${m.count / monthMax})` }}
+                />
               </span>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div key="crews" {...swap} className="absolute inset-0 flex flex-col p-[14px]">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-[12px] text-muted-foreground">Most check-ins in</h3>
-              <button
-                ref={backRef}
-                type="button"
-                onClick={() => go('year')}
-                aria-label="Back to your year"
-                className="hit-44 grid size-7 place-items-center rounded-full border border-border-strong text-muted-foreground transition-[transform,color,border-color] duration-150 ease-out hover:border-foreground/40 hover:text-foreground active:scale-[.97]"
-              >
-                <ChevronIcon size={14} className="rotate-180" />
-              </button>
-            </div>
-            <ol className="mt-2 flex flex-col gap-0.5">
-              {top.map((c, i) => (
-                <motion.li
-                  key={c.id}
-                  initial={{ opacity: 0, y: reduce ? 0 : 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduce ? 0 : 0.28, ease: EASE_SWAP, delay: reduce ? 0 : 0.035 * (i + 1) }}
-                  className="flex h-[34px] items-center gap-2.5 rounded-[10px] px-2 transition-colors duration-150 ease-out hover:bg-muted"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={cn('grid size-6 flex-none place-items-center rounded-full text-[12px] leading-none', HUE_CLASS[c.color].solid)}
-                  >
-                    {c.emoji ?? c.name.trim()[0]?.toUpperCase()}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{c.name}</span>
-                  <span className="tnum font-mono text-[12px] text-muted-foreground">
-                    {c.count.toLocaleString()}
-                    <span className="sr-only"> check-ins</span>
-                  </span>
-                </motion.li>
-              ))}
-            </ol>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <span className={cn('flex w-full flex-col items-center gap-0.5 font-mono text-[10px] leading-none', now ? 'text-foreground' : 'text-subtle-foreground')}>
+                <span>{name}</span>
+                <span className="tnum text-[9.5px] opacity-80">{m.count}</span>
+              </span>
+              <span className="sr-only">
+                {name}: {m.count} check-ins
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+
+      {/* Crews: tap one to see only its days (in its color); All brings everything back. */}
+      <div role="group" aria-label="Show a crew" className="no-scrollbar -mx-1 mt-auto flex gap-1.5 overflow-x-auto px-1 pt-3">
+        <CrewChip active={!crewId} onClick={() => setCrewId(null)} label="All" count={ranked.reduce((n, c) => n + c.count, 0)} />
+        {ranked.map((c) => (
+          <CrewChip
+            key={c.id}
+            active={crewId === c.id}
+            onClick={() => setCrewId(crewId === c.id ? null : c.id)}
+            label={c.name}
+            count={c.count}
+            dot={HUE_CLASS[c.color].solid}
+          />
+        ))}
+      </div>
     </section>
   )
 }
 
-/** The last 31 weeks, Monday on top, as an ARIA grid (weekdays are rows) with one tab stop. */
-function YearGrid({ counts, today }: { counts: Record<string, number>; today: Date }) {
-  const reduce = useReducedMotion() ?? false
-  const todayKey = localDate(today)
-  const dow = (today.getDay() + 6) % 7
-  const start = addDays(today, -dow - (WEEKS - 1) * 7)
-
-  // rows[d][w]: weekday d of week w.
-  const rows = useMemo(
-    () =>
-      Array.from({ length: 7 }, (_, d) =>
-        Array.from({ length: WEEKS }, (_, w) => {
-          const day = addDays(start, w * 7 + d)
-          const key = localDate(day)
-          return { day, key, count: counts[key] ?? 0, future: key > todayKey }
-        }),
-      ),
-    // start is derived from today; key on the day, not the Date object.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [counts, todayKey],
+function CrewChip({ active, onClick, label, count, dot }: { active: boolean; onClick: () => void; label: string; count: number; dot?: string }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        'inline-flex h-8 flex-none items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-[transform,background-color,color,border-color] duration-150 ease-out active:scale-[.97]',
+        active ? 'border-transparent bg-foreground text-background' : 'bg-muted text-foreground hover:border-border-strong',
+      )}
+    >
+      {dot && <span aria-hidden="true" className={cn('size-2 rounded-full', dot)} />}
+      <span className="max-w-[140px] truncate">{label}</span>
+      <span className={cn('tnum font-mono text-[11px]', active ? 'text-background/70' : 'text-muted-foreground')}>{count.toLocaleString()}</span>
+    </button>
   )
-  const inDays = rows.flat().filter((c) => !c.future && c.count > 0).length
+}
 
-  // The roving tab stop (today to start), and which day the tooltip is on (hover or focus).
-  const [cursor, setCursor] = useState<[number, number]>([dow, WEEKS - 1])
-  const [tip, setTip] = useState<[number, number] | null>(null)
+/** The last 31 weeks, Monday on top, as an ARIA grid (weekdays are rows) with one tab stop. */
+function YearGrid({
+  rows, months, crewOf, cursorStart, hover, pinned, onHover, onPin, summaryText,
+}: {
+  rows: Cell[][]
+  months: (Date | null)[]
+  crewOf: Map<string, ActivityCrew>
+  cursorStart: [number, number]
+  hover: [number, number] | null
+  pinned: [number, number] | null
+  onHover: (c: [number, number] | null) => void
+  onPin: (c: [number, number] | null) => void
+  summaryText: string
+}) {
+  const reduce = useReducedMotion() ?? false
+  const [cursor, setCursor] = useState<[number, number]>(cursorStart)
   const wrap = useRef<HTMLDivElement>(null)
   const tipRef = useRef<HTMLDivElement>(null)
   const cells = useRef<Map<string, HTMLSpanElement>>(new Map())
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+  const tip = hover
 
-  const cellAt = (d: number, w: number) => rows[d]?.[w]
-
-  // Place the tooltip above the active day, kept inside the grid's width.
+  // Place the tooltip above the day, kept inside the grid's width.
   useLayoutEffect(() => {
     if (!tip) return
     const el = cells.current.get(`${tip[0]}-${tip[1]}`)
@@ -222,110 +295,168 @@ function YearGrid({ counts, today }: { counts: Record<string, number>; today: Da
 
   const onKey = (e: KeyboardEvent) => {
     const [d, w] = cursor
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onPin(pinned && pinned[0] === d && pinned[1] === w ? null : [d, w])
+      return
+    }
+    if (e.key === 'Escape') {
+      onPin(null)
+      return
+    }
     let next: [number, number] | null = null
     if (e.key === 'ArrowLeft') next = [d, w - 1]
     else if (e.key === 'ArrowRight') next = [d, w + 1]
     else if (e.key === 'ArrowUp') next = [d - 1, w]
     else if (e.key === 'ArrowDown') next = [d + 1, w]
     else if (e.key === 'Home') next = [d, 0]
-    else if (e.key === 'End') next = [dow, WEEKS - 1]
+    else if (e.key === 'End') next = cursorStart
     if (!next) return
     e.preventDefault()
-    const c = cellAt(next[0], next[1])
+    const c = rows[next[0]]?.[next[1]]
     if (c && !c.future) focusCell(next[0], next[1])
   }
 
-  const active = tip ? cellAt(tip[0], tip[1]) : null
-  const label = (c: { day: Date; count: number }) => {
+  const active = tip ? rows[tip[0]]?.[tip[1]] : null
+  const label = (c: Cell) => {
     const date = c.day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-    return c.count === 0 ? `No check-ins on ${date}` : `${c.count} check-in${c.count === 1 ? '' : 's'} on ${date}`
+    if (c.total === 0) return `No check-ins on ${date}`
+    const names = c.byCrew.map(([id]) => crewOf.get(id)?.name).filter(Boolean).join(', ')
+    return `${c.total} check-in${c.total === 1 ? '' : 's'} on ${date}: ${names}`
+  }
+  const tipText = (c: Cell) => {
+    const date = c.day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    return c.total === 0 ? `None on ${date}` : `${c.total} on ${date}`
   }
 
   return (
-    <div ref={wrap} className="relative mt-2.5" onPointerLeave={() => setTip(wrap.current?.contains(document.activeElement) ? cursor : null)}>
-      <p id="year-activity-summary" className="sr-only">
-        {inDays} days in over the last {WEEKS} weeks. Arrow keys move by day and week.
-      </p>
-      <div
-        role="grid"
-        aria-label={`Check-ins, last ${WEEKS} weeks`}
-        aria-describedby="year-activity-summary"
-        onKeyDown={onKey}
-        onBlur={(e) => {
-          if (!wrap.current?.contains(e.relatedTarget as Node)) setTip(null)
-        }}
-        className="grid grid-cols-[repeat(31,minmax(0,1fr))] gap-[3px]"
-      >
-        {rows.map((row, d) => (
-          <div role="row" key={d} aria-label={DAY[d]} className="contents">
-            {row.map((c, w) => {
-              const isCursor = cursor[0] === d && cursor[1] === w
-              return (
-                <span
-                  key={c.key}
-                  ref={(el) => {
-                    if (el) cells.current.set(`${d}-${w}`, el)
-                    else cells.current.delete(`${d}-${w}`)
-                  }}
-                  role="gridcell"
-                  tabIndex={c.future ? undefined : isCursor ? 0 : -1}
-                  aria-label={c.future ? 'Still to come' : label(c)}
-                  aria-disabled={c.future || undefined}
-                  onPointerEnter={() => !c.future && setTip([d, w])}
-                  onFocus={() => {
-                    setCursor([d, w])
-                    setTip([d, w])
-                  }}
-                  className={cn(
-                    'aspect-square rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card',
-                    c.future ? 'hatch opacity-40' : LEVEL[Math.min(c.count, 4)],
-                  )}
-                />
-              )
-            })}
-          </div>
+    <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2">
+      <span />
+      {/* Month names over the week each starts in. */}
+      <div aria-hidden="true" className="mb-1.5 grid h-3 grid-cols-[repeat(31,minmax(0,1fr))] gap-[3px] font-mono text-[10px] leading-none text-subtle-foreground">
+        {months.map((m, i) => (
+          <span key={i} className="relative">
+            {m && <span className="absolute left-0 top-0 whitespace-nowrap">{m.toLocaleDateString(undefined, { month: 'short' })}</span>}
+          </span>
         ))}
       </div>
 
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            ref={tipRef}
-            aria-hidden="true"
-            initial={{ opacity: 0, y: reduce ? 0 : 2 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.12, ease: EASE_TIP }}
-            style={{ left: pos?.left ?? 0, top: pos?.top ?? 0, visibility: pos ? 'visible' : 'hidden' }}
-            className="pointer-events-none absolute z-10 -translate-y-full whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-[11px] font-medium text-background shadow-overlay"
-          >
-            {label(active)}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div aria-hidden="true" className="grid grid-rows-7 gap-[3px] font-mono text-[10px] leading-none text-subtle-foreground">
+        {DAY_LETTER.map((l, i) => (
+          <span key={i} className="flex items-center">{l}</span>
+        ))}
+      </div>
+
+      <div
+        ref={wrap}
+        className="relative"
+        onPointerLeave={() => onHover(wrap.current?.contains(document.activeElement) ? cursor : null)}
+      >
+        <p id="year-activity-summary" className="sr-only">
+          {summaryText} Arrow keys move by day and week; Enter shows a day below.
+        </p>
+        <div
+          role="grid"
+          aria-label={`Check-ins, last ${WEEKS} weeks`}
+          aria-describedby="year-activity-summary"
+          onKeyDown={onKey}
+          onBlur={(e) => {
+            if (!wrap.current?.contains(e.relatedTarget as Node)) onHover(null)
+          }}
+          className="grid grid-cols-[repeat(31,minmax(0,1fr))] gap-[3px]"
+        >
+          {rows.map((row, d) => (
+            <div role="row" key={d} aria-label={DAY[d]} className="contents">
+              {row.map((c, w) => {
+                const isCursor = cursor[0] === d && cursor[1] === w
+                const isPinned = pinned?.[0] === d && pinned?.[1] === w
+                const top = c.byCrew[0] ? crewOf.get(c.byCrew[0][0]) : undefined
+                return (
+                  <span
+                    key={c.key}
+                    ref={(el) => {
+                      if (el) cells.current.set(`${d}-${w}`, el)
+                      else cells.current.delete(`${d}-${w}`)
+                    }}
+                    role="gridcell"
+                    tabIndex={c.future ? undefined : isCursor ? 0 : -1}
+                    aria-label={c.future ? 'Still to come' : label(c)}
+                    aria-selected={isPinned || undefined}
+                    aria-disabled={c.future || undefined}
+                    onPointerEnter={() => !c.future && onHover([d, w])}
+                    onClick={() => {
+                      if (c.future) return
+                      setCursor([d, w])
+                      onPin(isPinned ? null : [d, w])
+                    }}
+                    onFocus={() => {
+                      setCursor([d, w])
+                      onHover([d, w])
+                    }}
+                    className={cn(
+                      'aspect-square cursor-pointer rounded-[2px] outline-none transition-opacity duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card',
+                      c.future
+                        ? 'cursor-default hatch opacity-40'
+                        : top
+                          ? cn(HUE_CLASS[top.color].solid, STRENGTH[Math.min(c.total, 3)])
+                          : 'bg-muted',
+                      isPinned && 'ring-2 ring-foreground ring-offset-1 ring-offset-card',
+                    )}
+                  />
+                )
+              })}
+            </div>
+          ))}
+        </div>
+
+        <AnimatePresence>
+          {active && (
+            <motion.div
+              ref={tipRef}
+              aria-hidden="true"
+              initial={{ opacity: 0, y: reduce ? 0 : 2 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduce ? 0 : 0.12, ease: EASE_TIP }}
+              style={{ left: pos?.left ?? 0, top: pos?.top ?? 0, visibility: pos ? 'visible' : 'hidden' }}
+              className="pointer-events-none absolute z-10 -translate-y-full whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-[11px] font-medium text-background shadow-overlay"
+            >
+              {tipText(active)}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
 
-/** Deterministic sample data for the kitchen sink: a year of check-ins and three crews. */
-export function demoYearActivity(today = new Date()): { counts: Record<string, number>; crews: ActivityCrew[] } {
+/** Deterministic sample data for the kitchen sink: a year of check-ins across three crews. */
+export function demoYearActivity(today = new Date()): { byDay: Record<string, Record<string, number>>; crews: ActivityCrew[] } {
   let seed = 20261103
   const rand = () => {
     seed = (seed * 1664525 + 1013904223) % 4294967296
     return seed / 4294967296
   }
-  const counts: Record<string, number> = {}
+  const crews: ActivityCrew[] = [
+    { id: 'dialed', name: 'DIALED', color: 'sky', emoji: '💪', count: 0 },
+    { id: 'sketch', name: 'Sketchbook Daily', color: 'grape', emoji: '🎨', count: 0 },
+    { id: 'pages', name: 'Ten Pages', color: 'lemon', emoji: '📚', count: 0 },
+  ]
+  const weight = [0.6, 0.85, 1]
+  const year = `${today.getFullYear()}-`
+  const byDay: Record<string, Record<string, number>> = {}
   for (let i = 0; i < 400; i++) {
     const day = addDays(today, -i)
+    const key = localDate(day)
     const weekend = day.getDay() === 0 || day.getDay() === 6
-    if (rand() < (weekend ? 0.45 : 0.68)) counts[localDate(day)] = 1 + Math.floor(rand() * rand() * 4.6)
+    if (rand() > (weekend ? 0.45 : 0.68)) continue
+    const n = 1 + Math.floor(rand() * rand() * 3.4)
+    for (let k = 0; k < n; k++) {
+      const r = rand()
+      const c = crews[weight.findIndex((x) => r < x)]
+      ;(byDay[key] ??= {})[c.id] = (byDay[key][c.id] ?? 0) + 1
+      if (key.startsWith(year)) c.count++
+    }
   }
-  return {
-    counts,
-    crews: [
-      { id: 'dialed', name: 'DIALED', color: 'sky', emoji: '💪', count: 214 },
-      { id: 'sketch', name: 'Sketchbook Daily', color: 'grape', emoji: '🎨', count: 96 },
-      { id: 'pages', name: 'Ten Pages', color: 'lemon', emoji: '📚', count: 41 },
-    ],
-  }
+  return { byDay, crews }
 }
