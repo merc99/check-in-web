@@ -3,6 +3,7 @@ import type { CrewPattern } from '@/lib/crewStyle'
 import type { CheckInDetails, CheckInSource, SkillKind, TierKey } from '@/lib/mastery'
 export type { SkillAchievement } from '@/lib/mastery-achievements'
 import type { LocalDate } from '@/lib/dates'
+import type { CardFinish, FrameKey, Loadout, RankKey, Slot } from '@/lib/progression'
 
 // ─── Rows: shaped exactly like the Supabase tables (snake_case, nullable where the column is) ───
 
@@ -20,6 +21,8 @@ export interface Profile {
   timezone: string
   /** The crew whose top tier card is pinned first in the binder (mastery). */
   pinned_group_id: UUID | null
+  /** What they wear on their check-in card (progression): finish, frame, title, badge. */
+  loadout: Loadout
   created_at: Timestamp
   deleted_at: Timestamp | null
 }
@@ -229,6 +232,61 @@ export interface FeedItem {
   photoUrl: string | null
   /** Crewmates tagged as doing this session with them. */
   with: Person[]
+  /** The author's flex: level, rank and what they wear (progression). */
+  flex: Flex
+}
+
+/** How someone shows up on a post: their level and rank, and the rewards they've put on. */
+export interface Flex {
+  level: number
+  rank: RankKey
+  title: string | null
+  badge: BadgeInfo | null
+  frame: FrameKey | null
+  card: CardFinish | null
+}
+
+/** One badge (an achievement): account-wide (`all.week`) or in one crew's skill (`g1:early`). */
+export interface BadgeInfo {
+  key: string
+  name: string
+  /** How to earn it. */
+  subtitle: string
+  /** The crew it's from, for skill badges. */
+  crewName: string | null
+  unlocked: boolean
+  progress: { n: number; of: number } | null
+}
+
+/** One reward and where you are with it. */
+export interface RewardState {
+  id: string
+  slot: Exclude<Slot, 'badge'>
+  name: string
+  blurb: string
+  value: string
+  unlocked: boolean
+  /** "Level 8", "Reach Seasoned", "Badge: Early bird". */
+  how: string
+  /** Level rewards: the level. */
+  level: number | null
+}
+
+/** Your progression: XP, level, rank, what's unlocked and what you wear. */
+export interface MyProgress {
+  xp: number
+  level: number
+  rank: RankKey
+  /** XP at the start of this level and at the next (equal at the max level). */
+  levelFrom: number
+  levelTo: number
+  /** XP earned in the last 7 days. */
+  weekXp: number
+  /** Where your XP came from, biggest first. */
+  sources: { label: string; xp: number }[]
+  rewards: RewardState[]
+  badges: BadgeInfo[]
+  loadout: Loadout
 }
 
 /** Who vouched for a tier. `null` on tiers that don't take vouches (below Committed). */
@@ -361,6 +419,8 @@ export interface ProfilePatch {
   avatar_color?: Hue
   avatar_url?: string | null
 }
+
+export type LoadoutPatch = Partial<Loadout>
 
 export interface GroupPatch {
   name?: string

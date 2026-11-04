@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { CrewDays } from '@/components/you/CrewDays'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
 import { YouHero } from '@/components/you/YouHero'
+import { BadgeWall } from '@/components/you/BadgeWall'
+import { RankCard } from '@/components/you/RankCard'
+import { RewardsRoad } from '@/components/you/RewardsRoad'
+import { YourCard } from '@/components/you/YourCard'
 import { YearActivity } from '@/components/checkin/YearActivity'
-import { AchievementCard } from '@/components/checkin/AchievementCard'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
 import { TagChip } from '@/components/checkin/Chip'
@@ -29,9 +32,8 @@ import { Binder } from '@/components/checkin/Binder'
 import { shareCard } from '@/lib/shareCard'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { useAuth } from '@/lib/auth'
-import { deleteAccount, getAchievements, getMe, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, getMyYear, getBinder, pinCard, useQuery } from '@/lib/data'
+import { deleteAccount, getMe, getMyProgress, getMyInsights, getMyRecentCheckIns, getMySkills, getMyStats, getMyYear, getBinder, pinCard, useQuery } from '@/lib/data'
 import { localDate, timeAgo } from '@/lib/dates'
-import { useDragScroll } from '@/lib/useDragScroll'
 import { PREF, usePref } from '@/lib/prefs'
 import { tierOf } from '@/lib/mastery'
 
@@ -46,24 +48,12 @@ export default function YouPage() {
   const binder = useQuery(() => (meId ? getBinder(meId) : Promise.resolve(null)), [meId], ['check_ins', 'groups', 'group_members', 'vouches', 'profiles'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const year = useQuery(getMyYear, [], ['check_ins', 'groups', 'group_members'])
-  const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
+  const progress = useQuery(getMyProgress, [], ['check_ins', 'groups', 'group_members', 'profiles'])
   const recent = useQuery(() => getMyRecentCheckIns(3), [], ['check_ins', 'tags', 'groups'])
   const insights = useQuery(getMyInsights, [], ['check_ins', 'groups', 'group_members'])
   const skills = useQuery(getMySkills, [], ['check_ins', 'groups', 'group_members', 'vouches', 'profiles'])
 
-  const [foilFrame, setFoilFrame] = usePref(PREF.foilFrame)
-  const [perkSeen, setPerkSeen] = usePref(`${PREF.foilFrame}.seen`)
-  const perkUnlocked = !!skills.data?.some((s) => s.tier && tierOf(s.tier).at >= tierOf('committed').at)
-  // The first time you open You with the perk unlocked, say so once.
-  useEffect(() => {
-    if (perkUnlocked && !perkSeen) {
-      setPerkSeen(true)
-      toast('New perk: a foil frame for your avatar. Turn it on in Settings.')
-    }
-  }, [perkUnlocked, perkSeen, setPerkSeen, toast])
   const [profileId, setProfileId] = useState<string | null>(null)
-  const shelf = useRef<HTMLDivElement>(null)
-  useDragScroll(shelf, achievements.data)
 
   const week = useMemo(() => {
     const days = new Set(stats.data?.days)
@@ -81,7 +71,6 @@ export default function YouPage() {
 
   if (!me.data || !stats.data) return <main className="min-h-dvh px-5" />
   const { profile, person } = me.data
-  const unlocked = achievements.data?.filter((a) => a.unlocked).length ?? 0
   const topSkill = skills.data?.reduce<(typeof skills.data)[number] | null>(
     (best, s) => (s.tier && (!best?.tier || tierOf(s.tier).at > tierOf(best.tier).at) ? s : best),
     null,
@@ -108,6 +97,18 @@ export default function YouPage() {
         />
       )}
       </div>
+
+      {/* Progression: your rank and the card your crew sees, then the road of rewards ahead. */}
+      {progress.data && (
+        <>
+          <div className="lg:mt-4 lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-4 lg:[&>*]:mt-0">
+            <RankCard progress={progress.data} className="mt-3" />
+            <YourCard person={person} progress={progress.data} className="mt-3" />
+          </div>
+          <SectionTitle title="Rewards road" note={`level ${progress.data.level} of 50`} />
+          <RewardsRoad progress={progress.data} />
+        </>
+      )}
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
       <div className="min-w-0">
@@ -153,25 +154,17 @@ export default function YouPage() {
         </>
       )}
 
-      {achievements.data && (
+      {progress.data && (
         <>
           <SectionTitle
-            title="Achievements"
+            title="Badges"
             note={
               <>
-                <span className="tnum">{unlocked}</span> of <span className="tnum">{achievements.data.length}</span>
+                <span className="tnum">{progress.data.badges.filter((b) => b.unlocked).length}</span> of <span className="tnum">{progress.data.badges.length}</span>
               </>
             }
           />
-          {/* Swipe on touch; press and drag with a mouse (useDragScroll). */}
-          <div
-            ref={shelf}
-            className="no-scrollbar -mx-5 flex cursor-grab snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-3 pt-[6px] select-none"
-          >
-            {achievements.data.map((a, i) => (
-              <AchievementCard key={a.key} achievement={a} tilt={i % 2 ? 'right' : 'left'} />
-            ))}
-          </div>
+          <BadgeWall progress={progress.data} />
         </>
       )}
 
@@ -266,15 +259,6 @@ export default function YouPage() {
             <p className="mt-1 text-[13px] text-muted-foreground">Add a recent run, walk or ride when you check in to a fitness crew. Demo: sample activities, no account.</p>
           </div>
           <Switch checked={strava} onChange={setStrava} label="Strava" />
-        </div>
-        <div className="flex items-center gap-4 border-t pt-4">
-          <div className="min-w-0 flex-1">
-            <p className="font-medium">Foil frame</p>
-            <p className="mt-1 text-[13px] text-muted-foreground">
-              {perkUnlocked ? 'A perk for reaching Committed: a foil ring on your avatar.' : 'Unlocks at Committed (50 sessions) in any skill.'}
-            </p>
-          </div>
-          <Switch checked={perkUnlocked && foilFrame} onChange={setFoilFrame} disabled={!perkUnlocked} label="Foil frame" />
         </div>
       </Card>
 

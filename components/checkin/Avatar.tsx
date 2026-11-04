@@ -2,7 +2,9 @@
 
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
-import { PREF, usePref } from '@/lib/prefs'
+import { useMyFrame } from '@/lib/data'
+import type { FrameKey } from '@/lib/progression'
+import { Frame } from './Progression'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 const SIZE: Record<Size, string> = {
@@ -22,17 +24,20 @@ export interface AvatarProps {
   you?: boolean
   /** Not here yet (crew hero): white, dashed and faded instead of filled. */
   pending?: boolean
+  /** A frame (progression reward). Your own avatar wears yours unless this is set (null: none). */
+  frame?: FrameKey | null
   className?: string
 }
 
 export function Avatar(props: AvatarProps) {
-  const [foil] = usePref(PREF.foilFrame)
-  // Perk (mastery, Committed): your avatar wears a thin holo foil ring instead of the mint one.
-  if (props.you && foil && !props.pending) {
+  const mine = useMyFrame()
+  // Progression: a frame you've earned replaces the mint ring on your avatar; crewmates show theirs.
+  const frame = props.frame !== undefined ? props.frame : props.you ? mine : null
+  if (frame && !props.pending) {
     return (
-      <span className={cn('foil-frame -m-[3px] inline-grid flex-none rounded-full p-[3px]', props.className)}>
-        <AvatarFace {...props} className="shadow-[0_0_0_2px_var(--background)]" you={false} />
-      </span>
+      <Frame frame={frame} hue={props.color ?? 'leaf'}>
+        <AvatarFace {...props} className={cn('shadow-[0_0_0_2px_var(--background)]', props.className)} you={false} />
+      </Frame>
     )
   }
   return <AvatarFace {...props} />

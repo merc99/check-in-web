@@ -12,6 +12,7 @@ import { HEART_PATH } from './icons'
 import { SessionDetails } from './SessionDetails'
 import { TIER_HUE, TierMedal } from './TierCard'
 import { crewTint } from './CrewTint'
+import { BadgeDisc, cardFinish, RankEmblem } from './Progression'
 import { Share2 } from 'lucide-react'
 import { Button as UiButton } from '@/components/ui/button'
 import { tierOf } from '@/lib/mastery'
@@ -75,9 +76,12 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
   const moment = item.milestone
     ? crewTint(TIER_HUE[item.milestone.tier], ['holo', 'aurora', 'master'].includes(tierOf(item.milestone.tier).material) ? 'holo' : 'glow')
     : null
+  // Everyday posts wear the author's earned finish (progression); milestone posts keep the tier's card.
+  const finish = !moment && item.flex.card ? cardFinish(item.flex.card, item.user.color) : null
+  const flex = item.flex
 
   const avatar = (
-    <Avatar name={item.user.name} color={item.user.color} photoUrl={item.user.photoUrl} you={item.isMine} />
+    <Avatar name={item.user.name} color={item.user.color} photoUrl={item.user.photoUrl} you={item.isMine} frame={flex.frame} />
   )
 
   return (
@@ -89,9 +93,10 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
           ? moment.className
           : // A mouse over a post brightens its edge; touch has no hover.
             'border border-border bg-card edge-lit transition-[border-color] duration-150 ease-out [@media(hover:hover)]:hover:border-border-strong',
+        finish?.className,
         entering && 'animate-enter',
       )}
-      style={moment?.style}
+      style={moment?.style ?? finish?.style}
     >
       <div className="flex items-center gap-3">
         {onPersonTap && !item.isMine ? (
@@ -106,15 +111,27 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         ) : (
           avatar
         )}
-        <p className="min-w-0 flex-1">
-          <span className="font-medium">{item.isMine ? 'You' : item.user.name}</span>
-          {item.with.length > 0 && (
-            <span className="text-muted-foreground">
-              {' '}with <span className="font-medium text-foreground">{listNames(item.with.map((p) => p.name))}</span>
+        <div className="min-w-0 flex-1">
+          <p className="min-w-0">
+            <span className="font-medium">{item.isMine ? 'You' : item.user.name}</span>
+            {/* The flex: level emblem and a showcase badge (progression). */}
+            <span className="ml-1.5 inline-flex translate-y-[3px] items-center gap-1">
+              <RankEmblem level={flex.level} rank={flex.rank} size="xs" />
+              {flex.badge && <BadgeDisc badgeKey={flex.badge.key} size="xs" />}
+              <span className="sr-only">
+                Level {flex.level}
+                {flex.badge ? `, ${flex.badge.name} badge` : ''}
+              </span>
             </span>
-          )}
-          <span className="ml-2 text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
-        </p>
+            {item.with.length > 0 && (
+              <span className="text-muted-foreground">
+                {' '}with <span className="font-medium text-foreground">{listNames(item.with.map((p) => p.name))}</span>
+              </span>
+            )}
+            <span className="ml-2 text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
+          </p>
+          {flex.title && <p className="truncate text-[12px] leading-tight text-muted-foreground">{flex.title}</p>}
+        </div>
         {justIn && (
           <span className="ml-auto inline-flex items-center gap-1.5 text-[12px] text-primary-ink">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />

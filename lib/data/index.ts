@@ -25,6 +25,10 @@ export {
   getMyRecentCheckIns,
   getMyStats,
   getMyYear,
+  getMyProgress,
+  getFlexOf,
+  setLoadout,
+  peekMyFrame,
   getMySkills,
   getSkillsOf,
   getBinder,
@@ -52,3 +56,4 @@ export {
   updateProfile,
 } from '@/lib/mock/api'
 export { useQuery } from './useQuery'
+export { useMyFrame } from './useMyFrame'
