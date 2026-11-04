@@ -36,7 +36,7 @@ export interface TierCardProps {
 
 /**
  * A mastery tier as a card: the material says the tier (paper, enamel, foil, holo, holo with an
- * aurora edge), the medal shows the tier's session number. Foil and up tilt toward a mouse (fx/Foil).
+ * aurora edge), the medal shows the tier's session number. Foil and up carry the sheen (fx/Foil); a tap sweeps it on touch, nothing moves on hover.
  */
 export function TierCard({ tier, skill, crewName, color, sessions, locked, serial, verified, size = 'md', portrait, className }: TierCardProps) {
   const t = tierOf(tier)

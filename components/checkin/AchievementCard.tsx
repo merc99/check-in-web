@@ -5,8 +5,7 @@ import type { Achievement } from '@/lib/data'
 
 /**
  * Medal card for the achievements shelf. Unlocked ones are foil: filled with the achievement's
- * color, a dark enamel medal, and a white sheen that tilts toward the pointer (a tap sweeps it on
- * touch). Locked ones are dashed and hide their glyph. `finish="sweep"` is the older plain card
+ * color, a dark enamel medal, and a white sheen (a tap sweeps it on touch; nothing moves on hover). Locked ones are dashed and hide their glyph. `finish="sweep"` is the older plain card
  * with a light sweep on hover, kept for the effects preview.
  */
 export function AchievementCard({
