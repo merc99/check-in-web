@@ -1,10 +1,11 @@
-import { BadgeCheck } from 'lucide-react'
+import { BadgeCheck, CalendarCheck, Crown, Flame, Gem, Mountain, Sprout, type LucideIcon } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Foil, FoilLight } from '@/components/fx/Foil'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { SKILL_LABEL, tierOf, type SkillKind, type TierKey } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
 import styles from './TierCard.module.css'
+import badge from './TierBadge.module.css'
 
 const MATERIAL: Record<ReturnType<typeof tierOf>['material'], string> = {
   paper: styles.paper,
@@ -34,12 +35,35 @@ export interface TierCardProps {
   className?: string
 }
 
-/** Just the tier's medal (its session number on dark enamel in the crew's hue), for a compact milestone line. */
-export function TierMedal({ tier, color, className }: { tier: TierKey; color: Hue; className?: string }) {
-  const t = tierOf(tier)
+const BADGE_ICON: Record<TierKey, LucideIcon> = {
+  started: Sprout,
+  habit: CalendarCheck,
+  committed: Flame,
+  seasoned: Mountain,
+  expert: Gem,
+  master: Crown,
+}
+/** Each tier's own color, for the milestone post's card (the badge carries the full palette). */
+export const TIER_HUE: Record<TierKey, Hue> = {
+  started: 'leaf',
+  habit: 'sky',
+  committed: 'clay',
+  seasoned: 'indigo',
+  expert: 'grape',
+  master: 'lemon',
+}
+
+/**
+ * The tier as a glossy coin in its own colors, for a milestone post's line (TierBadge.module.css):
+ * green sprout, sky calendar, fire flame, dusk mountain, prism gem, gold crown. The post's text says
+ * the tier and the count, so it's decorative.
+ */
+export function TierMedal({ tier, className }: { tier: TierKey; color?: Hue; className?: string }) {
+  const Icon = BADGE_ICON[tier]
+  const prism = tier === 'seasoned' || tier === 'expert' || tier === 'master'
   return (
-    <span aria-hidden="true" className={cn(styles.medal, styles.mini, className)} style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}>
-      {t.at >= 1000 ? '1K' : t.at}
+    <span aria-hidden="true" className={cn(badge.badge, badge[tier], prism && badge.prism, className)}>
+      <Icon size={21} strokeWidth={2} />
     </span>
   )
 }

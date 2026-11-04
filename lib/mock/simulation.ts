@@ -5,7 +5,7 @@ import type { CheckIn } from '@/lib/data/types'
 import { localDate } from '@/lib/dates'
 import { HEART } from '@/lib/reactions'
 import { TIERS, tierOf, type TierKey } from '@/lib/mastery'
-import { insertCheckIn, onCheckIn, onWave, setCheer, setReaction, setVouch } from './api'
+import { insertCheckIn, onCheckIn, onWave, setReaction, setVouch } from './api'
 import { db, onChange } from './db'
 import { ME_ID, NOTES } from './seed'
 
@@ -73,11 +73,12 @@ export function simulateHeart(checkInId: string): boolean {
   return true
 }
 
-/** Crewmates cheer a milestone post (1 to 3 of them). */
+/** Crewmates celebrate a milestone post with a reaction (1 to 3 of them). The Cheer button is gone (Ben, Nov 2026). */
 function simulateCheers(checkInId: string, groupId: string, authorId: string, schedule: (fn: () => void, ms: number) => void) {
   const crew = db().group_members.filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== authorId && m.user_id !== ME_ID).map((m) => m.user_id)
   const fans = [...crew].sort(() => Math.random() - 0.5).slice(0, 1 + Math.floor(Math.random() * Math.min(3, crew.length)))
-  fans.forEach((uid, i) => schedule(() => setCheer(uid, checkInId, true), 2200 + i * 1800 + Math.random() * 1500))
+  const party = ['🙌', '👏', '🔥']
+  fans.forEach((uid, i) => schedule(() => setReaction(uid, checkInId, party[Math.floor(Math.random() * party.length)], true), 2200 + i * 1800 + Math.random() * 1500))
 }
 
 /** Two crewmates vouch for a fresh Committed-and-up tier, a little after the cheers. */
