@@ -333,7 +333,8 @@ The MMO layer over mastery. Your check-in card is the thing you flex; what goes 
   (account-wide `all.<key>` and per skill `<groupId>:<key>`); you show one.
 - **Loadout** (`Profile.loadout`: card, frame, title, badge). `setLoadout` only takes what's unlocked; anything
   else reads as plain. `FeedItem.flex` carries the author's level, rank and loadout.
-- **On posts** (`PostCard`): the level emblem and the badge beside the name, the title under it, the frame on the
+- **On posts** (`PostCard`): the name and time, the title (or rank) under it; the showcase badge and the level
+  emblem ("Lv n" from `sm`) on their own at the top right; the frame on the
   avatar, the finish on the card (milestone posts keep the tier's `CrewTint`). Your avatar wears your frame
   everywhere (`useMyFrame`).
 - **On You**: `RankCard` (emblem, level, XP to the next in mint, XP this week, what the next level gives, "How
