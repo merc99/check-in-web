@@ -24,7 +24,6 @@ export function TagChip({
 
 /** Dashed "Add “name”" chip shown while typing a tag that doesn't exist yet. */
 export function AddChip({ name, onAdd, size = 'm' }: { name: string; onAdd: () => void; size?: Size }) {
-  const c = HUE_CLASS[getTagHue(name)]
   return (
     <button
       type="button"
