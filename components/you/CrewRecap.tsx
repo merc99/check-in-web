@@ -3,6 +3,8 @@
 import { RotateCw, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { CrewDot } from '@/components/checkin/CrewBlock'
+import { TaskRun, useTaskRun, type TaskEvent, type TaskStep } from '@/components/checkin/TaskRun'
+import { useToast } from '@/components/checkin/Toast'
 import { Button } from '@/components/ui/button'
 import { streamRecap } from '@/lib/ai/demo'
 import type { Hue } from '@/lib/colors'
@@ -11,6 +13,22 @@ import { cn } from '@/lib/utils'
 import styles from './CrewRecap.module.css'
 
 type State = { step: 'idle' } | { step: 'writing'; text: string } | { step: 'done'; text: string }
+
+/** What the demo AI does before it writes, shown as a task list (TaskRun). The last step waits for you. */
+const STEPS: TaskStep[] = [
+  { id: 'read', label: 'Read the week’s check-ins' },
+  { id: 'count', label: 'Count sessions per person' },
+  { id: 'quote', label: 'Pick notes worth quoting' },
+  { id: 'write', label: 'Write the recap' },
+  { id: 'share', label: 'Share with the crew', gate: true },
+]
+
+/** A pause that a new tap or a crew switch can cancel. */
+const wait = (ms: number, signal: AbortSignal) =>
+  new Promise<void>((ok, no) => {
+    const t = window.setTimeout(ok, ms)
+    signal.addEventListener('abort', () => { window.clearTimeout(t); no(new DOMException('aborted', 'AbortError')) }, { once: true })
+  })
 
 /**
  * A short recap of one crew's last seven days by the demo AI (lib/ai: in the browser, no model).
@@ -23,6 +41,8 @@ export function CrewRecap({ crews, initialId }: { crews: { id: string; name: str
   const abort = useRef<AbortController | null>(null)
   /** Which phrasing to use next; picked at random on the first tap, then the next one on each rewrite. */
   const variant = useRef(-1)
+  const { state: run, emit } = useTaskRun(STEPS)
+  const toast = useToast()
   useEffect(() => () => abort.current?.abort(), [])
 
   const crew = crews.find((c) => c.id === crewId)
@@ -34,9 +54,34 @@ export function CrewRecap({ crews, initialId }: { crews: { id: string; name: str
     abort.current = ctrl
     if (variant.current < 0) variant.current = Math.floor(Math.random() * 6)
     setState({ step: 'writing', text: '' })
+    emit({ type: 'reset' })
+    const go = async (e: TaskEvent, ms: number) => { emit(e); await wait(ms, ctrl.signal) }
     try {
+      // The steps are the demo AI's real work on this crew's data, paced so you can follow it.
+      await go({ type: 'step-start', step: 'read' }, 0)
+      await go({ type: 'sub-start', step: 'read', id: 'r1', text: `Opening ${crew.name}’s week` }, 500)
       const week = await getCrewWeek(crew.id)
+      const n = week.checkIns.length
+      await go({ type: 'sub-done', step: 'read', id: 'r1', text: `Read ${n} check-in${n === 1 ? '' : 's'}` }, 450)
+      await go({ type: 'step-done', step: 'read' }, 150)
+
+      await go({ type: 'step-start', step: 'count' }, 0)
+      const top = week.perPerson[0]
+      await go({ type: 'sub-start', step: 'count', id: 'c1', text: `Counting ${week.memberCount} people` }, 550)
+      await go({ type: 'sub-done', step: 'count', id: 'c1', text: `Counted ${week.memberCount} people` }, 0)
+      if (top && top.count > 0) await go({ type: 'sub-start', step: 'count', id: 'c2', text: `${top.isMe ? 'You lead' : `${top.name} leads`} with ${top.count}` }, 650)
+      await go({ type: 'step-done', step: 'count' }, 150)
+
+      await go({ type: 'step-start', step: 'quote' }, 0)
+      const notes = week.checkIns.filter((c) => c.note).length
+      await go({ type: 'sub-start', step: 'quote', id: 'q1', text: `Reading ${notes} note${notes === 1 ? '' : 's'}` }, 650)
+      await go({ type: 'sub-done', step: 'quote', id: 'q1', text: notes ? `Picked the ones that sound like the crew` : 'No notes this week, numbers only' }, 600)
+      await go({ type: 'step-done', step: 'quote' }, 150)
+
+      await go({ type: 'step-start', step: 'write' }, 0)
+      emit({ type: 'sub-start', step: 'write', id: 'w1', text: 'Writing in the crew’s voice' })
       await streamRecap(week, (text) => setState({ step: 'writing', text }), variant.current++, ctrl.signal)
+      emit({ type: 'step-done', step: 'write' })
       setState((s) => ({ step: 'done', text: s.step === 'idle' ? '' : s.text }))
     } catch {
       // Aborted (another crew was picked, or the page closed): nothing to show.
@@ -48,9 +93,21 @@ export function CrewRecap({ crews, initialId }: { crews: { id: string; name: str
     abort.current?.abort()
     setCrewId(id)
     setState({ step: 'idle' })
+    emit({ type: 'reset' })
   }
 
   const text = state.step === 'idle' ? '' : state.text
+  /** The gate: nothing leaves your device until you say so. Copying is the share, so it marks the step done. */
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      emit({ type: 'step-start', step: 'share' })
+      emit({ type: 'step-done', step: 'share' })
+      toast(`Recap copied. Paste it wherever ${crew.name} talks`)
+    } catch {
+      toast('Couldn’t copy. Select the text and copy it instead')
+    }
+  }
   return (
     <div className="rounded-lg border bg-card p-4 shadow-card">
       {crews.length > 1 && (
@@ -88,10 +145,18 @@ export function CrewRecap({ crews, initialId }: { crews: { id: string; name: str
         </div>
       ) : (
         <div aria-live="polite" aria-busy={state.step === 'writing'}>
-          {text ? (
-            <p className={cn('text-[15px] leading-[1.55]', state.step === 'writing' && styles.caret)}>{text}</p>
-          ) : (
-            <p className={cn('text-[14px] font-medium', styles.shimmer)}>Reading {crew.name}’s week…</p>
+          <TaskRun
+            run={run}
+            gate={
+              state.step === 'done' && run.by.share.status !== 'done' ? (
+                <Button size="sm" variant="secondary" className="h-7 px-3 text-[12px]" onClick={share}>
+                  Copy to share
+                </Button>
+              ) : undefined
+            }
+          />
+          {text && (
+            <p className={cn('mt-3 border-t pt-3 text-[15px] leading-[1.55]', state.step === 'writing' && styles.caret)}>{text}</p>
           )}
           {state.step === 'done' && (
             <div className="mt-3 flex items-center justify-between gap-3 border-t pt-3">

@@ -2,10 +2,10 @@
 
 import { CrewDot } from '@/components/checkin/CrewBlock'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/checkin/Button'
 import { CapacityDots } from '@/components/checkin/CapacityDots'
-import { ToggleChip } from '@/components/checkin/Chip'
+import { RollingCounter } from '@/components/bencho/RollingCounter'
 import { FormField, Input } from '@/components/checkin/FormField'
 import { Segmented } from '@/components/checkin/Segmented'
 import { PageHead } from '@/components/checkin/SectionTitle'
@@ -16,13 +16,19 @@ import { useActiveCrew } from '@/lib/activeCrew'
 import { CREW_HUES, type Hue } from '@/lib/colors'
 import { createGroup, getGroup, joinGroupBySlug } from '@/lib/data'
 
-const SIZES = [5, 8, 10, 15] as const
+const MIN_SIZE = 3
+const MAX_SIZE = 15
 
 export default function NewGroupPage() {
   const router = useRouter()
   const toast = useToast()
   const { groups, setActiveId } = useActiveCrew()
   const [mode, setMode] = useState<'create' | 'join'>('create')
+  // "Join with a code" in the create menu links here with ?join=1.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read once from the URL after hydration, so the server render matches
+    if (new URLSearchParams(window.location.search).has('join')) setMode('join')
+  }, [])
   const [name, setName] = useState('')
   const [color, setColor] = useState<Hue>('leaf')
   const [max, setMax] = useState<number>(8)
@@ -115,10 +121,10 @@ export default function NewGroupPage() {
               <Swatches colors={CREW_HUES} value={color} onChange={setColor} />
             </FormField>
             <FormField label="Max size" as="group" hint="Small on purpose. Everyone should notice everyone.">
-              <div className="flex flex-wrap gap-2">
-                {SIZES.map((n) => (
-                  <ToggleChip key={n} label={`${n} people`} color="leaf" size="l" selected={max === n} onToggle={() => setMax(n)} />
-                ))}
+              {/* Bencho's rolling counter: tap, hold or drag the number. 3 to 15, the size a crew is for. */}
+              <div className="flex items-center gap-3">
+                <RollingCounter start={max} min={MIN_SIZE} max={MAX_SIZE} label="Max size" corner={16} onChange={setMax} />
+                <span className="text-[14px] text-muted-foreground">people</span>
               </div>
             </FormField>
             <Button variant="primary" block disabled={busy} onClick={create}>

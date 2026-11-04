@@ -34,6 +34,10 @@ When this file and the prototype disagree, this file wins.
   the specs below**. Registry components depend on these, so keep shadcn's file names and variant names.
   Nothing else goes in this folder.
 - `components/arc/`: Arc installs (motion components). Restyle via tokens, not by forking unless needed.
+- `components/bencho/`: Bencho components (MIT, bencho.dev/licence), their CSS in `app/bencho.css` (imported by
+  globals.css), Bencho tokens mapped to ours. On screens: `LiquidToggle` (inside `Switch`), `RollingCounter` (New crew,
+  max size), `StackedBars` (You, "Your days" via `components/you/CrewDays.tsx`). The rest live on the kitchen sink's
+  Bencho shelf only. Keep their comments; lint exceptions sit at the top of each file with a reason.
 - `components/checkin/`: Check-in product components (`TagChip`, `ToggleChip`, `CrewAvatar`, `ThemeToggle`, and the
   ones listed under *Product components*). Build once, reuse, never restyle inline.
   It also holds the pre-upgrade components (PascalCase files, e.g. `Button.tsx`, `Sheet.tsx`). Screens move to the
@@ -146,6 +150,10 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Cheer press (pop, small burst, rolling count) | delight | The Cheer button on milestone posts |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
+| `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
+| `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
+| `StackedBars` (grow in once, scrub ring + tooltip) | calm | You, "Your days" by crew |
+| `TaskRun` (turning wedge on the active step, sub-lines fold) | live state | The crew recap while it writes; the wedge stops when the step ends |
 
 **Sound** (`components/fx/sound.ts`): off by default; You → Settings → Sounds. `success` after a check-in, `tap` when
 picking a reaction, `charge` / `confirm` on hold buttons, `levelUp` on a milestone reveal. No other sounds.
@@ -174,6 +182,11 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **HeatmapGrid:** the week as the tally: 7 pills Mon–Sun; done = `bg-primary` + check; open = `bg-muted`; future =
   `hatch` dashed; today = a ring; mono day letters; `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
+- **Switch**: renders Bencho's `LiquidToggle`; same API (`checked`, `onChange`, `label`, `disabled`).
+- **TaskRun** (`components/checkin/TaskRun.tsx`, after magpui's agent task list): a list driven by typed events
+  (`useTaskRun().emit`): one active step with a turning lemon ring and a timer, sub-lines that fold when it ends, a mint
+  check and rail when done, and a `gate` step that says "Asks first" (or shows the `gate` node) and waits for the person.
+  aria-live announces each step; reduced motion stills it.
 - **CrewSurface** (`components/checkin/CrewSurface.tsx`): a crew's own surface, its hue with depth (deeper toward the
   bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
   (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Retired from everyday
@@ -263,8 +276,9 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 A demo only: **no model, no API key, no server calls.** `lib/ai/writer.ts` writes from the crew's own data in the
 brand voice; `lib/ai/demo.ts` delivers it like a model would (a short "reading" pause, then word-by-word streaming).
 - **Weekly recap** (`components/you/CrewRecap.tsx`): "Your crew's week" on the **You tab** (under "This week"), not the
-  feed: the feed stays minimal and extras are optional, on You. Crew chips pick which crew; "Write recap" shows a
-  shimmer "reading" line, then the text streams in with a caret. Each "Rewrite" uses different phrasing and quotes
+  feed: the feed stays minimal and extras are optional, on You. Crew chips pick which crew; "Write recap" runs a
+  `TaskRun` (read, count, pick quotes, write, then "Share with the crew" asks first), the text streams in with a caret
+  during the write step, and "Copy to share" copies it. Each "Rewrite" uses different phrasing and quotes
   different notes. Labeled "Demo AI, written on your device from this week's check-ins". Data: `getCrewWeek`.
 - **Smart check-in** (`CheckInSheet`): with 2+ words in the note, "Tidy with AI" suggests a tidier note and up to three
   tags from the crew's own list; "Use this" / "Keep mine".
