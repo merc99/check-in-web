@@ -19,6 +19,7 @@ import { CodeTiles, Ticket } from '@/components/checkin/Ticket'
 import { useToast } from '@/components/checkin/Toast'
 import { useActiveCrew } from '@/lib/activeCrew'
 import { cn } from '@/lib/utils'
+import { SKILL_KINDS, SKILL_LABEL } from '@/lib/mastery'
 import { deleteGroup, getGroup, leaveGroup, removeMember, updateGroup, useQuery, type MemberRow } from '@/lib/data'
 
 
@@ -136,6 +137,28 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
         <>
           <SectionTitle title="Crew look" note="banner, cards and lists" />
           <CrewLook name={g.name} value={{ color: g.color, emoji: g.emoji, pattern: g.pattern }} onChange={(patch) => updateGroup(g.id, patch).catch(fail)} />
+
+          {/* Mastery: the skill this crew practises decides the check-in details and the tier cards' label. */}
+          <SectionTitle title="What the crew practises" />
+          <div role="group" aria-label="Skill" className="flex flex-wrap gap-2">
+            {SKILL_KINDS.map((k) => {
+              const on = g.skillKind === k
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => !on && updateGroup(g.id, { skill_kind: k }).then(() => toast(`${g.name} practises ${SKILL_LABEL[k].toLowerCase()}`), fail)}
+                  className={cn(
+                    'hit-44 inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-semibold transition-colors duration-150 ease-out',
+                    on ? 'border-foreground bg-foreground text-background' : 'border-border-strong bg-card hover:bg-muted',
+                  )}
+                >
+                  {SKILL_LABEL[k]}
+                </button>
+              )
+            })}
+          </div>
 
           <SectionTitle title="Who can find it" />
           <Card className="flex items-center gap-4">

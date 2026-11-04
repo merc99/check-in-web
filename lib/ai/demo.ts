@@ -2,6 +2,7 @@
 
 import type { CrewWeek } from '@/lib/data'
 import { prefersReducedMotion } from '@/lib/motion'
+import type { SkillKind } from '@/lib/mastery'
 import { recapText, tidyNote, type Suggestion } from './writer'
 
 // The demo AI as the screens use it: the writer's output, delivered like a model's. A short
@@ -35,7 +36,7 @@ export async function streamRecap(week: CrewWeek, onText: (text: string) => void
 }
 
 /** A tidied note and matching crew tags, after a short "thinking" pause. */
-export async function suggestCheckIn(text: string, tags: string[], signal?: AbortSignal): Promise<Suggestion> {
+export async function suggestCheckIn(text: string, tags: string[], skill: SkillKind, signal?: AbortSignal): Promise<Suggestion> {
   await wait(500 + Math.random() * 400, signal)
-  return tidyNote(text, tags)
+  return tidyNote(text, tags, skill)
 }

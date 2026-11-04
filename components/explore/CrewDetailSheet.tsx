@@ -8,8 +8,6 @@ import { CheckIcon } from '@/components/checkin/icons'
 import { List, listRow } from '@/components/checkin/List'
 import { Sheet } from '@/components/checkin/Sheet'
 import { StatCard } from '@/components/checkin/StatCard'
-import { cn } from '@/lib/utils'
-import { HUE_CLASS } from '@/lib/colors'
 import { getExploreDetails, useQuery } from '@/lib/data'
 
 /** A public crew up close: who's in, their streaks, and the one action that fits. */
@@ -36,11 +34,11 @@ export function CrewDetailSheet({
     <Sheet open={!!crewId} onClose={onClose} label={d?.name ?? 'Crew'}>
       {d && (
         <>
-          <div className={cn('-mx-5 mb-5 flex items-center gap-4 border-y border-border px-5 py-6', HUE_CLASS[d.color].soft)}>
-            <CrewBlock name={d.name} color={d.color} emoji={d.emoji} size="lg" white />
+          <div className="mb-5 flex items-center gap-4">
+            <CrewBlock name={d.name} color={d.color} emoji={d.emoji} size="lg" />
             <div>
-              <h2 className="font-display text-[30px] leading-[.95]">{d.name}</h2>
-              {d.description && <p className="mt-[6px] font-medium">{d.description}</p>}
+              <h2 className="text-[24px] font-medium leading-tight">{d.name}</h2>
+              {d.description && <p className="mt-1 text-[14px] text-muted-foreground">{d.description}</p>}
             </div>
           </div>
           <div className="flex flex-col gap-4">
@@ -61,7 +59,7 @@ export function CrewDetailSheet({
                 <div key={m.person.id} className={listRow}>
                   <Avatar name={m.person.name} color={m.person.color} photoUrl={m.person.photoUrl} size="sm" you={m.isMe} />
                   <span className="min-w-0 flex-1 font-medium">{m.isMe ? 'You' : m.person.name}</span>
-                  <span className="tnum font-display text-[17px]">{m.streak}</span>
+                  <span className="tnum text-[16px] font-medium">{m.streak}</span>
                   <span className="text-xs text-muted-foreground">day streak</span>
                 </div>
               ))}

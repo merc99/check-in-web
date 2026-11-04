@@ -1,4 +1,5 @@
 import type { CrewWeek } from '@/lib/data'
+import { cleanDetails, DETAIL_FIELDS, type CheckInDetails, type SkillKind } from '@/lib/mastery'
 
 // The demo "AI" writer: the weekly recap and the check-in tidy-up, built from the crew's own data in
 // the brand voice. No model, no key, no server: it runs in the browser. `variant` picks different
@@ -7,6 +8,28 @@ import type { CrewWeek } from '@/lib/data'
 export interface Suggestion {
   note: string
   tags: string[]
+  /** Specifics spotted in the words ("20 min", "5k", "30 pages"), for the crew's skill. */
+  details: CheckInDetails | null
+}
+
+/** Pull obvious specifics out of a rough note, limited to the fields this skill offers. */
+export function detailsFrom(text: string, skill: SkillKind): CheckInDetails | null {
+  const t = text.toLowerCase()
+  const fields = DETAIL_FIELDS[skill]
+  const d: CheckInDetails = {}
+  const hours = t.match(/(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hours?)\b/)
+  const mins = t.match(/(\d{1,3})\s*(?:m|min|mins|minutes?)\b/)
+  if (fields.includes('minutes') && (hours || mins)) d.minutes = Math.round((hours ? Number(hours[1]) * 60 : 0) + (mins ? Number(mins[1]) : 0))
+  const km = t.match(/(\d+(?:\.\d+)?)\s*(?:km|k)\b/)
+  const mi = t.match(/(\d+(?:\.\d+)?)\s*(?:mi|miles?)\b/)
+  if (fields.includes('distanceKm') && (km || mi)) d.distanceKm = km ? Number(km[1]) : Number(mi![1]) * 1.609
+  const pages = t.match(/(\d+)\s*(?:pages?|pp)\b/)
+  if (fields.includes('pages') && pages) d.pages = Number(pages[1])
+  if (fields.includes('activity')) {
+    const a = [['run', 'Run'], ['jog', 'Run'], ['walk', 'Walk'], ['ride', 'Ride'], ['bike', 'Ride'], ['cycl', 'Ride'], ['swim', 'Swim'], ['yoga', 'Yoga'], ['lift', 'Strength'], ['squat', 'Strength'], ['bench', 'Strength'], ['deadlift', 'Strength']].find(([k]) => t.includes(k))
+    if (a) d.activity = a[1]
+  }
+  return cleanDetails(d)
 }
 
 const pick = <T,>(options: T[], variant: number, salt = 0) => options[(variant + salt) % options.length]
@@ -103,7 +126,7 @@ export function recapText(week: CrewWeek, variant = 0): string {
 }
 
 /** Tidy a few loose words into a note, and pick matching tags from the crew's own list. */
-export function tidyNote(text: string, tags: string[]): Suggestion {
+export function tidyNote(text: string, tags: string[], skill: SkillKind = 'other'): Suggestion {
   let note = text
     .trim()
     .replace(/\s+/g, ' ')
@@ -118,5 +141,5 @@ export function tidyNote(text: string, tags: string[]): Suggestion {
       .split(/[\s-]+/)
       .some((part) => part.length >= 3 && words.some((w) => w.length >= 3 && (w.startsWith(part.slice(0, 4)) || part.startsWith(w.slice(0, 4))))),
   )
-  return { note: note.slice(0, 140), tags: matches.slice(0, 3) }
+  return { note: note.slice(0, 140), tags: matches.slice(0, 3), details: detailsFrom(text, skill) }
 }

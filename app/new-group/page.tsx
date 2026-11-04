@@ -1,11 +1,11 @@
 'use client'
 
+import { CrewDot } from '@/components/checkin/CrewBlock'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/checkin/Button'
 import { CapacityDots } from '@/components/checkin/CapacityDots'
 import { ToggleChip } from '@/components/checkin/Chip'
-import { CrewSurface } from '@/components/checkin/CrewSurface'
 import { FormField, Input } from '@/components/checkin/FormField'
 import { Segmented } from '@/components/checkin/Segmented'
 import { PageHead } from '@/components/checkin/SectionTitle'
@@ -87,16 +87,19 @@ export default function NewGroupPage() {
       <div className="mt-2 flex flex-col gap-4">
         {mode === 'create' ? (
           <>
-            {/* Live preview of the crew's banner as you type (the same surface the feed uses). */}
-            <CrewSurface hue={color} aria-hidden="true" className="mt-5 rounded-xl px-5 py-4">
-              <h2 className="truncate font-display text-[26px] font-extrabold leading-[1.1] tracking-tighter">{shownName || 'Your crew'}</h2>
-              <div className="mt-2 flex items-center gap-[10px]">
+            {/* Live preview of the crew's header as you type (the same look the feed uses). */}
+            <div aria-hidden="true" className="mt-5 rounded-xl border bg-card px-5 py-4 edge-lit">
+              <h2 className="flex items-center gap-2 truncate text-[24px] font-medium leading-tight">
+                <CrewDot color={color} className="size-[10px]" />
+                {shownName || 'Your crew'}
+              </h2>
+              <div className="mt-2 flex items-center gap-2.5">
                 <CapacityDots filled={1} max={max} />
-                <span className="text-[13px] font-bold">
-                  <span className="tnum">1</span> of <span className="tnum">{max}</span>
+                <span className="font-mono text-[12px] text-muted-foreground">
+                  <span className="tnum text-foreground">1</span> of <span className="tnum">{max}</span>
                 </span>
               </div>
-            </CrewSurface>
+            </div>
 
             <FormField label="Crew name" error={tried === 'create' && !shownName ? 'Give your crew a name to create it.' : undefined}>
               <Input

@@ -15,13 +15,13 @@ export const Fab = forwardRef<HTMLButtonElement, { done: boolean; onClick: () =>
         onClick={onClick}
         aria-label={done ? 'You’re checked in today' : 'Check in'}
         className={cn(
-          'pointer-events-auto grid size-16 place-items-center rounded-full border border-border shadow-raised',
-          'transition-[transform,box-shadow] duration-150 ease-out active:translate-y-[2px] active:shadow-card',
-          done ? 'bg-card' : 'bg-primary text-primary-foreground hover:rotate-90 active:rotate-90',
+          'pointer-events-auto grid size-16 place-items-center rounded-full border shadow-raised',
+          'transition-[transform,background-color] duration-150 ease-out active:scale-[.96]',
+          done ? 'border-border bg-card edge-lit' : 'border-transparent bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.3),var(--elev-raised)]',
         )}
       >
         {done ? (
-          <span className="grid size-[42px] place-items-center rounded-full border border-border bg-primary text-primary-foreground">
+          <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-primary-ink">
             <CheckIcon size={22} />
           </span>
         ) : (

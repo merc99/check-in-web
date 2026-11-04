@@ -30,11 +30,11 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
       role="tablist"
       aria-label={label}
       onKeyDown={onKeyDown}
-      className="relative flex rounded-full border border-border bg-card p-1 shadow-card"
+      className="relative flex rounded-full border border-border bg-muted p-1 dark:bg-card"
     >
       <span
         aria-hidden="true"
-        className="absolute inset-y-1 left-1 rounded-full bg-foreground transition-transform duration-200 ease-out"
+        className="absolute inset-y-1 left-1 rounded-full border border-border-strong bg-card edge-lit transition-transform duration-200 ease-out dark:bg-muted"
         style={{ width: `calc((100% - 8px) / ${options.length})`, transform: `translateX(${index * 100}%)` }}
       />
       {options.map((o) => {
@@ -48,8 +48,8 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(o.value)}
             className={cn(
-              'relative z-1 flex-1 rounded-full p-[11px] font-bold transition-colors duration-200',
-              selected ? 'text-background' : 'text-foreground',
+              'relative z-1 flex-1 rounded-full px-3 py-2.5 text-[14px] font-medium transition-colors duration-200',
+              selected ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {o.label}

@@ -1,0 +1,75 @@
+/* The tier-up ceremony (mastery). One flip, then a finish that grows with the tier:
+   paper stamp → enamel fill → foil flash → holo prism → aurora turn → all of it for Master.
+   Moment tier in the motion budget: only when your own session reaches a tier. */
+.root { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; }
+.scrim { position: absolute; inset: 0; background: rgb(0 0 0 / var(--dim, .55)); animation: fade .25s var(--ease-out); }
+@keyframes fade { from { opacity: 0; } }
+
+.stage { position: relative; width: min(360px, 100%); display: grid; justify-items: center; gap: 14px; text-align: center; color: white; }
+
+/* The card rises, face down, then flips to its face. */
+.flip { position: relative; width: 100%; perspective: 1100px; animation: rise .5s var(--fx-spring) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(60px) scale(.9); } }
+.flipper { position: relative; width: 100%; transform-style: preserve-3d; transition: transform .75s var(--fx-spring); transform: rotateY(180deg); }
+.stage[data-open] .flipper { transform: rotateY(0deg); }
+.face, .back { backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 16px; }
+.back {
+  position: absolute; inset: 0; transform: rotateY(180deg); display: grid; place-items: center; cursor: pointer;
+  background:
+    radial-gradient(80% 120% at 30% 0%, color-mix(in srgb, var(--hue) 55%, white) 0%, transparent 55%),
+    linear-gradient(160deg, var(--hue), color-mix(in srgb, var(--hue) 70%, black));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 30%, transparent), 0 30px 60px -20px color-mix(in srgb, var(--hue) 60%, black);
+  color: var(--on-color); font-family: var(--font-display); font-weight: 800; font-size: 44px;
+}
+.back span { display: grid; place-items: center; width: 74px; height: 74px; border-radius: 9999px; background: var(--on-color); color: color-mix(in srgb, var(--hue) 75%, white); animation: pulse 1.4s ease-in-out 3; }
+@keyframes pulse { 50% { transform: scale(1.07); } }
+.face { position: relative; }
+
+/* ── the finishes, played once as it opens ── */
+.fx { position: absolute; inset: 0; border-radius: 16px; pointer-events: none; overflow: hidden; }
+
+/* Paper: the card thuds down like a stamp. */
+.stage[data-open][data-m="paper"] .face { animation: thud .5s .55s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes thud { 0% { transform: scale(1.18) rotate(-4deg); } 60% { transform: scale(.97) rotate(1deg); } 100% { transform: none; } }
+
+/* Enamel: the color fills in from the bottom. */
+.stage[data-open][data-m="enamel"] .fx { background: var(--card); animation: fill .9s .6s var(--ease-out) both; }
+@keyframes fill { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
+
+/* Foil and up: a bright band crosses the card. */
+.stage[data-open][data-m="foil"] .fx::before,
+.stage[data-open][data-m="holo"] .fx::before,
+.stage[data-open][data-m="aurora"] .fx::before,
+.stage[data-open][data-m="master"] .fx::before {
+  content: ""; position: absolute; inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / .85) 50%, transparent 62%);
+  transform: translateX(-80%); animation: flash .9s .65s var(--ease-out) both;
+}
+.stage[data-open][data-m="holo"] .fx::before,
+.stage[data-open][data-m="aurora"] .fx::before,
+.stage[data-open][data-m="master"] .fx::before {
+  background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--rose) 70%, white) 42%, color-mix(in srgb, var(--sky) 70%, white) 50%, color-mix(in srgb, var(--lemon) 70%, white) 58%, transparent 70%);
+}
+@keyframes flash { to { transform: translateX(80%); } }
+
+/* Expert and Master: the aurora edge turns once around the card. */
+.stage[data-open][data-m="aurora"] .fx::after,
+.stage[data-open][data-m="master"] .fx::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 3px;
+  background: conic-gradient(from var(--fx-ang, 0deg), var(--sky), var(--leaf), var(--grape), var(--rose), var(--sky));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: turn 1.8s .7s linear both, fadeout .4s 2.5s var(--ease-in) forwards;
+}
+@keyframes turn { from { --fx-ang: 0deg; } to { --fx-ang: 360deg; } }
+@keyframes fadeout { to { opacity: 0; } }
+
+/* The words arrive after the finish. */
+.words { display: grid; gap: 6px; opacity: 0; transform: translateY(8px); transition: opacity .3s .9s var(--ease-out), transform .3s .9s var(--ease-out); }
+.stage[data-open] .words { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .flip, .back span, .stage[data-open] .face { animation: none !important; }
+  .flipper { transition: none; }
+  .fx, .fx::before, .fx::after { display: none; }
+  .words { transition: none; }
+}

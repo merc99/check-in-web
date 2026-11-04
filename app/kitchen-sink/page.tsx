@@ -14,6 +14,11 @@ import { SectionTitle } from '@/components/checkin/SectionTitle'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
+import { SessionDetails } from '@/components/checkin/SessionDetails'
+import { TierCard } from '@/components/checkin/TierCard'
+import { TierCeremony } from '@/components/fx/TierCeremony'
+import { CheerButton } from '@/components/checkin/CheerButton'
+import { TIER_KEYS, tierOf, type TierKey } from '@/lib/mastery'
 import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
 import { cn } from '@/lib/utils'
@@ -24,7 +29,7 @@ import { useToast } from '@/components/checkin/Toast'
 import { AVATAR_HUES } from '@/lib/colors'
 import { DataCheck } from './DataCheck'
 
-const VARIANTS = ['primary', 'dark', 'secondary', 'danger'] as const
+const VARIANTS = ['primary', 'brand', 'secondary', 'danger'] as const
 const TAGS = ['leg day', 'run', 'pr', 'stretch', 'rest day', 'push', 'gouache', 'ink']
 const AVATAR_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const
 const NAMES = ['Maya', 'Dre', 'Priya', 'Sam', 'Theo']
@@ -42,6 +47,7 @@ export default function KitchenSink() {
   const toast = useToast()
   const live = useLive()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [ceremony, setCeremony] = useState<TierKey | null>(null)
   const [arcSheetOpen, setArcSheetOpen] = useState(false)
   const [mode, setMode] = useState<'create' | 'join'>('create')
   const [tab, setTab] = useState<TabKey>('feed')
@@ -82,7 +88,7 @@ export default function KitchenSink() {
               </Button>
             </div>
           ))}
-          <Button variant="primary" block>
+          <Button variant="brand" block>
             <CheckIcon size={18} /> Check in
           </Button>
           <Button block>
@@ -148,6 +154,56 @@ export default function KitchenSink() {
           <CrewBlock name="Lifters" color="sky" emoji="💪" />
           <CrewBlock name="Sketch" color="grape" emoji="🎨" />
           <CrewBlock name="Letter" color="lemon" />
+        </div>
+      </Section>
+
+      <Section title="Tier cards" note="paper · enamel · foil · holo · aurora · locked">
+        <div className="flex flex-col gap-3">
+          {(['started', 'habit', 'committed', 'seasoned', 'expert'] as const).map((t, i) => (
+            <TierCard key={t} tier={t} skill="music" crewName="Guitar, 20 Minutes" color={(['clay', 'grape', 'sky', 'coral', 'leaf'] as const)[i]} sessions={[1, 12, 61, 152, 400][i]} />
+          ))}
+          <TierCard tier="master" skill="music" crewName="Guitar, 20 Minutes" color="clay" sessions={400} locked />
+          <TierCard tier="habit" skill="art" crewName="Sketchbook Daily" color="grape" sessions={10} size="sm" />
+        </div>
+      </Section>
+
+      <Section title="Tier ceremony" note="tap a tier to play it">
+        <div className="flex flex-wrap gap-2">
+          {TIER_KEYS.map((t) => (
+            <Button key={t} size="sm" onClick={() => setCeremony(t)}>
+              {tierOf(t).name}
+            </Button>
+          ))}
+        </div>
+        {ceremony && (
+          <TierCeremony
+            tier={ceremony}
+            skill="music"
+            crewName="Guitar, 20 Minutes"
+            color="clay"
+            sessions={tierOf(ceremony).at}
+            rarity={{ started: 96, habit: 71, committed: 38, seasoned: 9, expert: 2, master: 0 }[ceremony]}
+            serial={ceremony === 'master' ? 1 : null}
+            onShare={() => {}}
+            onClose={() => setCeremony(null)}
+          />
+        )}
+      </Section>
+
+      <Section title="Cheer and challenge" note="milestone posts · monthly goal">
+        <div className="flex flex-col gap-4">
+          <CheerButton count={4} byMe={false} people={[{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }, { id: 'k2', name: 'Priya', color: 'grape', photoUrl: null }]} color="sky" isMine={false} onCheer={() => {}} />
+          <CheerButton count={5} byMe people={[{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }]} color="sky" isMine={false} onCheer={() => {}} />
+          <TierCard tier="committed" skill="fitness" crewName="DIALED" color="sky" sessions={50} verified />
+          <TierCard tier="seasoned" skill="art" crewName="Sketchbook Daily" color="grape" sessions={150} portrait className="max-w-[180px]" />
+        </div>
+      </Section>
+
+      <Section title="Session details" note="fitness · music · reading · Strava">
+        <div className="flex flex-col gap-3">
+          <SessionDetails skill="fitness" details={{ activity: 'Run', minutes: 27, distanceKm: 5.2 }} source="strava" />
+          <SessionDetails skill="music" details={{ minutes: 20, items: ['Wonderwall intro', 'C major scale'] }} />
+          <SessionDetails skill="reading" details={{ book: 'The Creative Act', pages: 30 }} />
         </div>
       </Section>
 
@@ -272,7 +328,7 @@ export default function KitchenSink() {
           </FormField>
           <div className="pt-3">
             <Button
-              variant="primary"
+              variant="brand"
               block
               onClick={() => {
                 setSheetOpen(false)

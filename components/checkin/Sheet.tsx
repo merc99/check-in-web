@@ -158,7 +158,7 @@ export function Sheet({ open, onClose, title, aside, label, children }: SheetPro
         </div>
         {title && (
           <div className="mb-5 flex items-center gap-3">
-            <h2 id={titleId} className="font-display text-[28px] leading-none">
+            <h2 id={titleId} className="text-[22px] font-medium leading-tight">
               {title}
             </h2>
             {aside && <div className="ml-auto">{aside}</div>}

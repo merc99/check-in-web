@@ -1,7 +1,7 @@
 'use client'
 
 import { CrewCover } from '@/components/checkin/CrewCover'
-import { CrewSurface } from '@/components/checkin/CrewSurface'
+import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
 import { Swatches } from '@/components/checkin/Swatches'
 import { CREW_HUES, HUE_CLASS, type Hue } from '@/lib/colors'
 import { CREW_EMOJI, CREW_PATTERNS, PATTERN_LABEL, type CrewPattern } from '@/lib/crewStyle'
@@ -21,20 +21,24 @@ export function CrewLook({ name, value, onChange }: { name: string; value: CrewL
   const hue = HUE_CLASS[value.color]
   const letter = (name.trim()[0] ?? '?').toUpperCase()
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
-      {/* Preview: the banner as the feed shows it. */}
-      <CrewSurface hue={value.color} className="flex items-center gap-3 p-4 shadow-none!" aria-hidden="true">
-        <span className="relative min-w-0 flex-1 truncate font-display text-[26px] font-extrabold leading-none tracking-tighter">{name}</span>
-      </CrewSurface>
+    <div className="overflow-hidden rounded-xl border border-border bg-card edge-lit">
+      {/* Preview: the crew's medal and its name as the feed header shows it. */}
+      <div className="flex items-center gap-3 border-b p-4" aria-hidden="true">
+        <CrewBlock name={name} color={value.color} emoji={value.emoji} size="md" />
+        <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-[22px] font-medium leading-none">
+          <CrewDot color={value.color} className="size-[10px]" />
+          {name}
+        </span>
+      </div>
 
       <div className="flex flex-col gap-5 p-4">
         <fieldset>
-          <legend className="mb-3 text-sm font-bold">Color</legend>
+          <legend className="mb-3 text-sm font-medium">Color</legend>
           <Swatches colors={CREW_HUES} value={value.color} onChange={(color) => onChange({ color })} />
         </fieldset>
 
         <fieldset>
-          <legend className="mb-3 text-sm font-bold">Emoji</legend>
+          <legend className="mb-3 text-sm font-medium">Emoji</legend>
           <div className="flex flex-wrap gap-2">
             <Pick selected={value.emoji === null} onClick={() => onChange({ emoji: null })} label={`First letter, ${letter}`}>
               <span className="font-display text-[17px]">{letter}</span>
@@ -48,7 +52,7 @@ export function CrewLook({ name, value, onChange }: { name: string; value: CrewL
         </fieldset>
 
         <fieldset>
-          <legend className="mb-3 text-sm font-bold">Cover pattern</legend>
+          <legend className="mb-3 text-sm font-medium">Cover pattern</legend>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
             {CREW_PATTERNS.map((p) => {
               const selected = value.pattern === p

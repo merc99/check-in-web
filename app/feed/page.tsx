@@ -14,6 +14,7 @@ import { BrandMark } from '@/components/checkin/BrandMark'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
 import { CrewHero } from '@/components/checkin/CrewHero'
+import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import { HeatmapGrid, weekDays } from '@/components/checkin/HeatmapGrid'
 import { CheckIcon, PinIcon } from '@/components/checkin/icons'
 import { useLive } from '@/components/checkin/LivePill'
@@ -31,6 +32,10 @@ import {
   getJoinRequests,
   getMe,
   getMyStats,
+  getMySkills,
+  getMasterCount,
+  cheer,
+  vouch,
   onCheckIn,
   onHeart,
   react,
@@ -42,12 +47,14 @@ import {
 import { dayLabel, localDate } from '@/lib/dates'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HEART } from '@/lib/reactions'
+import { tierOf, type TierKey } from '@/lib/mastery'
+import { shareCard } from '@/lib/shareCard'
 import { useDesktop } from '@/lib/viewport'
 import { cn } from '@/lib/utils'
-import { HUE_CLASS } from '@/lib/colors'
 import { burstFrom } from '@/components/fx/burst'
 import { flyArc } from '@/components/fx/fly'
 import { RevealCard } from '@/components/fx/RevealCard'
+import { TierCeremony, type CeremonyProps } from '@/components/fx/TierCeremony'
 import { RollingCount } from '@/components/fx/RollingCount'
 import { sfx } from '@/components/fx/sound'
 
@@ -65,6 +72,7 @@ export default function FeedPage() {
   const [entering, setEntering] = useState<ReadonlySet<string>>(() => new Set())
   const [arrivedId, setArrivedId] = useState<string | null>(null)
   const [milestone, setMilestone] = useState<Achievement | null>(null)
+  const [ceremony, setCeremony] = useState<Omit<CeremonyProps, 'onClose' | 'onShare'> | null>(null)
   /** Crewmates you've waved at today, as `crewId:userId`. */
   const [waved, setWaved] = useState<ReadonlySet<string>>(() => new Set())
   const fab = useRef<HTMLButtonElement>(null)
@@ -72,7 +80,7 @@ export default function FeedPage() {
   const desktop = useDesktop()
 
   const group = useQuery(() => (activeId ? getGroup(activeId) : Promise.resolve(null)), [activeId], ['groups', 'group_members', 'check_ins', 'tags', 'profiles'])
-  const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([])), [activeId], ['check_ins', 'reactions', 'tags', 'profiles'])
+  const feed = useQuery(() => (activeId ? getFeed(activeId) : Promise.resolve([])), [activeId], ['check_ins', 'reactions', 'tags', 'profiles', 'cheers', 'vouches'])
   const requests = useQuery(() => (activeId ? getJoinRequests(activeId) : Promise.resolve([])), [activeId], ['join_requests', 'group_members'])
   const stats = useQuery(getMyStats, [], ['check_ins'])
   const achievements = useQuery(getAchievements, [], ['check_ins', 'groups', 'group_members'])
@@ -111,7 +119,8 @@ export default function FeedPage() {
           const sticker = document.querySelector(`[data-person="${item.user.id}"]`)
           if (sticker) burstFrom(sticker, [`--${item.user.color}`, 'white', '--primary'], 22)
         })
-        live({ user: item.user, message: <>{name} just checked in</>, onTap: scrollTop })
+        const tier = item.milestone ? tierOf(item.milestone.tier).name : null
+        live({ user: item.user, message: tier ? <>{name} reached {tier}</> : <>{name} just checked in</>, onTap: scrollTop })
       } else {
         const crew = groups?.find((g) => g.id === item.groupId)?.name ?? 'your crew'
         live({
@@ -160,6 +169,24 @@ export default function FeedPage() {
     window.scrollTo({ top: 0 })
   }
 
+  // Mastery: vouch for a crewmate's tier, and share your own tier card as an image.
+  const vouchFor = (item: FeedItem, on: boolean) => {
+    if (!item.milestone) return
+    vouch(item.user.id, item.groupId, item.milestone.tier, on).then(
+      () => on && toast(`You vouched for ${item.user.name}’s ${tierOf(item.milestone!.tier).name}.`),
+      (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
+    )
+  }
+  const share = async ({ tier, sessions, rarity, serial }: { tier: TierKey; sessions: number; rarity?: number; serial?: number | null }) => {
+    if (!g || !me.data) return
+    try {
+      const how = await shareCard({ tier, crewName: g.name, color: g.color, sessions, personName: me.data.person.name, rarity, serial })
+      if (how === 'downloaded') toast('Card saved as an image.')
+    } catch {
+      toast('That card didn’t draw. Try again.')
+    }
+  }
+
   const openCheckIn = () => {
     if (meIn) toast('You’re in for today')
     else setCheckInOpen(true)
@@ -170,7 +197,7 @@ export default function FeedPage() {
     const firstToday = !stats.data?.checkedInToday
     const unlockedBefore = new Set(achievements.data?.filter((a) => a.unlocked).map((a) => a.key))
     try {
-      const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags })
+      const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags, details: draft.details, source: draft.source, photoUrl: draft.photoUrl })
       const [after, earned] = await Promise.all([getMyStats(), getAchievements()])
       setCheckInOpen(false)
       // The celebration (fx, D2): a burst from whichever check-in button is on screen
@@ -186,7 +213,14 @@ export default function FeedPage() {
       }
       // A milestone (fx, F2) gets the reveal card; otherwise one toast says it counted.
       const fresh = earned.find((a) => a.unlocked && !unlockedBefore.has(a.key))
-      if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
+      const tierUp = item.milestone ? tierOf(item.milestone.tier) : null
+      if (tierUp && item.milestone) {
+        // A tier-up is the bigger moment: the ceremony (fx/TierCeremony), escalating with the tier.
+        const [skills, masters] = await Promise.all([getMySkills(), tierUp.key === 'master' ? getMasterCount() : Promise.resolve(0)])
+        const sp = skills.find((s) => s.groupId === g.id)
+        const c = { tier: tierUp.key, skill: g.skillKind, crewName: g.name, color: g.color, sessions: item.milestone.sessions, rarity: sp?.rarity, serial: tierUp.key === 'master' ? masters : null }
+        window.setTimeout(() => setCeremony(c), 700)
+      } else if (fresh) window.setTimeout(() => setMilestone(fresh), 700)
       else toast(firstToday && after.streak === 7 ? 'Week one. Seven days in a row.' : 'You showed up. That one’s yours for good.')
     } catch (e) {
       setCheckInOpen(false)
@@ -268,6 +302,7 @@ export default function FeedPage() {
           !desktop && (
             <TodayStrip
               key={g.id}
+              groupId={g.id}
               color={g.color}
               members={g.members}
               arrivedId={arrivedId}
@@ -293,16 +328,16 @@ export default function FeedPage() {
       ))}
 
       {g.pinnedMessage && (
-        // A note pinned to the crew, in the crew's tint: it reads as a note, not another post.
-        <div className={cn('mt-4 flex items-start gap-[10px] rounded-lg px-4 py-3 text-[14.5px] font-medium', HUE_CLASS[g.color].soft, HUE_CLASS[g.color].ink)}>
-          <PinIcon size={17} className="mt-[2px] flex-none rotate-[20deg]" />
+        // A note pinned to the crew: a quiet row, the pin in muted ink.
+        <div className="mt-3 flex items-start gap-3 rounded-lg border bg-card px-4 py-3 text-[14px] edge-lit">
+          <PinIcon size={16} className="mt-[2px] flex-none text-muted-foreground" />
           <p>{g.pinnedMessage}</p>
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="px-2 py-10 text-center">
-          <h2 className="font-display text-[26px] leading-none">Quiet so far.</h2>
+          <h2 className="text-[22px] font-medium leading-none">Quiet so far</h2>
           <p className="mt-2 text-muted-foreground">Be the first one in today.</p>
         </div>
       ) : (
@@ -315,7 +350,7 @@ export default function FeedPage() {
             return (
               <Fragment key={item.id}>
                 {divider && (
-                  <h2 className={cn('flex items-center gap-3 font-display text-[15px] leading-none after:h-[1.5px] after:flex-1 after:bg-border', first ? 'mt-8' : 'mt-6')}>
+                  <h2 className={cn('px-1 text-[13px] font-normal leading-none tracking-normal text-muted-foreground', first ? 'mt-6' : 'mt-4')}>
                     {label}
                   </h2>
                 )}
@@ -325,6 +360,11 @@ export default function FeedPage() {
                   onHeart={(on) => react(item.id, HEART, on)}
                   reactions={<Reactions chips={item.reactions} onReact={(emoji, on) => react(item.id, emoji, on)} />}
                   onPersonTap={setProfileId}
+                  crewName={g.name}
+                  crewColor={g.color}
+                  onCheer={item.milestone ? (on) => cheer(item.id, on).catch(() => toast('That didn’t go through. Try again.')) : undefined}
+                  onVouch={item.milestone?.vouches ? (on) => vouchFor(item, on) : undefined}
+                  onShare={item.milestone && item.isMine ? () => share({ tier: item.milestone!.tier, sessions: item.milestone!.sessions, rarity: item.milestone!.rarity }) : undefined}
                 />
               </Fragment>
             )
@@ -335,19 +375,22 @@ export default function FeedPage() {
 
       {desktop && (
         <aside aria-label="Today" className="sticky top-0 flex flex-col gap-4 self-start pt-[62px]">
-          <Button ref={railButton} variant={meIn ? 'secondary' : 'primary'} block onClick={openCheckIn}>
+          <Button ref={railButton} variant={meIn ? 'secondary' : 'brand'} block onClick={openCheckIn}>
             <CheckIcon size={18} /> {meIn ? 'You’re in for today' : 'Check in'}
           </Button>
           {hero}
           <Card>
+            <ChallengeBar groupId={g.id} color={g.color} />
+          </Card>
+          <Card>
             <div className="mb-[14px] flex items-baseline justify-between gap-3">
-              <h2 className="font-display text-[17px] leading-none">Your week</h2>
-              {stats.data && <small className="tnum text-[13px] text-muted-foreground">{stats.data.total} all time</small>}
+              <h2 className="text-[15px] font-medium leading-none">Your week</h2>
+              {stats.data && <small className="tnum font-mono text-[12px] text-muted-foreground">{stats.data.total} all time</small>}
             </div>
             <HeatmapGrid days={week} />
             {stats.data && (
               <p className="mt-3 text-[13px] text-muted-foreground">
-                <span data-fx-streak="" className="inline-block font-bold text-foreground">
+                <span data-fx-streak="" className="inline-block font-medium text-foreground">
                   <RollingCount n={stats.data.streak} label={`${stats.data.streak}`} />
                 </span>
                 -day streak, best <span className="tnum">{stats.data.best}</span>
@@ -380,6 +423,7 @@ export default function FeedPage() {
       <ProfileSheet userId={profileId} onClose={() => setProfileId(null)} />
 
       {milestone && <RevealCard achievement={milestone} onClose={() => setMilestone(null)} />}
+      {ceremony && <TierCeremony {...ceremony} onShare={() => share(ceremony)} onClose={() => setCeremony(null)} />}
     </main>
   )
 }

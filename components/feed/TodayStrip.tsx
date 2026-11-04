@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { burstFrom } from '@/components/fx/burst'
+import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import type { Hue } from '@/lib/colors'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { CheckIcon, ChevronIcon } from '@/components/checkin/icons'
@@ -19,8 +20,9 @@ const SHOWN = 6
  * Closed: a sticker per member and "n/total". Open: the brand line, the last 14 days and the bar.
  */
 export function TodayStrip({
-  color, members, arrivedId, onPersonTap, onWave, waved, recent,
+  groupId, color, members, arrivedId, onPersonTap, onWave, waved, recent,
 }: {
+  groupId: string
   color: Hue
   members: HeroMember[]
   arrivedId?: string | null
@@ -57,7 +59,7 @@ export function TodayStrip({
   }, [allIn, color])
 
   return (
-    <div ref={strip} role="region" aria-label="Who’s in today" className="relative mt-3 rounded-lg bg-black/10 p-2 shadow-[inset_0_1px_0_rgb(255_255_255/.18)]">
+    <div ref={strip} role="region" aria-label="Who’s in today" className="relative mt-4 rounded-xl border bg-card p-2 edge-lit">
       <div className="flex items-center gap-2">
         <ul className="flex min-w-0 items-center pl-1">
           {shown.map(({ person, inToday, isMe }, i) => (
@@ -74,7 +76,7 @@ export function TodayStrip({
               className={i > 0 ? '-ml-[6px]' : undefined}
             />
           ))}
-          {extra > 0 && <li className="tnum -ml-[6px] grid size-8 place-items-center rounded-full bg-on-color text-[12px] font-bold text-white">+{extra}</li>}
+          {extra > 0 && <li className="tnum -ml-[6px] grid size-8 place-items-center rounded-full border border-border bg-muted font-mono text-[12px] text-muted-foreground">+{extra}</li>}
         </ul>
         <span className="flex-1" />
         <button
@@ -82,21 +84,21 @@ export function TodayStrip({
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls={panel}
-          className="inline-flex items-center gap-2 rounded-full py-1 pl-2 pr-1 transition-colors duration-150 ease-out hover:bg-black/10"
+          className="inline-flex items-center gap-2 rounded-full py-1 pl-2 pr-1 transition-colors duration-150 ease-out hover:bg-muted"
         >
-          <span className="tnum inline-flex items-baseline whitespace-nowrap font-display text-[22px] leading-none">
+          <span className="tnum inline-flex items-baseline whitespace-nowrap text-[22px] font-medium leading-none">
             <RollingCount n={n} tight label={`${n} of ${total} in today`} />
-            <span aria-hidden="true" className="text-[14px] opacity-60">/{total}</span>
+            <span aria-hidden="true" className="text-[14px] text-muted-foreground">/{total}</span>
           </span>
           {/* The whole crew in is the moment the app is for: say it, in the crew's ink with a check. */}
           {allIn ? (
-            <span ref={label} className="inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-bold">
+            <span ref={label} className="inline-flex items-center gap-1 whitespace-nowrap text-[13px] font-medium text-primary-ink">
               <CheckIcon size={12} /> all in
             </span>
           ) : (
-            <span className="whitespace-nowrap text-[12px] font-bold">in today</span>
+            <span className="whitespace-nowrap text-[13px] text-muted-foreground">in today</span>
           )}
-          <span className="grid size-7 place-items-center rounded-full bg-black/10">
+          <span className="grid size-7 place-items-center rounded-full border bg-muted text-muted-foreground">
             <ChevronIcon size={15} className={cn('transition-transform duration-200 ease-out', open && 'rotate-180')} />
           </span>
         </button>
@@ -105,12 +107,12 @@ export function TodayStrip({
       {/* Opens by height (grid rows 0fr → 1fr), so nothing below jumps. */}
       <div id={panel} className={cn('grid transition-[grid-template-rows,opacity] duration-200 ease-out', open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')} inert={!open}>
         <div className="min-h-0 overflow-hidden">
-          <p className="px-1 pt-3 text-[13px] font-semibold">{heroLine(n, total, members.some((m) => m.isMe && m.inToday))}</p>
+          <p className="px-1 pt-3 text-[13px] text-muted-foreground">{heroLine(n, total, members.some((m) => m.isMe && m.inToday))}</p>
           {recent && recent.length > 1 && (
-            <div className="mt-2 rounded-md bg-black/[.08] px-3 pb-2 pt-2">
-              <div className="flex items-baseline justify-between text-[12px] font-bold">
+            <div className="mt-2 rounded-md bg-muted px-3 pb-2 pt-2">
+              <div className="flex items-baseline justify-between font-mono text-[12px] text-muted-foreground">
                 <span>Last 14 days</span>
-                <span className="opacity-70">today</span>
+                <span>today</span>
               </div>
               {open && (
                 <Sparkline
@@ -127,10 +129,12 @@ export function TodayStrip({
               )}
             </div>
           )}
+          {/* This month's crew challenge: optional, behind the tap like the rest of the details. */}
+          <ChallengeBar groupId={groupId} color={color} className="mt-2 rounded-md bg-muted px-3 py-2" />
           <div aria-hidden="true" className="mt-3 flex gap-[5px] px-1 pb-1">
             {members.map((m, i) => (
-              <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/10">
-                <span className={cn('absolute inset-0 origin-left bg-on-color transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />
+              <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                <span className={cn('absolute inset-0 origin-left bg-primary transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />
               </span>
             ))}
           </div>

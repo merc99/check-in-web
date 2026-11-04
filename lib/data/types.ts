@@ -1,5 +1,7 @@
 import type { Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
+import type { CheckInDetails, CheckInSource, SkillKind, TierKey } from '@/lib/mastery'
+export type { SkillAchievement } from '@/lib/mastery-achievements'
 import type { LocalDate } from '@/lib/dates'
 
 // ─── Rows: shaped exactly like the Supabase tables (snake_case, nullable where the column is) ───
@@ -16,6 +18,8 @@ export interface Profile {
   avatar_url: string | null
   avatar_color: Hue | null
   timezone: string
+  /** The crew whose top tier card is pinned first in the binder (mastery). */
+  pinned_group_id: UUID | null
   created_at: Timestamp
   deleted_at: Timestamp | null
 }
@@ -29,6 +33,8 @@ export interface Group {
   emoji: string | null
   /** The texture on the crew's banner and cards. */
   pattern: CrewPattern
+  /** What the crew practises: decides the check-in detail fields and the skill in mastery tiers. */
+  skill_kind: SkillKind
   /** A cover photo for the crew's Explore card, if it has one. */
   cover_url: string | null
   invite_slug: string
@@ -67,6 +73,12 @@ export interface CheckIn {
   group_id: UUID
   local_date: LocalDate
   note: string | null
+  /** Optional specifics (minutes, songs, book, distance...). */
+  details: CheckInDetails | null
+  /** Where it came from: typed in, or picked from a Strava activity. */
+  source: CheckInSource
+  /** Proof photo (demo: an image picked on this device, held in memory). */
+  photo_url: string | null
   created_at: Timestamp
   deleted_at: Timestamp | null
 }
@@ -95,7 +107,29 @@ export interface JoinRequest {
   created_at: Timestamp
 }
 
+/** A crewmate confirms someone reached a tier (Committed and up). Two or more make it verified. */
+export interface Vouch {
+  id: UUID
+  voucher_id: UUID
+  user_id: UUID
+  group_id: UUID
+  tier: TierKey
+  created_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/** A cheer on a milestone post (separate from emoji reactions: one per person). */
+export interface Cheer {
+  id: UUID
+  check_in_id: UUID
+  user_id: UUID
+  created_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
 export interface Tables {
+  vouches: Vouch[]
+  cheers: Cheer[]
   profiles: Profile[]
   groups: Group[]
   group_members: GroupMember[]
@@ -136,6 +170,7 @@ export interface GroupSummary {
   color: Hue
   emoji: string | null
   pattern: CrewPattern
+  skillKind: SkillKind
   memberCount: number
   maxMembers: number
   inToday: number
@@ -182,6 +217,23 @@ export interface FeedItem {
   }
   /** Every emoji on this check-in, in the order each was first left. */
   reactions: ReactionCount[]
+  details: CheckInDetails | null
+  source: CheckInSource
+  /** The crew's skill (decides how details read). */
+  skill: SkillKind
+  /** Set when this session reached a tier: a milestone post. `sessions` is the count it reached. */
+  milestone: { tier: TierKey; sessions: number; rarity: number; vouches: VouchInfo | null; cheers: { count: number; byMe: boolean; people: Person[] } } | null
+  /** Proof photo, if any. */
+  photoUrl: string | null
+}
+
+/** Who vouched for a tier. `null` on tiers that don't take vouches (below Committed). */
+export interface VouchInfo {
+  count: number
+  /** Two or more vouches. */
+  verified: boolean
+  people: Person[]
+  byMe: boolean
 }
 
 export interface ReactionCount {
@@ -271,16 +323,20 @@ export interface PublicProfile {
 }
 
 export interface CheckInInput {
+  photoUrl?: string | null
   groupId: UUID
   note?: string
   /** Tag names. New names become new crew tags. */
   tags?: string[]
+  details?: CheckInDetails | null
+  source?: CheckInSource
 }
 
 export interface NewGroupInput {
   name: string
   color: Hue
   maxMembers: number
+  skillKind?: SkillKind
 }
 
 export interface ProfilePatch {
@@ -296,8 +352,80 @@ export interface GroupPatch {
   color?: Hue
   emoji?: string | null
   pattern?: CrewPattern
+  skill_kind?: SkillKind
   pinned_message?: string | null
   is_public?: boolean
+}
+
+/** A recent activity from Strava (sample data in the demo). */
+export interface StravaActivity {
+  id: string
+  name: string
+  /** Matches the check-in activity choices: Run, Walk, Ride, Swim... */
+  type: string
+  minutes: number
+  distanceKm: number
+  startedAt: Timestamp
+}
+
+/** One person's progress in one crew's skill (mastery tiers). */
+export interface SkillProgress {
+  groupId: UUID
+  crewName: string
+  color: Hue
+  skill: SkillKind
+  sessions: number
+  /** Reached so far (null before the first session). */
+  tier: TierKey | null
+  /** The next tier and sessions to go (null at Master). */
+  next: { tier: TierKey; toGo: number } | null
+  /** When the current tier was reached. */
+  tierReachedAt: Timestamp | null
+  /** Vouches for the current tier (Committed and up). */
+  vouches: VouchInfo | null
+  /** Share of all members (across crews) who've reached the current tier, 0–100. */
+  rarity: number
+  /** This crew's card is the person's pinned card. */
+  pinned: boolean
+}
+
+/** One earned tier card in a binder, with the history its back shows. */
+export interface BinderCard {
+  groupId: UUID
+  crewName: string
+  color: Hue
+  skill: SkillKind
+  tier: TierKey
+  /** Current sessions in the skill. */
+  sessions: number
+  reachedAt: Timestamp
+  firstSessionAt: Timestamp
+  bestMonth: number
+  vouches: VouchInfo | null
+  rarity: number
+  /** Master cards only: their number. */
+  serial: number | null
+}
+
+export interface Binder {
+  person: Person
+  isMe: boolean
+  /** Every tier earned, highest first; the pinned crew's top card leads. */
+  cards: BinderCard[]
+  /** The next tier in each skill, as locked slots. */
+  next: { groupId: UUID; crewName: string; color: Hue; skill: SkillKind; tier: TierKey; toGo: number }[]
+  pinnedGroupId: UUID | null
+}
+
+/** This month's shared goal for a crew. */
+export interface CrewChallenge {
+  groupId: UUID
+  /** "October" */
+  month: string
+  target: number
+  done: number
+  /** Days left in the month, including today. */
+  daysLeft: number
 }
 
 /** A crew's last seven days, for the AI weekly recap. Plain values only (it's sent to the server). */

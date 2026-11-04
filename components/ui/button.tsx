@@ -3,18 +3,21 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Slot } from "radix-ui"
 
-// Restyled to the Check-in button spec (CLAUDE.md). shadcn's variant and size names are kept.
+// Check-in button spec (CLAUDE.md). shadcn's variant and size names are kept.
+// default = the one bright button (off-white on dark, near-black on light); brand = mint, for the check-in only.
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent bg-clip-padding font-semibold whitespace-nowrap transition-[transform,background-color,color,box-shadow,border-color] duration-150 ease-out outline-none select-none active:not-aria-[haspopup]:scale-[.97] focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
+  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-[transform,background-color,color,box-shadow,border-color] duration-150 ease-out outline-none select-none active:not-aria-[haspopup]:scale-[.97] focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary bg-[linear-gradient(rgb(255_255_255/.18),transparent)] text-primary-foreground shadow-card hover:bg-primary/90",
+          "bg-foreground text-background edge-lit hover:bg-foreground/90",
+        brand:
+          "bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.3)] hover:bg-primary/90",
         outline:
-          "border-border-strong bg-card text-foreground hover:bg-muted aria-expanded:bg-muted",
+          "border-border-strong bg-transparent text-foreground hover:bg-muted aria-expanded:bg-muted",
         secondary:
-          "border-border-strong bg-card text-foreground shadow-card hover:bg-muted aria-expanded:bg-muted",
+          "border-border bg-muted text-foreground edge-lit hover:border-border-strong aria-expanded:border-border-strong",
         ghost:
           "text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
         destructive:
