@@ -191,6 +191,12 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   in full ink); done = `bg-primary` + check, and back-to-back days in are joined by a mint bridge (the streak you can
   see); open = a quiet `bg-muted` well; future = faint `hatch`; today = a ring (a dot while still open);
   `animate-cellin` staggered when the You tab opens. The feed rail's card: "n/7 days", then streak | all time under a hairline.
+- **YearActivity** (`components/checkin/YearActivity.tsx`, after magpui's activity heatmap): a 340×172 card, "n
+  check-ins in 2026" over the last 31 weeks as a mint grid (none → 4+), a muted footer "Most check-ins in" with
+  your top three crews as hue circles and a round toggle that swaps to the three ranked crew rows (and back). The
+  card never changes size: the views crossfade in 280ms, the entering one rises 8px, rows stagger 35ms. Hover or
+  focus a day for a pale tooltip (120ms). The grid is an ARIA grid with one tab stop (arrows move by week and day).
+  Props: `counts` per day and `crews`; `demoYearActivity()` is seeded sample data. Kitchen sink only for now.
 - **LivePill**, **Ticket** (`Ticket.module.css`, Ben, Nov 2026): the crew's hue with depth, two notches cut clean
   through at the perforation (a mask; the shadow is a drop-shadow filter so it follows the cut), the code as letters
   pressed into the ticket (dark wells, inner shadow, a lit lip, bright letters), `animate-wave` on copy, and the
