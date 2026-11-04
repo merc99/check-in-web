@@ -91,7 +91,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             type="button"
             onClick={() => onPersonTap(item.user.id)}
             aria-label={`View ${item.user.name}`}
-            className="rounded-full transition-transform duration-150 ease-out hover:scale-[1.06]"
+            className="rounded-full transition-transform duration-150 ease-out active:scale-[.96]"
           >
             {avatar}
           </button>
@@ -163,7 +163,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             aria-pressed={item.hearts.byMe}
             aria-label={item.hearts.byMe ? 'Remove heart' : 'Send a heart'}
             className={cn(
-              'tnum inline-flex items-center gap-[6px] rounded-full border border-border py-[5px] pl-[9px] pr-3 text-[13px] font-bold shadow-xs',
+              'tnum inline-flex items-center gap-1.5 rounded-full border border-border py-1 pl-2 pr-3 text-[13px] font-medium shadow-xs',
               'transition-[background-color,color,transform,box-shadow] duration-200 active:translate-y-px active:shadow-none',
               item.hearts.byMe ? 'bg-rose-soft text-rose-ink' : 'bg-card',
             )}

@@ -74,7 +74,7 @@ function SheetContent({
       >
         {side === "bottom" && (
           <div aria-hidden="true" className="-mx-5 grid h-7 shrink-0 place-items-center">
-            <span className="h-[5px] w-10 rounded-full bg-border-strong" />
+            <span className="h-1 w-10 rounded-full bg-border-strong" />
           </div>
         )}
         {children}
@@ -124,7 +124,7 @@ function SheetTitle({
     <SheetPrimitive.Title
       data-slot="sheet-title"
       className={cn(
-        "font-display text-[28px] leading-none font-bold tracking-tighter text-foreground",
+        "font-display text-[28px] leading-none font-medium tracking-tighter text-foreground",
         className
       )}
       {...props}

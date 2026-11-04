@@ -67,7 +67,7 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
         onClick={onToggle}
         aria-expanded={open}
         aria-controls={panelId}
-        className="flex w-full items-center gap-3 px-4 py-[14px] text-left font-bold"
+        className="flex w-full items-center gap-3 px-4 py-[14px] text-left font-medium"
       >
         <CrewBlock name={group.name} color={group.color} emoji={group.emoji} size="sm" />
         <span className="min-w-0 truncate">{group.name}</span>
@@ -86,7 +86,7 @@ export function TagAccordion({ group, open, onToggle }: { group: GroupSummary; o
               {list.length ? (
                 list.map((t) => <ToggleChip key={t.id} label={t.name} selected={selected.has(t.id)} onToggle={() => toggle(t.id)} />)
               ) : (
-                <p className="text-[12.5px] text-muted-foreground">No tags yet.</p>
+                <p className="text-[13px] text-muted-foreground">No tags yet.</p>
               )}
             </div>
             {selected.size > 0 && (

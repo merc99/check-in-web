@@ -3,9 +3,9 @@ import { HUE_CLASS, getTagHue, type Hue } from '@/lib/colors'
 
 type Size = 's' | 'm' | 'l'
 const SIZE: Record<Size, string> = {
-  s: 'px-[10px] py-[3px] text-xs',
-  m: 'px-3 py-[5px] text-[13px]',
-  l: 'px-4 py-[9px] text-[15px]',
+  s: 'px-2.5 py-1 text-xs',
+  m: 'px-3 py-1.5 text-[13px]',
+  l: 'px-4 py-2 text-[15px]',
 }
 const base = 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border font-normal leading-tight'
 

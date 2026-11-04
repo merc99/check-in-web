@@ -84,7 +84,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
   1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
-  crews in two columns) and You (glossy stat cards, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
+  crews in two columns) and You (the stat bento, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`, or the CSS in `Sheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
@@ -159,7 +159,7 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   `@supports not (backdrop-filter: blur(1px))`; active tab = a raised `bg-muted edge-lit` pill sliding (200ms).
 - **Crew look** (`lib/crewStyle.ts`): each crew has a color, an `emoji` (on its `CrewBlock`, else the first letter)
   and a cover `pattern` (`CrewCover`: dots, stripes, waves, grid, confetti, plain). Owners pick all three in crew
-  settings (`components/crew/CrewLook.tsx`). Banners and Explore cards wear the cover, so no two crews look alike.
+  settings (`components/crew/CrewLook.tsx`). Explore cards without a photo wear the cover as a soft tint, so no two crews look alike.
 - **TodayStrip** (phones): who's in today as a plain card under the crew header, one row of stickers + "n/total";
   tapping it opens the brand line, the 14-day line, the challenge and the tally. `CrewHero` shows only in the desktop rail.
 - **The tally (signature):** one pill per member or day, mint when in, muted when open, hatched when still to come.
@@ -176,8 +176,9 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
 - **CrewSurface** (`components/checkin/CrewSurface.tsx`): a crew's own surface, its hue with depth (deeper toward the
   bottom, a lighter tone of the same hue top right), film grain and a lit top edge; overlays on it are dark ink
-  (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Used by the feed banner,
-  Explore card covers and the crew-look preview.
+  (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Retired from everyday
+  screens in the clean UI pass (the feed header, Explore covers and crew-look preview are neutral now); kept for
+  the kitchen sink and as a reference.
 - **FeedHeader:** a quiet header, no surface (Ben, Nov 2026: flat, the crew's color as a dot): the dot + name (medium,
   24/28px, tap to switch), one muted line of members and crew streak, the round gear, the TodayStrip on phones. No
   pattern, emoji or holo. Scrolled, it collapses into a neutral frosted sticky bar.

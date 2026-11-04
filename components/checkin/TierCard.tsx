@@ -53,7 +53,7 @@ export function TierCard({ tier, skill, crewName, color, sessions, locked, seria
         {t.at >= 1000 ? '1K' : t.at}
       </span>
       <span aria-hidden="true" className="min-w-0 flex-1">
-        <span className={cn('block truncate font-semibold opacity-75', size === 'sm' ? 'text-[12px]' : 'text-[12.5px]')}>{crewName}</span>
+        <span className={cn('block truncate font-semibold opacity-75', size === 'sm' ? 'text-[12px]' : 'text-[13px]')}>{crewName}</span>
         <span className={cn('block font-display font-extrabold leading-[1.05] tracking-tighter', portrait ? 'text-[22px]' : size === 'sm' ? 'text-[19px]' : 'text-[26px]')}>
           {t.name}
         </span>

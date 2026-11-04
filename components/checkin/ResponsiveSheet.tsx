@@ -37,7 +37,7 @@ export function ResponsiveSheet({ open, onOpenChange, title, description, detent
         className="max-h-[85dvh] gap-0 overflow-y-auto overscroll-contain p-6 sm:max-w-[480px]"
         {...(description ? {} : { 'aria-describedby': undefined })}
       >
-        <DialogTitle className="mb-5 pr-10 font-display text-[28px] font-bold leading-none tracking-tighter">{title}</DialogTitle>
+        <DialogTitle className="mb-5 pr-10 font-display text-[28px] font-medium leading-none tracking-tighter">{title}</DialogTitle>
         {description && <DialogDescription className="-mt-3 mb-5">{description}</DialogDescription>}
         {children}
       </DialogContent>

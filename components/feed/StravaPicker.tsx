@@ -45,8 +45,8 @@ export function StravaPicker({ pickedId, onPick }: { pickedId: string | null; on
             )}
           >
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[14px] font-semibold">{a.name}</span>
-              <span className="tnum block text-[12.5px] text-muted-foreground">
+              <span className="block truncate text-[14px] font-medium">{a.name}</span>
+              <span className="tnum block text-[13px] text-muted-foreground">
                 {a.distanceKm} km, {formatMinutes(a.minutes)}, {timeAgo(a.startedAt, now)}
               </span>
             </span>

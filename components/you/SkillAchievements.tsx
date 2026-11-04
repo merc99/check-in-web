@@ -28,7 +28,7 @@ export function SkillAchievements({ groupId, color }: { groupId: string; color: 
         className="hit-44 flex w-full items-center justify-between gap-3 text-left text-[13px]"
       >
         <span>
-          <span className="font-semibold">Achievements</span>{' '}
+          <span className="font-medium">Achievements</span>{' '}
           <span className="tnum text-muted-foreground">
             {done} of {items.length}
           </span>
@@ -40,7 +40,7 @@ export function SkillAchievements({ groupId, color }: { groupId: string; color: 
           {items.map((a) => (
             <li
               key={a.key}
-              className={cn('rounded-md border p-[10px] text-[12.5px]', a.unlocked ? cn(hue.soft, 'border-transparent') : 'border-dashed border-border-strong')}
+              className={cn('rounded-md border p-[10px] text-[13px]', a.unlocked ? cn(hue.soft, 'border-transparent') : 'border-dashed border-border-strong')}
             >
               <span className="flex items-start gap-2">
                 <span
@@ -50,7 +50,7 @@ export function SkillAchievements({ groupId, color }: { groupId: string; color: 
                   {a.unlocked && <Check size={12} strokeWidth={2.5} />}
                 </span>
                 <span className="min-w-0">
-                  <span className={cn('block font-semibold leading-tight', a.unlocked ? hue.ink : 'text-foreground')}>{a.title}</span>
+                  <span className={cn('block font-medium leading-tight', a.unlocked ? hue.ink : 'text-foreground')}>{a.title}</span>
                   <span className="block text-[12px] text-muted-foreground">{a.subtitle}</span>
                 </span>
               </span>

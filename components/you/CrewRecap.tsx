@@ -64,7 +64,7 @@ export function CrewRecap({ crews, initialId }: { crews: { id: string; name: str
                 aria-pressed={on}
                 onClick={() => choose(c.id)}
                 className={cn(
-                  'hit-44 inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors duration-150 ease-out',
+                  'hit-44 inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[13px] font-medium transition-colors duration-150 ease-out',
                   on ? 'border-foreground bg-foreground text-background' : 'border-border-strong text-muted-foreground hover:text-foreground',
                 )}
               >

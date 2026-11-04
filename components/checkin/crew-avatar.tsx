@@ -15,7 +15,7 @@ export function CrewAvatar({ name, hue = 'leaf', photoUrl, size = 'md', you, cla
   return (
     <Avatar className={cn(SIZE[size], 'ring-1 ring-inset ring-black/5', you && 'shadow-you', className)}>
       {photoUrl ? <AvatarImage src={photoUrl} alt="" /> : null}
-      <AvatarFallback className={cn('font-display font-bold text-on-color', HUE_CLASS[hue].solid)}>
+      <AvatarFallback className={cn('font-display font-medium text-on-color', HUE_CLASS[hue].solid)}>
         {name?.trim()[0]?.toUpperCase() ?? ''}
       </AvatarFallback>
     </Avatar>
