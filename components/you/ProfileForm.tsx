@@ -36,6 +36,8 @@ export function ProfileForm({
   const [color, setColor] = useState<Hue>('leaf')
   const [photo, setPhoto] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // Set by a save with no name; the error goes once there is one (the button always works, as on New crew).
+  const [tried, setTried] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -61,7 +63,8 @@ export function ProfileForm({
   }
 
   const save = async () => {
-    if (!name.trim() || saving) return
+    if (saving) return
+    if (!name.trim()) return setTried(true)
     setSaving(true)
     try {
       await updateProfile({ name, handle, bio, avatar_color: color, avatar_url: photo })
@@ -107,8 +110,15 @@ export function ProfileForm({
         <FormField label="Avatar color" as="group">
           <Swatches colors={AVATAR_HUES} value={color} onChange={setColor} />
         </FormField>
-        <FormField label="Name">
-          <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder="What your crew calls you" />
+        <FormField label="Name" error={tried && !name.trim() ? 'Add a name so your crew knows who checked in.' : undefined}>
+          <Input
+            value={name}
+            aria-invalid={tried && !name.trim()}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && save()}
+            maxLength={40}
+            placeholder="What your crew calls you"
+          />
         </FormField>
         <FormField label="Handle" optional>
           <Input value={handle} onChange={(e) => setHandle(e.target.value)} maxLength={25} placeholder="@handle" autoCapitalize="none" />
@@ -116,7 +126,7 @@ export function ProfileForm({
         <FormField label="Bio" optional>
           <Textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={140} placeholder="One line about you" />
         </FormField>
-        <Button variant="primary" block disabled={!name.trim() || saving} onClick={save}>
+        <Button variant="primary" block disabled={saving} onClick={save}>
           {submitLabel}
         </Button>
       </div>
