@@ -52,7 +52,7 @@ export const TIER_HUE: Record<TierKey, Hue> = {
 }
 
 /**
- * The tier as a flat tile in its own colors, for a milestone post's line (TierBadge.module.css):
+ * The tier as a flat disc in its own colors, for a milestone post's line (TierBadge.module.css):
  * green sprout, sky calendar, fire flame, dusk mountain, prism gem, gold crown. The post's text says
  * the tier and the count, so it's decorative.
  */

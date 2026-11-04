@@ -223,7 +223,7 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   color with faint dots: avatar, name, handle, your top tier as a small `TierMedal`, bio, an edit pencil, and an ink
   strip of all time (biggest) | streak | best in `RollingCount`. Then `ShowingUp`: the last 20 weeks as a mosaic (mint
   in, muted open, hatched still to come, today ringed), "n of m days in", this month | last month. Side by side on
-  desktop. Then the week tally, skills (`TrophyCase`: compact rows, a tier tile, a bar in the next tier's hue), binder,
+  desktop. Then the week tally, skills (`TrophyCase`: compact rows, a tier disc, a bar in the next tier's hue), binder,
   recap, achievements, recent | the leaderboard and the crew share.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
@@ -271,7 +271,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card in the **tier's**
   color (`TIER_HUE`: Started leaf, Habit sky, Committed clay, Seasoned indigo, Expert grape, Master lemon) with a
   lighter glow wash (a still holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
-  DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px rounded tile
+  DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px disc
   (`TierBadge.module.css`) in the tier's own palette with a white icon: green sprout, sky calendar, fire flame (lemon →
   clay → coral), dusk mountain, prism gem, gold crown; a smooth gradient, a hairline lit edge and a soft glow, a still
   holo ring from Seasoned. No numbers, no orb or gloss (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
