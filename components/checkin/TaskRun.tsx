@@ -121,7 +121,7 @@ function Row({ step, s, last, still, gate }: { step: TaskStep; s: StepState; las
           {step.label}
         </span>
         {waiting ? (
-          gate ?? <span className="rounded-[4px] bg-lemon-soft px-1.5 py-0.5 text-[11px] font-medium text-lemon-ink">Asks first</span>
+          gate ?? <span className="font-mono text-[11px] text-muted-foreground">Asks first</span>
         ) : (
           (active || done) && (
             <span className={cn('tnum font-mono text-[11px]', active ? 'text-muted-foreground' : 'text-subtle-foreground')}>

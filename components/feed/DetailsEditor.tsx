@@ -146,8 +146,8 @@ function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; c
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        'hit-44 inline-flex h-9 items-center rounded-full border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 ease-out active:scale-[.96]',
-        on ? 'border-primary bg-primary-soft text-primary-ink' : 'border-border-strong bg-card hover:bg-muted',
+        'hit-44 inline-flex h-9 items-center rounded-full border px-3 text-[13px] font-medium transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[.96]',
+        on ? 'border-border-strong bg-foreground text-background' : 'border-border-strong bg-card hover:bg-muted',
       )}
     >
       {children}

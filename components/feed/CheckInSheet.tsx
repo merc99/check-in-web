@@ -342,10 +342,7 @@ export function CheckInSheet({
 
         {/* Who you did it with: crewmates as faces in a pill (Bencho's assignees). */}
         {crewmates.length > 0 && (
-          <div className="-mt-1 flex items-center gap-3">
-            <p className="text-[13px] font-medium">
-              With <span className="font-normal text-muted-foreground">optional</span>
-            </p>
+          <FormField label="With" optional as="group">
             <Assignees
               inline
               defaultOpen={false}
@@ -356,7 +353,7 @@ export function CheckInSheet({
               value={withIds}
               onChange={setWithIds}
             />
-          </div>
+          </FormField>
         )}
 
         <FormField label="Tags" optional>
