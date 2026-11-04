@@ -10,7 +10,8 @@ import { Avatar } from './Avatar'
 import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
 import { SessionDetails } from './SessionDetails'
-import { TierCard } from './TierCard'
+import { TierMedal } from './TierCard'
+import { crewTint } from './CrewTint'
 import { CheerButton } from './CheerButton'
 import { BadgeCheck, Share2 } from 'lucide-react'
 import { Button as UiButton } from '@/components/ui/button'
@@ -71,6 +72,12 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
     lastTap.current = { t: now, x: e.clientX, y: e.clientY }
   }
 
+  // A milestone post is the crew's big moment: the whole card wears the crew's hue with a soft glow,
+  // and a still holo edge from Seasoned up. The tier shows as one compact line, not a second card.
+  const moment = item.milestone
+    ? crewTint(crewColor ?? item.user.color, ['holo', 'aurora', 'master'].includes(tierOf(item.milestone.tier).material) ? 'holo' : 'glow')
+    : null
+
   const avatar = (
     <Avatar name={item.user.name} color={item.user.color} photoUrl={item.user.photoUrl} you={item.isMine} />
   )
@@ -79,11 +86,14 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
     <article
       onPointerUp={onPointerUp}
       className={cn(
-        'relative touch-manipulation select-none rounded-xl border border-border bg-card p-4 edge-lit lg:p-5',
-        // A mouse over a post brightens its edge; touch has no hover.
-        'transition-[border-color] duration-150 ease-out [@media(hover:hover)]:hover:border-border-strong',
+        'relative touch-manipulation select-none rounded-xl p-4 lg:p-5',
+        moment
+          ? moment.className
+          : // A mouse over a post brightens its edge; touch has no hover.
+            'border border-border bg-card edge-lit transition-[border-color] duration-150 ease-out [@media(hover:hover)]:hover:border-border-strong',
         entering && 'animate-enter',
       )}
+      style={moment?.style}
     >
       <div className="flex items-center gap-3">
         {onPersonTap && !item.isMine ? (
@@ -116,6 +126,19 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
       </div>
 
       <div className="-mt-1 pl-[52px]">
+        {item.milestone && (
+          <div className="mb-3 mt-2 flex items-center gap-3">
+            <TierMedal tier={item.milestone.tier} color={crewColor ?? item.user.color} />
+            <div className="min-w-0">
+              <p className="text-[17px] font-medium leading-tight tracking-tight">
+                {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
+              </p>
+              <p className="mt-0.5 font-mono text-[12px] text-muted-foreground">
+                <span className="tnum">{item.milestone.sessions.toLocaleString()}</span> sessions{crewName ? ` in ${crewName}` : ''}
+              </p>
+            </div>
+          </div>
+        )}
         {item.note && <p className="text-[15px] leading-[1.5] lg:text-base">{item.note}</p>}
         <SessionDetails details={item.details} skill={item.skill} source={item.source} className={item.note ? 'mt-2' : undefined} />
         {item.photoUrl && (
@@ -129,17 +152,14 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             ))}
           </div>
         )}
-        {/* A milestone post: this session reached a tier. The tier card makes it stand out in the scroll. */}
+        {/* Milestone: vouches, then the cheer (and Share on yours) and the reactions, in one row. */}
         {item.milestone && (
-          <div className="mt-3">
-            <p className="mb-2 text-[13px] text-muted-foreground">
-              {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
-            </p>
-            <TierCard tier={item.milestone.tier} skill={item.skill} crewName={crewName ?? ''} color={crewColor ?? item.user.color} sessions={item.milestone.sessions} verified={item.milestone.vouches?.verified} />
+          <>
             <VouchLine milestone={item.milestone} isMine={item.isMine} name={item.user.name} onVouch={onVouch} />
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               {onCheer && (
                 <CheerButton
+                  className="mt-0"
                   count={item.milestone.cheers.count}
                   byMe={item.milestone.cheers.byMe}
                   people={item.milestone.cheers.people}
@@ -149,14 +169,15 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
                 />
               )}
               {item.isMine && onShare && (
-                <UiButton size="sm" variant="ghost" className="mt-3" onClick={onShare}>
+                <UiButton size="sm" variant="ghost" onClick={onShare}>
                   <Share2 size={15} /> Share card
                 </UiButton>
               )}
+              {reactions}
             </div>
-          </div>
+          </>
         )}
-        {reactions ? (
+        {item.milestone && reactions ? null : reactions ? (
           // Reactions include the heart as their first emoji, so they replace the heart pill
           // and the who-hearted stack. Double-tap still hearts, through onHeart.
           <div className="mt-3">{reactions}</div>

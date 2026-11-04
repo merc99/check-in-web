@@ -15,7 +15,8 @@ import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
-import { TierCard } from '@/components/checkin/TierCard'
+import { TierCard, TierMedal } from '@/components/checkin/TierCard'
+import { CrewTint } from '@/components/checkin/CrewTint'
 import { TierCeremony } from '@/components/fx/TierCeremony'
 import { CheerButton } from '@/components/checkin/CheerButton'
 import { TIER_KEYS, tierOf, type TierKey } from '@/lib/mastery'
@@ -155,6 +156,21 @@ export default function KitchenSink() {
           <CrewBlock name="Lifters" color="sky" emoji="💪" />
           <CrewBlock name="Sketch" color="grape" emoji="🎨" />
           <CrewBlock name="Letter" color="lemon" />
+        </div>
+      </Section>
+
+      <Section title="Crew tint" note="feed header · milestone glow · holo edge">
+        <div className="flex flex-col gap-3">
+          {(['plain', 'glow', 'holo'] as const).map((level, i) => (
+            <CrewTint key={level} hue={(['sky', 'grape', 'coral'] as const)[i]} level={level} className="flex items-center gap-3 rounded-xl p-4">
+              {level === 'plain' ? (
+                <CrewBlock name="DIALED" color="sky" emoji="💪" size="lg" className="bg-sky text-on-color" />
+              ) : (
+                <TierMedal tier={level === 'glow' ? 'committed' : 'seasoned'} color={(['sky', 'grape', 'coral'] as const)[i]} />
+              )}
+              <span className="relative text-[15px] font-medium">{level}</span>
+            </CrewTint>
+          ))}
         </div>
       </Section>
 

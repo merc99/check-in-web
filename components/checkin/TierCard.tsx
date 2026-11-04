@@ -34,6 +34,16 @@ export interface TierCardProps {
   className?: string
 }
 
+/** Just the tier's medal (its session number on dark enamel in the crew's hue), for a compact milestone line. */
+export function TierMedal({ tier, color, className }: { tier: TierKey; color: Hue; className?: string }) {
+  const t = tierOf(tier)
+  return (
+    <span aria-hidden="true" className={cn(styles.medal, styles.mini, className)} style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}>
+      {t.at >= 1000 ? '1K' : t.at}
+    </span>
+  )
+}
+
 /**
  * A mastery tier as a card: the material says the tier (paper, enamel, foil, holo, holo with an
  * aurora edge), the medal shows the tier's session number. Foil and up carry the sheen (fx/Foil); a tap sweeps it on touch, nothing moves on hover.
