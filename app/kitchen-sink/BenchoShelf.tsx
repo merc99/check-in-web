@@ -7,6 +7,7 @@ import { ContextMeter } from '@/components/bencho/ContextMeter'
 import { CreateMenu } from '@/components/bencho/CreateMenu'
 import { DynamicIsland } from '@/components/bencho/DynamicIsland'
 import { LiquidToggle } from '@/components/bencho/LiquidToggle'
+import { MagneticSelect } from '@/components/bencho/MagneticSelect'
 import { Palette } from '@/components/bencho/Palette'
 import { RollingCounter } from '@/components/bencho/RollingCounter'
 import { SlideToConfirm } from '@/components/bencho/SlideToConfirm'
@@ -121,6 +122,9 @@ export function BenchoShelf() {
         <Bench name="Dynamic island" where="kitchen sink only"><DynamicIsland activity="Music" /></Bench>
         <Bench name="Context meter" where="kitchen sink only"><ContextMeter /></Bench>
         <Bench name="Palette" where="kitchen sink only"><Palette /></Bench>
+        <Bench name="Magnetic select" where="kitchen sink only (crew covers, later)">
+          <MagneticSelect label="Crew cover" onChange={(_, name) => toast(name)} />
+        </Bench>
       </div>
     </section>
   )
