@@ -65,7 +65,8 @@ plus a few Check-in extras, so registry components inherit the theme.
   Lists are L1 surfaces with hairline dividers. Depth in dark mode is the surface step plus `edge-lit` (a lit top
   edge), not drop shadows. `hatch` marks "not yet" (future days, unfilled segments).
 - **Text:** `text-foreground`, `text-muted-foreground`, `text-subtle-foreground`; `text-on-color` on solid crew hues.
-- **Lines:** `border` (default color is `--border`) everywhere; `border-border-strong` for inputs, secondary buttons, hover.
+- **Lines:** `border` (default color is `--border`) everywhere; `border-border-strong` for secondary buttons and hover;
+  `border-input` for input edges (3:1 against the card, WCAG 1.4.11).
 - **Brand accent = `primary` (mint)**, a few percent of a screen: the check-in action (`variant="brand"`), "in" states
   (the tally, check badges), your own chart line or bar, `text-primary-ink` for links and mint text, `bg-primary-soft`
   for a delta pill, `ring` for focus. The default primary button is off-white on dark, near-black on light.
@@ -104,7 +105,8 @@ plus a few Check-in extras, so registry components inherit the theme.
   `text-primary-ink underline-offset-4`. Press: `active:scale-[.97]`, 150ms ease-out.
 - **card:** `rounded-lg border bg-card edge-lit` (`rounded-xl` for posts and stat cards); padding 16 (20 for large);
   interactive cards brighten their edge on hover (`hover:border-border-strong`) and press down; no lift.
-- **input / textarea:** `h-12 rounded-md border-border-strong bg-card`, focus = 3px `ring-primary/25` + `border-primary`.
+- **input / textarea:** `h-12 rounded-md border-input bg-card`, focus = 3px `ring-ring/25` + `border-ring`. `--ring` is the
+  deep mint (`#047857`) in light mode and mint in dark, so focus is at least 3:1 in both.
 - **sheet:** bottom side, `rounded-t-xl shadow-overlay`, drag handle, scrim `bg-black/40`. Prefer Arc `bottom-sheet`
   if it gives drag-to-dismiss with velocity.
 - **toasts:** `components/checkin/Toast.tsx` (not sonner): a frosted stack with a mint edge, batching arrivals.

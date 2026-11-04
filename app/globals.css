@@ -36,8 +36,8 @@
   --destructive: #EF4444;
 
   --border: rgb(23 23 23 / 0.08);
-  --input: rgb(23 23 23 / 0.14);
-  --ring: #34D399;
+  --input: rgb(23 23 23 / 0.48);   /* input edges: 3:1 on card and canvas (WCAG 1.4.11) */
+  --ring: #047857;                /* focus: the deep mint, 5.5:1 on white (mint itself is 1.9:1) */
 
   --chart-1: #34D399;
   --chart-2: #38BDF8;
@@ -47,7 +47,7 @@
 
   /* Check-in extras */
   --border-strong: rgb(23 23 23 / 0.14);
-  --subtle-foreground: #737373;
+  --subtle-foreground: #6B6B6B;   /* 4.5:1 on canvas and muted */
   --on-color: #1C1B19;            /* text on solid crew hues, both modes */
   --primary-ink: #047857;         /* mint as readable text / links */
   --primary-soft: rgb(52 211 153 / 0.16);
@@ -123,10 +123,11 @@
   --accent-foreground: #EDEDED;
 
   --border: rgb(255 255 255 / 0.08);
-  --input: rgb(255 255 255 / 0.12);
+  --input: rgb(255 255 255 / 0.34); /* input edges: 3:1 on card and canvas */
+  --ring: #34D399;                /* focus: bright mint, 9:1 on the dark card */
 
   --border-strong: rgb(255 255 255 / 0.12);
-  --subtle-foreground: #85858B;
+  --subtle-foreground: #8E8E94;   /* 4.5:1 on muted */
   --primary-ink: #6EE7B7;
   --primary-soft: rgb(52 211 153 / 0.18);
   --destructive-soft: rgb(239 68 68 / 0.18);

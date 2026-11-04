@@ -124,7 +124,8 @@ function Row({ step, s, last, still, gate }: { step: TaskStep; s: StepState; las
           gate ?? <span className="font-mono text-[11px] text-muted-foreground">Asks first</span>
         ) : (
           (active || done) && (
-            <span className={cn('tnum font-mono text-[11px]', active ? 'text-muted-foreground' : 'text-subtle-foreground')}>
+            // The timer is visual only: aria-live already announces each step.
+            <span aria-hidden="true" className={cn('tnum font-mono text-[11px]', active ? 'text-muted-foreground' : 'text-subtle-foreground')}>
               <RollingCount n={secs} />s
             </span>
           )

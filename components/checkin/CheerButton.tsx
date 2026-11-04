@@ -39,7 +39,7 @@ export function CheerButton({
           aria-pressed={byMe}
           onClick={press}
           className={cn(
-            'inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[14px] font-medium transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[.97]',
+            'hit-44 inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[14px] font-medium transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[.97]',
             byMe ? 'border-primary bg-primary text-primary-foreground' : 'border-border-strong bg-card hover:bg-muted',
           )}
         >
@@ -47,7 +47,7 @@ export function CheerButton({
           {byMe ? 'Cheered' : 'Cheer'}
           {count > 0 && (
             <span className="tnum">
-              <RollingCount n={count} />
+              <RollingCount n={count} label={`, ${count} ${count === 1 ? 'cheer' : 'cheers'}`} />
             </span>
           )}
         </button>
@@ -56,7 +56,7 @@ export function CheerButton({
           <span className="inline-flex items-center gap-2 text-[14px] font-medium">
             <Megaphone size={17} strokeWidth={2} aria-hidden="true" />
             <span className="tnum">
-              <RollingCount n={count} />
+              <RollingCount n={count} label={String(count)} />
             </span>{' '}
             cheer{count === 1 ? '' : 's'}
           </span>

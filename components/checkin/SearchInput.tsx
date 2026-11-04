@@ -10,7 +10,7 @@ export const SearchInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTML
   return (
     <span
       className={cn(
-        'flex items-center gap-[10px] rounded-full border border-border bg-card px-4 shadow-card transition-shadow duration-150 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/25',
+        'flex items-center gap-[10px] rounded-full border border-input bg-card px-4 shadow-card transition-shadow duration-150 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25',
         className,
       )}
     >

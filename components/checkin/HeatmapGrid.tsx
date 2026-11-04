@@ -33,7 +33,7 @@ export function HeatmapGrid({ days, animate }: { days: HeatDay[]; animate?: bool
             title={`${DAY_NAMES[i] ?? d.label}: ${d.done ? 'checked in' : d.future ? 'still to come' : 'open'}`}
             className={cn(
               'grid h-11 place-items-center rounded-full border',
-              d.done ? 'border-transparent bg-primary text-primary-foreground' : d.future ? 'hatch border-dashed border-border-strong' : 'border-border bg-muted',
+              d.done ? 'border-primary-ink bg-primary text-primary-foreground dark:border-transparent' : d.future ? 'hatch border-dashed border-border-strong' : 'border-border bg-muted',
               d.today && 'outline-solid outline-2 outline-offset-2 outline-foreground/60',
               animate && d.done && 'animate-cellin',
             )}
