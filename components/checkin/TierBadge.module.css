@@ -1,0 +1,54 @@
+/* The tier badge on a milestone post: a small coin. The face is the crew's hue, soft and lit from the
+   top; the tier's icon sits on it in the hue's ink. The rim says the tier: a hairline (Started), the
+   hue (Habit), brushed silver (Committed), a still holo ring (Seasoned, Expert, Master).
+   Nothing moves. Set --hue on the element. */
+.badge {
+  --rim: var(--border-strong);
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  padding: 1.5px;
+  background: var(--rim);
+  box-shadow: 0 6px 16px -10px color-mix(in oklab, var(--hue) 70%, transparent);
+}
+
+.face {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  color: color-mix(in oklab, var(--hue) 62%, var(--foreground));
+  background:
+    radial-gradient(110% 80% at 30% 0%, color-mix(in oklab, var(--hue) 30%, transparent) 0%, transparent 65%),
+    color-mix(in oklab, var(--hue) 16%, var(--card));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 22%, transparent);
+}
+:global(.dark) .face {
+  color: color-mix(in oklab, var(--hue) 70%, white);
+  background:
+    radial-gradient(110% 80% at 30% 0%, color-mix(in oklab, var(--hue) 34%, transparent) 0%, transparent 65%),
+    color-mix(in oklab, var(--hue) 20%, var(--card));
+}
+
+.paper { --rim: var(--border-strong); box-shadow: none; }
+.enamel { --rim: color-mix(in oklab, var(--hue) 75%, transparent); }
+.foil {
+  --rim: linear-gradient(
+    140deg,
+    color-mix(in oklab, white 92%, var(--hue)) 0%,
+    color-mix(in oklab, var(--hue) 35%, var(--muted-foreground)) 38%,
+    color-mix(in oklab, white 85%, var(--hue)) 62%,
+    color-mix(in oklab, var(--hue) 30%, var(--muted-foreground)) 100%
+  );
+}
+.holo {
+  --rim: conic-gradient(from 210deg, var(--hue), var(--grape), var(--rose), var(--lemon), var(--leaf), var(--hue));
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--hue) 12%, transparent),
+    0 6px 18px -8px color-mix(in oklab, var(--hue) 75%, transparent);
+}

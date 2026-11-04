@@ -34,7 +34,6 @@ import {
   getMyStats,
   getMySkills,
   getMasterCount,
-  cheer,
   vouch,
   onCheckIn,
   onHeart,
@@ -357,7 +356,6 @@ export default function FeedPage() {
                   onPersonTap={setProfileId}
                   crewName={g.name}
                   crewColor={g.color}
-                  onCheer={item.milestone ? (on) => cheer(item.id, on).catch(() => toast('That didn’t go through. Try again.')) : undefined}
                   onVouch={item.milestone?.vouches ? (on) => vouchFor(item, on) : undefined}
                   onShare={item.milestone && item.isMine ? () => share({ tier: item.milestone!.tier, sessions: item.milestone!.sessions, rarity: item.milestone!.rarity }) : undefined}
                 />

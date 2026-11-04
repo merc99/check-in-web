@@ -117,7 +117,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   exit, transform and opacity only. Entrances `animate-rise`. Press `active:scale-[.97]`.
 - **Delight moments** (springs allowed, `ease-spring` / `--fx-spring`): check-in stamp, avatar check-badge pop, heart
   burst, chip selection, rolling digits, emoji reactions (picker rise, the flying landing and squash, each emoji's
-  own arrival), the 👋 on a crewmate you waved at, and a cheer on a milestone post. The list is closed.
+  own arrival), and the 👋 on a crewmate you waved at. The list is closed.
 - **Effects** are the `components/fx` system (below). Use one of them before writing a new effect.
 - transitions.dev recipes are the default source for chrome motion; keep our durations and easing when adopting them.
 - Always respect `prefers-reduced-motion` (globals.css zeroes animations; every fx piece has a reduced-motion branch).
@@ -153,7 +153,6 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Tier card materials (paper, enamel, `Foil`, holo film, a still aurora edge; nothing moves on hover) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
 | Foil frame (static holo ring) | calm (static) | Your avatar, when the perk is on |
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
-| Cheer press (pop, small burst, rolling count) | delight | The Cheer button on milestone posts |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
 | `CrewTint` glow (soft hue halo, brighter edge; still holo edge from Seasoned) | calm (static) | Milestone posts only |
@@ -263,7 +262,9 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card with a glow (a still
   holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
-  DIALED"; vouches under the note, then Cheer and the reactions in one row. The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
+  DIALED"; vouches under the note, then the reactions (and Share card on yours). `TierMedal` is a small coin
+  (`TierBadge.module.css`): the tier's icon (sprout, calendar check, flame, mountain, gem, crown) on the crew's hue,
+  the rim by tier (hairline, hue, brushed silver, still holo from Seasoned). No numbers, no dark orb (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
   week", with sessions to the next tier and a Perks list; a crewmate's cards on their profile sheet.
 - **Strava (mocked):** `CheckIn.source` (`manual` | `strava`). You → Settings → Strava, or "Connect Strava" in the
   sheet, turns on the demo (sample activities, `getStravaActivities`). Fitness crews get "Add from Strava"; posts say
@@ -277,7 +278,8 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Ceremony** (`components/fx/TierCeremony.tsx`): your own tier-up opens a face-down card; a tap flips it and the
   finish grows with the tier (paper stamp, enamel fill, foil flash, holo prism, aurora turn, all of it for Master),
   then rarity, Share card and Keep going. Every tier plays from the kitchen sink.
-- **Cheers** (`cheers` table, `CheerButton`): one per person on a milestone post, separate from emoji reactions.
+- **Cheers:** retired from screens (Ben, Nov 2026: redundant with reactions). The `cheers` table and `cheer()` stay in
+  the data layer; the demo crew now celebrates milestone posts with 🙌 👏 🔥 reactions.
 - **Vouches** (`vouches` table): crewmates vouch for Committed-and-up tiers; two make it **Verified** (a mark on the
   card, who vouched on posts, the trophy case and the card's back). You can't vouch for yourself.
 - **With:** a check-in can name crewmates who did the session with you (`CheckIn.with_user_ids`, `FeedItem.with`;
@@ -292,7 +294,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Achievements per skill** (`lib/mastery-achievements.ts`): obtainable goals from sessions and details; "14 of 17"
   in the trophy case. **Crew challenge** (`getCrewChallenge`, `ChallengeBar`): a monthly shared target a stretch
   above the crew's pace, on You, in the today panel and the desktop rail. Never a countdown.
-- **Demo:** the crew cheers milestone posts within seconds and vouches for big tiers a little later (never as you);
+- **Demo:** the crew reacts to milestone posts within seconds and vouches for big tiers a little later (never as you);
   now and then a crewmate vouches for your unverified card. Ben's Committed starts one vouch short.
 
 ## Demo AI (`lib/ai`)

@@ -1,10 +1,11 @@
-import { BadgeCheck } from 'lucide-react'
+import { BadgeCheck, CalendarCheck, Crown, Flame, Gem, Mountain, Sprout, type LucideIcon } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Foil, FoilLight } from '@/components/fx/Foil'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { SKILL_LABEL, tierOf, type SkillKind, type TierKey } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
 import styles from './TierCard.module.css'
+import badge from './TierBadge.module.css'
 
 const MATERIAL: Record<ReturnType<typeof tierOf>['material'], string> = {
   paper: styles.paper,
@@ -34,12 +35,35 @@ export interface TierCardProps {
   className?: string
 }
 
-/** Just the tier's medal (its session number on dark enamel in the crew's hue), for a compact milestone line. */
+const BADGE_ICON: Record<TierKey, LucideIcon> = {
+  started: Sprout,
+  habit: CalendarCheck,
+  committed: Flame,
+  seasoned: Mountain,
+  expert: Gem,
+  master: Crown,
+}
+const BADGE_RIM: Record<ReturnType<typeof tierOf>['material'], string> = {
+  paper: badge.paper,
+  enamel: badge.enamel,
+  foil: badge.foil,
+  holo: badge.holo,
+  aurora: badge.holo,
+  master: badge.holo,
+}
+
+/**
+ * The tier as a small coin, for a milestone post's line (see TierBadge.module.css): the tier's icon on
+ * the crew's hue, the rim by tier. The post's text says the tier and the count, so it's decorative.
+ */
 export function TierMedal({ tier, color, className }: { tier: TierKey; color: Hue; className?: string }) {
   const t = tierOf(tier)
+  const Icon = BADGE_ICON[tier]
   return (
-    <span aria-hidden="true" className={cn(styles.medal, styles.mini, className)} style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}>
-      {t.at >= 1000 ? '1K' : t.at}
+    <span aria-hidden="true" className={cn(badge.badge, BADGE_RIM[t.material], className)} style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}>
+      <span className={badge.face}>
+        <Icon size={19} strokeWidth={1.75} />
+      </span>
     </span>
   )
 }

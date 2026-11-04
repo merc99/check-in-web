@@ -18,7 +18,6 @@ import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { TierCard, TierMedal } from '@/components/checkin/TierCard'
 import { CrewTint } from '@/components/checkin/CrewTint'
 import { TierCeremony } from '@/components/fx/TierCeremony'
-import { CheerButton } from '@/components/checkin/CheerButton'
 import { TIER_KEYS, tierOf, type TierKey } from '@/lib/mastery'
 import { CREW_HUES, HUE_CLASS } from '@/lib/colors'
 import { CREW_PATTERNS } from '@/lib/crewStyle'
@@ -175,6 +174,14 @@ export default function KitchenSink() {
         </div>
       </Section>
 
+      <Section title="Tier badges" note="milestone posts · started → master">
+        <div className="flex flex-wrap items-center gap-3">
+          {(['started', 'habit', 'committed', 'seasoned', 'expert', 'master'] as const).map((t) => (
+            <TierMedal key={t} tier={t} color="sky" />
+          ))}
+        </div>
+      </Section>
+
       <Section title="Tier cards" note="paper · enamel · foil · holo · aurora · locked">
         <div className="flex flex-col gap-3">
           {(['started', 'habit', 'committed', 'seasoned', 'expert'] as const).map((t, i) => (
@@ -208,10 +215,8 @@ export default function KitchenSink() {
         )}
       </Section>
 
-      <Section title="Cheer and challenge" note="milestone posts · monthly goal">
+      <Section title="Tier cards in use" note="verified · portrait">
         <div className="flex flex-col gap-4">
-          <CheerButton count={4} byMe={false} people={[{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }, { id: 'k2', name: 'Priya', color: 'grape', photoUrl: null }]} color="sky" isMine={false} onCheer={() => {}} />
-          <CheerButton count={5} byMe people={[{ id: 'k1', name: 'Maya', color: 'coral', photoUrl: null }]} color="sky" isMine={false} onCheer={() => {}} />
           <TierCard tier="committed" skill="fitness" crewName="DIALED" color="sky" sessions={50} verified />
           <TierCard tier="seasoned" skill="art" crewName="Sketchbook Daily" color="grape" sessions={150} portrait className="max-w-[180px]" />
         </div>
