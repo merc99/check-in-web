@@ -15,16 +15,20 @@ export interface FoilProps {
   strength?: number
   /** Turns the effect off (locked achievements), leaving just the content. */
   disabled?: boolean
+  /** Tilt and sheen under a mouse. Off by default (see above). */
+  hover?: boolean
   className?: string
   children: ReactNode
 }
 
 /**
- * A foil finish for something earned. Wrap the card in `Foil`, and put `<FoilLight />` inside it. With a mouse, the card tilts toward the pointer while a
- * sheen and a glare move across it; on touch, a tap plays one sweep. It never moves on its own.
- * The pointer only writes --mx / --my; the CSS draws everything.
+ * A foil finish for something earned. Wrap the card in `Foil`, and put `<FoilLight />` inside it.
+ * On touch, a tap plays one sweep of the sheen. It never moves on its own.
+ *
+ * Hover is off (Ben, Nov 2026: cards stay still under a mouse, no tilt and no shine). The tracking
+ * below is kept for when it comes back: pass `hover` to turn it on for one card.
  */
-export function Foil({ hue, tilt, strength, disabled, className, children }: FoilProps) {
+export function Foil({ hue, tilt, strength, disabled, hover = false, className, children }: FoilProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   if (disabled) return <div className={className}>{children}</div>
@@ -64,8 +68,8 @@ export function Foil({ hue, tilt, strength, disabled, className, children }: Foi
       ref={ref}
       className={cn(styles.foil, className)}
       style={vars}
-      onPointerMove={track}
-      onPointerLeave={leave}
+      onPointerMove={hover ? track : undefined}
+      onPointerLeave={hover ? leave : undefined}
       onPointerDown={tap}
       onAnimationEnd={(e) => {
         if (e.animationName.includes('shineGlare')) ref.current?.removeAttribute('data-shine')

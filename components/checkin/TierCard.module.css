@@ -61,7 +61,8 @@
   opacity: .9;
 }
 
-/* Expert: a turning multicolor edge, only while a mouse is over it. */
+/* Expert: a multicolor edge. It used to turn while a mouse was over it; hover is off for now
+   (Ben, Nov 2026), so it rests where it starts. */
 .aurora::before {
   content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; padding: 2px; pointer-events: none;
   background: conic-gradient(from var(--fx-ang, 0deg), var(--sky), var(--leaf), var(--grape), var(--rose), var(--sky));
@@ -69,7 +70,6 @@
   -webkit-mask-composite: xor; mask-composite: exclude;
   animation: turn 6s linear infinite paused;
 }
-@media (hover: hover) { .aurora:hover::before { animation-play-state: running; } }
 @keyframes turn { to { --fx-ang: 360deg; } }
 
 /* Master, not reached: a quiet silhouette of what's ahead. */

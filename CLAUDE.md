@@ -130,7 +130,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 
 | Effect | Tier | Allowed only on |
 |---|---|---|
-| `Foil` + `FoilLight` (tilt, white sheen; one sweep on tap) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
+| `Foil` + `FoilLight` (white sheen; one sweep on tap; no hover tilt or shine since Nov 2026) | calm | Unlocked `AchievementCard`s, and inside the milestone reveal |
 | `SheenLoop` (holo sheen, loops) | scoped loop | Invite `Ticket`s (crew settings, the invite page) |
 | `burstFrom` (canvas particles, crew hue + mint) | moment | After a check-in, from the button used (FAB or rail button) |
 | `flyArc` + `squash` (arc, tilt, land) | moment / calm | The day's first check-in (+1 to the streak: rail on desktop, You tab on phones); reactions landing on their chip |
@@ -146,7 +146,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Header swipe (follows the finger, slides out/in 150/200ms) | calm | Phones: the feed's crew header, to move between your crews |
 | `LogoMark` shimmer (one sweep) | calm | The logo: once when it appears, and on hover. Never loops |
 | Sparkline scrub (guide, dot, label) | calm | Every `Sparkline`: hover, drag or arrow keys show one point; no resting dot |
-| Tier card materials (paper, enamel, `Foil`, holo film, aurora edge on hover only) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
+| Tier card materials (paper, enamel, `Foil`, holo film, a still aurora edge; nothing moves on hover) | calm (static) | `TierCard`: milestone posts, the trophy case, profiles, the kitchen sink |
 | Foil frame (static holo ring) | calm (static) | Your avatar, when the perk is on |
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Cheer press (pop, small burst, rolling count) | delight | The Cheer button on milestone posts |
@@ -182,7 +182,7 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   chips from `lib/reactions.ts`, ❤️ first; yours are mint; the smiley opens the picker); own card gets a quiet mint
   "Just in" dot for an hour; double-tap = heart burst and adds your ❤️.
 - **AchievementCard:** unlocked ones are foil: filled with the achievement's hue, `text-on-color`, a dark enamel medal,
-  white sheen that tilts toward the pointer. Locked ones stay dashed.
+  white sheen (a tap sweeps it; still under a mouse). Locked ones stay dashed.
 - **HeatmapGrid:** the week as the tally: 7 pills Mon–Sun; done = `bg-primary` + check; open = `bg-muted`; future =
   `hatch` dashed; today = a ring; mono day letters; `animate-cellin` staggered when the You tab opens.
 - **LivePill**, **Ticket** (invite code, crew-hue tint, letter tiles, `animate-wave` on copy, `SheenLoop`).
@@ -245,7 +245,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   (`components/feed/DetailsEditor.tsx`); quiet icon rows on posts (`SessionDetails`). Loose check-ins stay the default.
   "Tidy with AI" (demo) spots details in a rough note.
 - **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
-  edge that turns only on hover; Master shows locked). Foil and up tilt with a mouse (fx/Foil).
+  edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
 - **Milestone posts:** a crewmate's (or your) tier-up shows its TierCard in the post, and the live line says "Dre
   reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
   week", with sessions to the next tier and a Perks list; a crewmate's cards on their profile sheet.
