@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Sparkline } from '@/components/fx/Gloss'
 import { RollingCount } from '@/components/fx/RollingCount'
 import { addDays } from '@/lib/dates'
@@ -28,6 +29,8 @@ export interface CrewHeroProps {
   streak?: number
   /** Members in on each of the last 14 days, oldest first (shown as a sparkline). */
   recent?: number[]
+  /** Join requests (owners): a row at the bottom of the card. */
+  requests?: ReactNode
 }
 
 export function heroLine(n: number, total: number, meIn: boolean) {
@@ -41,7 +44,7 @@ export function heroLine(n: number, total: number, meIn: boolean) {
  * "n/total in today" with a small muted unit, the brand line, the last two weeks as a thin line,
  * a sticker per member and the tally (one pill per member, mint when they're in).
  */
-export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved, streak, recent }: CrewHeroProps) {
+export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved, streak, recent, requests }: CrewHeroProps) {
   const n = members.filter((m) => m.inToday).length
   const total = members.length
   const everyone = total > 1 && n === total
@@ -108,6 +111,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved
           </span>
         ))}
       </div>
+      {requests && <div className="mt-4 empty:hidden">{requests}</div>}
     </section>
   )
 }

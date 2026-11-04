@@ -5,7 +5,7 @@ import { CrewBlock, CrewDot } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
 import { CrewTint } from '@/components/checkin/CrewTint'
 import { IconLink } from '@/components/checkin/IconButton'
-import { ChevronIcon, GearIcon } from '@/components/checkin/icons'
+import { ChevronIcon, GearIcon, PinIcon } from '@/components/checkin/icons'
 import { cn } from '@/lib/utils'
 import { HUE_CLASS, type Hue } from '@/lib/colors'
 import type { CrewPattern } from '@/lib/crewStyle'
@@ -25,17 +25,17 @@ export interface FeedHeaderCrew {
 
 /**
  * The crew you're looking at, as a quiet header (Rivals-style): the crew's color as a dot, the name
- * (tap to switch crews), a muted line of facts, join requests (owners), the gear and, on phones, who's in today (`today`, a
+ * (tap to switch crews), a muted line of facts, the gear, the crew's pinned note and, on phones, who's in today (`today`, a
  * TodayStrip). Past 70px of scroll it collapses into a sticky bar. Both open the crew switcher.
  */
 export function FeedHeader({
-  group, onSwitch, today, requests, onSwipe, position,
+  group, onSwitch, today, pinned, onSwipe, position,
 }: {
   group: FeedHeaderCrew
   onSwitch: () => void
   today?: ReactNode
-  /** People asking to join (a JoinRequests pill), next to the gear. */
-  requests?: ReactNode
+  /** The note pinned to the crew, shown inside the card. */
+  pinned?: string | null
   /** Phones: a sideways swipe on the banner moves to the next (1) or previous (-1) crew. */
   onSwipe?: (dir: 1 | -1) => void
   /** Which of your crews this is, for the dots on phones. */
@@ -123,13 +123,18 @@ export function FeedHeader({
               )}
             </p>
           </div>
-          <span className="flex flex-none items-center gap-2">
-            {requests}
-            <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
-              <GearIcon size={18} />
-            </IconLink>
-          </span>
+          <IconLink href={`/group-settings/${group.id}`} label="Crew settings">
+            <GearIcon size={18} />
+          </IconLink>
         </div>
+        {pinned && (
+          // The crew's pinned note, on a dark ink strip inside the card (overlays on a crew's hue are ink, never white).
+          <p className="relative mt-4 flex items-start gap-2 rounded-lg bg-black/[.06] px-3 py-2 text-[14px] leading-snug dark:bg-black/25">
+            <PinIcon size={15} className="mt-[2px] flex-none text-muted-foreground" />
+            <span className="sr-only">Pinned: </span>
+            {pinned}
+          </p>
+        )}
         </CrewTint>
         {today}
       </div>

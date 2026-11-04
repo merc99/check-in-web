@@ -75,8 +75,8 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Destructive:** `bg-destructive-soft text-destructive-ink` (soft) or `bg-destructive text-white` (solid, rare).
 - **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
   avatars, dots, chart marks and small badges; `bg-{hue}-soft text-{hue}-ink` for the crew medal (`CrewBlock`) and
-  a cover without a photo. Two places wear the crew's hue as a tinted card (`CrewTint`, Ben, Nov 2026): the feed
-  header and milestone posts. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
+  a cover without a photo. Three places wear the crew's hue as a tinted card (`CrewTint`, Ben, Nov 2026): the feed
+  header, its copies in the crew switcher, and milestone posts. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
   Mint is not a crew or avatar hue (it's `primary`); demo data that used mint now uses leaf.
 - **Shadows:** resting cards have none in dark (`edge-lit` only) and a 1px soft one in light. `shadow-raised` for
   floating things (FAB, dock), `shadow-overlay` (sheets, menus), `shadow-you` (the signed-in user's avatar ring).
@@ -204,11 +204,15 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
 - **FeedHeader:** the crew you're in as its own card (Ben, Nov 2026: make the crew obvious, crews look different):
   a `CrewTint` in the crew's hue, its cover pattern faint on the right (`CrewCover`), its emoji on a solid hue tile,
   the name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the
-  join requests pill (owners only, `components/feed/JoinRequests.tsx`: faces + count, opens a `ui/popover` list to
-  accept or decline in place; gone with the last request), the round gear, then the TodayStrip on phones. Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
+  round gear, the crew's pinned note on a dark ink strip inside the card, then the TodayStrip on phones.
+- **Join requests** (`components/feed/JoinRequests.tsx`, owners only): a dashed row in the "In today" card
+  (TodayStrip on phones, CrewHero on desktop): faces + "Jordan wants to join" + Review, which opens a `ui/popover`
+  list to accept or decline in place. Gone with the last request.
+- **Crew switcher** (`CrewSwitcherSheet`): each crew is a small copy of its header card (`CrewTint`, cover, emoji
+  tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
 - **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue washed into a card, a hue edge and a brighter tone
   top right; text stays light (dark) or dark (light). `glow` adds a soft hue halo, `holo` a still holo edge. Only on
-  the feed header (plain) and milestone posts (glow; holo from Seasoned up).
+  the feed header and the crew switcher (plain) and milestone posts (glow; holo from Seasoned up).
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
 - **You:** a bento (Data API, Crextio): an all-time hero card (the number, "+n vs last month" pill, the 12-week chart),
