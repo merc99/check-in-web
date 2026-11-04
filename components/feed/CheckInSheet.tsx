@@ -3,7 +3,8 @@
 import { ImagePlus, Plus, Route, Sparkles } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button as UiButton } from '@/components/ui/button'
-import { suggestCheckIn } from '@/lib/ai/demo'
+import { Assignees } from '@/components/bencho/Assignees'
+import { suggestCheckIn, wait } from '@/lib/ai/demo'
 import type { Suggestion as AssistSuggestion } from '@/lib/ai/writer'
 import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { Button } from '@/components/checkin/Button'
@@ -12,15 +13,35 @@ import { FormField, Textarea } from '@/components/checkin/FormField'
 import { CheckIcon } from '@/components/checkin/icons'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { SearchInput } from '@/components/checkin/SearchInput'
+import { TaskRun, useTaskRun, type TaskStep } from '@/components/checkin/TaskRun'
 import { DetailsEditor } from '@/components/feed/DetailsEditor'
 import { StravaPicker } from '@/components/feed/StravaPicker'
 import { cleanDetails, type CheckInDetails, type CheckInSource, type SkillKind } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
-import type { Hue } from '@/lib/colors'
+import { HUE_CLASS, type Hue } from '@/lib/colors'
 import { prefersReducedMotion } from '@/lib/motion'
 
 const NOTE_MAX = 280
 const STAMP_MS = 520
+
+// Tidy with AI, shown as a careful helper working down a list; the last step waits for you.
+const TIDY_STEPS: TaskStep[] = [
+  { id: 'read', label: 'Read your note' },
+  { id: 'details', label: 'Spot the details' },
+  { id: 'tags', label: 'Match your crew’s tags' },
+  { id: 'use', label: 'Use the tidy version', gate: true },
+]
+/** "45 min, 5 km" from the details a suggestion spotted. */
+function detailSummary(d: CheckInDetails) {
+  const out: string[] = []
+  if (d.activity) out.push(d.activity)
+  if (d.minutes) out.push(`${d.minutes} min`)
+  if (d.distanceKm) out.push(`${d.distanceKm} km`)
+  if (d.pages) out.push(`${d.pages} pages`)
+  if (d.book) out.push(d.book)
+  if (d.items?.length) out.push(d.items.join(', '))
+  return out.join(', ')
+}
 
 export interface CheckInDraft {
   /** A proof photo (demo: an object URL for an image picked on this device). */
@@ -31,19 +52,25 @@ export interface CheckInDraft {
   details: CheckInDetails | null
   /** Picked from a Strava activity (fitness crews). */
   source: CheckInSource
+  /** Crewmates who did it with you (user ids). */
+  with: string[]
 }
+
+/** A crewmate you can say you did it with, and a short line about them. */
+export type Crewmate = { id: string; name: string; color: Hue; note: string }
 
 /**
  * Note + tags, then the stamp: the button shrinks to a mint circle and draws a check
  * before `onSubmit` runs. New tags only get created if you actually check in.
  */
 export function CheckInSheet({
-  open, onClose, group, tags, onSubmit,
+  open, onClose, group, tags, crewmates = [], onSubmit,
 }: {
   open: boolean
   onClose: () => void
   group: { name: string; color: Hue; skillKind: SkillKind }
   tags: string[]
+  crewmates?: Crewmate[]
   onSubmit: (draft: CheckInDraft) => void
 }) {
   const [note, setNote] = useState('')
@@ -58,10 +85,12 @@ export function CheckInSheet({
   const [stravaOpen, setStravaOpen] = useState(false)
   const [stravaId, setStravaId] = useState<string | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
+  const [withIds, setWithIds] = useState<string[]>([])
   const photoInput = useRef<HTMLInputElement>(null)
   // Smart check-in: a tidied note and matching tags from a few loose words (AI, on request).
   const [tidy, setTidy] = useState<{ step: 'busy' } | { step: 'ready'; for: string; s: AssistSuggestion } | null>(null)
   const tidyAbort = useRef<AbortController | null>(null)
+  const { state: tidyRun, emit } = useTaskRun(TIDY_STEPS)
 
   // Start fresh each time the sheet opens (adjusting state during render, not in an effect).
   const [wasOpen, setWasOpen] = useState(open)
@@ -79,6 +108,7 @@ export function CheckInSheet({
       setStravaOpen(false)
       setStravaId(null)
       setPhoto(null)
+      setWithIds([])
     }
   }
 
@@ -88,9 +118,28 @@ export function CheckInSheet({
     const ctrl = new AbortController()
     tidyAbort.current = ctrl
     const asked = note
+    const n = asked.trim().split(/\s+/).filter(Boolean).length
+    const beat = (ms: number) => wait(prefersReducedMotion() ? 0 : ms, ctrl.signal)
+    emit({ type: 'reset' })
     setTidy({ step: 'busy' })
     try {
-      const s = await suggestCheckIn(asked, tags, group.skillKind, ctrl.signal)
+      const pending = suggestCheckIn(asked, tags, group.skillKind, ctrl.signal)
+      emit({ type: 'step-start', step: 'read' })
+      emit({ type: 'sub-start', step: 'read', id: 'r', text: `Reading ${n} words` })
+      await beat(380)
+      emit({ type: 'sub-done', step: 'read', id: 'r', text: `Read ${n} words` })
+      const s = await pending
+      emit({ type: 'step-start', step: 'details' })
+      emit({ type: 'sub-start', step: 'details', id: 'd', text: 'Looking for times and numbers' })
+      await beat(480)
+      emit({ type: 'sub-done', step: 'details', id: 'd', text: s.details ? `Found ${detailSummary(s.details)}` : 'Nothing specific, and that’s fine' })
+      await beat(260)
+      emit({ type: 'step-start', step: 'tags' })
+      emit({ type: 'sub-start', step: 'tags', id: 't', text: `Checking ${tags.length} crew tags` })
+      await beat(420)
+      emit({ type: 'sub-done', step: 'tags', id: 't', text: s.tags.length ? `Matched ${s.tags.join(', ')}` : 'No tag fits yet' })
+      await beat(260)
+      emit({ type: 'step-done', step: 'tags' })
       setTidy({ step: 'ready', for: asked, s })
     } catch {
       // Aborted.
@@ -103,6 +152,8 @@ export function CheckInSheet({
       setDetails((d) => ({ ...d, ...s.details }))
       setDetailsOpen(true)
     }
+    emit({ type: 'step-start', step: 'use' })
+    emit({ type: 'step-done', step: 'use' })
     setTidy(null)
   }
   // A suggestion only stands for the words it was made from.
@@ -137,7 +188,7 @@ export function CheckInSheet({
     }
     const d = detailsOpen ? cleanDetails(details) : null
     const source: CheckInSource = stravaId && d ? 'strava' : 'manual'
-    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d, source, photoUrl: photo }), prefersReducedMotion() ? 0 : STAMP_MS)
+    setTimeout(() => onSubmit({ note: note.trim(), tags: Array.from(selected), details: d, source, photoUrl: photo, with: withIds }), prefersReducedMotion() ? 0 : STAMP_MS)
   }
 
   return (
@@ -177,28 +228,34 @@ export function CheckInSheet({
           </div>
         </FormField>
 
-        {suggestion && (
-          <div aria-live="polite" className="-mt-2 animate-rise rounded-md border border-primary/30 bg-primary-soft/40 p-3">
-            <p className="flex items-center gap-[6px] text-[12px] font-medium text-primary-ink">
-              <Sparkles size={13} strokeWidth={1.75} aria-hidden="true" /> Suggestion
-            </p>
-            <p className="mt-1 text-[15px] leading-[1.45]">{suggestion.note}</p>
-            {suggestion.details && <SessionDetails details={suggestion.details} skill={group.skillKind} className="mt-2" />}
-            {suggestion.tags.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-[6px]">
-                {suggestion.tags.map((t) => (
-                  <TagChip key={t} name={t} />
-                ))}
+        {/* The tidy run: a short list of what it's doing, then the suggestion, which waits for you. */}
+        {(tidy?.step === 'busy' || suggestion) && (
+          <div className="-mt-2 animate-rise rounded-md border bg-muted/50 p-3">
+            <TaskRun run={tidyRun} />
+            {suggestion && (
+              <div className="mt-3 border-t pt-3">
+                <p className="flex items-center gap-[6px] text-[12px] font-medium text-primary-ink">
+                  <Sparkles size={13} strokeWidth={1.75} aria-hidden="true" /> Suggestion
+                </p>
+                <p className="mt-1 text-[15px] leading-[1.45]">{suggestion.note}</p>
+                {suggestion.details && <SessionDetails details={suggestion.details} skill={group.skillKind} className="mt-2" />}
+                {suggestion.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-[6px]">
+                    {suggestion.tags.map((t) => (
+                      <TagChip key={t} name={t} />
+                    ))}
+                  </div>
+                )}
+                <div className="mt-3 flex gap-2">
+                  <UiButton size="sm" onClick={() => applyTidy(suggestion)}>
+                    Use this
+                  </UiButton>
+                  <UiButton size="sm" variant="ghost" onClick={() => setTidy(null)}>
+                    Keep mine
+                  </UiButton>
+                </div>
               </div>
             )}
-            <div className="mt-3 flex gap-2">
-              <UiButton size="sm" onClick={() => applyTidy(suggestion)}>
-                Use this
-              </UiButton>
-              <UiButton size="sm" variant="ghost" onClick={() => setTidy(null)}>
-                Keep mine
-              </UiButton>
-            </div>
           </div>
         )}
 
@@ -279,6 +336,25 @@ export function CheckInSheet({
                 setDetailsOpen(true)
                 setStravaOpen(false)
               }}
+            />
+          </div>
+        )}
+
+        {/* Who you did it with: crewmates as faces in a pill (Bencho's assignees). */}
+        {crewmates.length > 0 && (
+          <div className="-mt-1 flex items-center gap-3">
+            <p className="text-[13px] font-medium">
+              With <span className="font-normal text-muted-foreground">optional</span>
+            </p>
+            <Assignees
+              inline
+              defaultOpen={false}
+              label="With"
+              empty="Just me"
+              corner={999}
+              people={crewmates.map((c) => ({ id: c.id, name: c.name, role: c.note, hue: HUE_CLASS[c.color].cssVar }))}
+              value={withIds}
+              onChange={setWithIds}
             />
           </div>
         )}

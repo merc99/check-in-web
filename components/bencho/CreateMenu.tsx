@@ -111,7 +111,13 @@ const PANEL_H = 24 + ITEMS.length * 34 + (ITEMS.length - 1) * 2;
 const CRT_CORNER = 20;
 const CRT_MAX = 40;
 
-export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
+/* Check-in: `rail` is the desktop crew rail's +, a 42px square
+   that unfolds down and to the right from its own corner, over the
+   panel beside it, instead of sitting centred on a reserved stage */
+const RAIL = 42;
+
+export function CreateMenu({ corner = CRT_CORNER, variant = "stage" }: { corner?: number; variant?: "stage" | "rail" } = {}) {
+  const rail = variant === "rail";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [sink, setSink] = useState(false);
@@ -206,8 +212,18 @@ export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
         setOpen(false);
       }
     };
+    /* Check-in: Escape puts it away too, and hands focus back */
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      panel.current?.querySelector<HTMLButtonElement>(".crt-pill")?.focus();
+    };
     document.addEventListener("pointerdown", away);
-    return () => document.removeEventListener("pointerdown", away);
+    document.addEventListener("keydown", key);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", key);
+    };
   }, [open]);
 
   const press = () => {
@@ -224,25 +240,26 @@ export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
   };
 
   /* glyph + gap + label + the padding either side */
-  const pillW = 18 + 8 + sayW + 34;
+  const pillW = rail ? RAIL : 18 + 8 + sayW + 34;
 
   /* the two the animation needs as NUMBERS — Framer writes
      borderRadius inline, so it cannot read a css variable */
   const panelR = clamp(corner, 0, CRT_MAX);
-  const shutR = Math.min(19, panelR * (19 / CRT_CORNER));
+  const shutR = rail ? 14 : Math.min(19, panelR * (19 / CRT_CORNER));
 
   return (
     <motion.div
       className="crt-stage"
       data-open={open || undefined}
       data-sink={sink || undefined}
+      data-rail={rail || undefined}
       ref={panel}
       style={{
         "--pill-w": `${pillW}px`,
         "--panel-h": `${PANEL_H}px`,
         "--crt-r": `${clamp(corner, 0, CRT_MAX)}px`,
         /* the shut pill is 38 tall, so 19 is as round as it goes */
-        "--crt-shut-r": `${Math.min(19, clamp(corner, 0, CRT_MAX) * (19 / CRT_CORNER)).toFixed(2)}px`,
+        "--crt-shut-r": `${shutR.toFixed(2)}px`,
         /* concentric: the panel's corner less its 10px inset,
            and no rounder than the 34px row's own half */
         "--crt-row-r": `${Math.min(17, Math.max(0, clamp(corner, 0, CRT_MAX) - 10)).toFixed(2)}px`,
@@ -258,7 +275,7 @@ export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
           className="crt-body"
           animate={{
             width: open ? 212 : pillW,
-            height: open ? PANEL_H : 38,
+            height: open ? PANEL_H : rail ? RAIL : 38,
             /* ── from the knob, not from two literals ──────
                Framer writes this inline every frame, so the
                stylesheet's `var(--r)` on .crt-body never gets
@@ -273,11 +290,19 @@ export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
         />
       </div>
 
-      <button className="crt-pill" onClick={press} aria-expanded={open}>
+      <button
+        type="button"
+        className="crt-pill"
+        onClick={press}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={rail ? "Start or join a crew" : undefined}
+        title={rail ? "Start or join a crew" : undefined}
+      >
         <span className="crt-glyph" aria-hidden="true">
-          <Plus size={16} strokeWidth={2} />
+          <Plus size={rail ? 18 : 16} strokeWidth={2} />
         </span>
-        <span className="crt-say" style={{ width: sayW || undefined }}>
+        <span className="crt-say" style={{ width: rail ? 0 : sayW || undefined }} aria-hidden={rail || undefined}>
           <span ref={say}>Create</span>
         </span>
       </button>
@@ -285,9 +310,10 @@ export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
       <div className="crt-panel">
         {/* each row lights its own wash — see .crt-item button::before;
             nothing travels between them */}
-        <ul className="crt-menu">
+        <ul className="crt-menu" role="menu" aria-label="Start or join a crew">
           {ITEMS.map((it, i) => (
             <li
+              role="none"
               className="crt-item"
               key={it.label}
               /* tightened with the shell. The last row used to
@@ -297,6 +323,9 @@ export function CreateMenu({ corner = CRT_CORNER }: { corner?: number } = {}) {
               style={{ transitionDelay: open ? `${30 + i * 22}ms` : "0ms" }}
             >
               <button
+                type="button"
+                role="menuitem"
+                tabIndex={open ? 0 : -1}
                 onClick={() => { setOpen(false); router.push(it.href); }}
               >
                 <it.icon size={16} strokeWidth={2} />

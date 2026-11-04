@@ -166,6 +166,7 @@ function toFeedItem(c: CheckIn): FeedItem {
     skill: db().groups.find((g) => g.id === c.group_id)?.skill_kind ?? 'other',
     milestone: milestoneOf(c),
     photoUrl: c.photo_url,
+    with: (c.with_user_ids ?? []).map(personOf),
   }
 }
 
@@ -892,6 +893,10 @@ export function insertCheckIn(userId: UUID, input: CheckInInput): FeedItem {
     details: cleanDetails(input.details),
     source: input.source === 'strava' ? 'strava' : 'manual',
     photo_url: input.photoUrl ?? null,
+    // Only crewmates, never yourself, at most six.
+    with_user_ids: Array.from(new Set(input.with ?? []))
+      .filter((id) => id !== userId && isMember(id, input.groupId))
+      .slice(0, 6),
     created_at: nowIso(),
     deleted_at: null,
   }

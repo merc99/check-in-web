@@ -36,7 +36,14 @@ export function simulateArrival(activeGroupId?: string | null): boolean {
   if (!waiting.length) return false
   const [note, tags] = pick(NOTES[groupId] ?? NOTES._)
   const crewTags = new Set(t.tags.filter((x) => x.group_id === groupId && !x.deleted_at).map((x) => x.name))
-  insertCheckIn(pick(waiting), { groupId, note, tags: tags.filter((name) => crewTags.has(name)) })
+  const who = pick(waiting)
+  // About one in four sessions was done with another crewmate who's already in today ("with Maya").
+  const inToday = t.group_members
+    .filter((m) => m.group_id === groupId && !m.deleted_at && m.user_id !== ME_ID && m.user_id !== who)
+    .map((m) => m.user_id)
+    .filter((uid) => !waiting.includes(uid))
+  const withIds = inToday.length && Math.random() < 0.25 ? [pick(inToday)] : []
+  insertCheckIn(who, { groupId, note, tags: tags.filter((name) => crewTags.has(name)), with: withIds })
   return true
 }
 

@@ -197,7 +197,7 @@ export default function FeedPage() {
     const firstToday = !stats.data?.checkedInToday
     const unlockedBefore = new Set(achievements.data?.filter((a) => a.unlocked).map((a) => a.key))
     try {
-      const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags, details: draft.details, source: draft.source, photoUrl: draft.photoUrl })
+      const item = await checkIn({ groupId: g.id, note: draft.note, tags: draft.tags, details: draft.details, source: draft.source, photoUrl: draft.photoUrl, with: draft.with })
       const [after, earned] = await Promise.all([getMyStats(), getAchievements()])
       setCheckInOpen(false)
       // The celebration (fx, D2): a burst from whichever check-in button is on screen
@@ -407,6 +407,7 @@ export default function FeedPage() {
         onClose={() => setCheckInOpen(false)}
         group={g}
         tags={g.tags.map((t) => t.name)}
+        crewmates={g.members.filter((m) => !m.isMe).map((m) => ({ id: m.person.id, name: m.person.name, color: m.person.color, note: m.inToday ? 'In today' : m.streak ? `${m.streak}-day streak` : 'Not in yet' }))}
         onSubmit={submit}
       />
       <CrewSwitcherSheet

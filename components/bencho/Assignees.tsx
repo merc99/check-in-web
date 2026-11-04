@@ -2,7 +2,7 @@
 
 // Pattern: Bencho / Assignees (adapted to Check-in tokens). MIT, bencho.dev/licence
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 
@@ -40,15 +40,15 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
    size rather than off the thumbnails: two men, two women. */
 /* Check-in: the demo crew, as their initials on their own
    colours (the demo has no photos) */
-const CAST = [
+/** One person in the list: a name, a line under it, and their colour (a CSS colour, e.g. var(--coral)). */
+export type AssigneePerson = { id: string; name: string; role: string; hue: string };
+const CAST: AssigneePerson[] = [
   { id: "u1", name: "Maya", role: "12-day streak", hue: "var(--coral)" },
   { id: "u3", name: "Priya", role: "21-day streak", hue: "var(--grape)" },
   { id: "u2", name: "Dre", role: "4-day streak", hue: "var(--sky)" },
   { id: "u4", name: "Sam", role: "Back tomorrow", hue: "var(--lemon)" },
 ];
-const who = (id: string) => CAST.find((p) => p.id === id)!;
-function Initial({ id, className }: { id: string; className?: string }) {
-  const p = who(id);
+function Initial({ p, className }: { p: AssigneePerson; className?: string }) {
   return <span className={`pik-initial ${className ?? ""}`} style={{ background: p.hue }}>{p.name[0]}</span>;
 }
 
@@ -113,18 +113,60 @@ export function Assignees({
   overlap = LAP,
   /* "Row" or "Grid" — see quad() above */
   stack = "Row",
+  /* Check-in: real people, a controlled pick, and app behaviour */
+  people = CAST,
+  value,
+  onChange,
+  /* the shelf lands open with two picked; the app starts shut */
+  defaultOpen = true,
+  /* in the app it reserves no box and closes on a press elsewhere or Escape */
+  inline = false,
+  /* what the pill says with nobody picked */
+  empty = "Unassigned",
+  label = "Assignees",
 }: {
   corner?: number;
   overlap?: number;
   stack?: string;
+  people?: AssigneePerson[];
+  value?: string[];
+  onChange?: (ids: string[]) => void;
+  defaultOpen?: boolean;
+  inline?: boolean;
+  empty?: string;
+  label?: string;
 } = {}) {
+  const who = (id: string) => people.find((p) => p.id === id);
   /* open, and with two already chosen. A picker drawn shut is
      a pill with a word in it: true of the component and
      useless as a picture of it. This is the state worth
      landing on — the pill doing its job and the list showing
      why. */
-  const [open, setOpen] = useState(true);
-  const [picked, setPicked] = useState<string[]>(["u1", "u3"]);
+  const [open, setOpen] = useState(defaultOpen);
+  const [own, setOwn] = useState<string[]>(value ?? ["u1", "u3"]);
+  const picked = (value ?? own).filter((id) => who(id));
+  const root = useRef<HTMLDivElement | null>(null);
+
+  /* Check-in: in the app, a press anywhere else or Escape puts it away (see the note below) */
+  useEffect(() => {
+    if (!open || !inline) return;
+    const away = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      setOpen(false);
+      root.current?.querySelector<HTMLButtonElement>(".pik-pill")?.focus();
+    };
+    /* on the window, capturing, so an open list takes Escape before a sheet around it does */
+    document.addEventListener("pointerdown", away);
+    window.addEventListener("keydown", key, true);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      window.removeEventListener("keydown", key, true);
+    };
+  }, [open, inline]);
 
   const r = clamp(corner, 0, 26);
   const lap = clamp(overlap, 0, 22);
@@ -173,15 +215,19 @@ export function Assignees({
      here is the wall, not the pattern. */
 
   const toggle = (id: string) => {
-    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+    const next = picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id];
+    setOwn(next);
+    onChange?.(next);
   };
 
   return (
     <div
+      ref={root}
       className="pik"
+      data-inline={inline || undefined}
       style={{
-        width: W,
-        height: H,
+        width: inline ? undefined : W,
+        height: inline ? undefined : H,
         /* ── concentric, and it follows the knob ───────────
            The row's hover pad was a flat 12 against a card cut
            at 22, which reads squarer than the box holding it.
@@ -198,11 +244,13 @@ export function Assignees({
       } as React.CSSProperties}
     >
       <button
+        type="button"
         className="pik-pill"
         style={{ borderRadius: r }}
         onClick={() => { setOpen((v) => !v); }}
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-label={picked.length ? `${label}: ${picked.map((id) => who(id)!.name).join(", ")}` : `${label}: ${empty}`}
       >
         {/* ── the faces ─────────────────────────────────────
             Absolutely placed inside a rail whose width is the
@@ -233,7 +281,7 @@ export function Assignees({
               <motion.span
                 key={id}
                 className="pik-face"
-                style={{ zIndex: CAST.length - i }}
+                style={{ zIndex: people.length - i }}
                 /* ── a face lands, it does not fade in ──────
                    It drops from slightly above with a turn on
                    it and overshoots on the way to rest, so
@@ -275,7 +323,7 @@ export function Assignees({
                   opacity: { duration: 0.16 },
                 }}
               >
-                <Initial id={id} />
+                <Initial p={who(id)!} />
               </motion.span>
               );
             })}
@@ -290,7 +338,7 @@ export function Assignees({
             verb, and it goes the moment there is a face,
             because a label beside three pictures is the control
             describing itself instead of answering. */}
-        {picked.length === 0 && <span className="pik-say">Unassigned</span>}
+        {picked.length === 0 && <span className="pik-say">{empty}</span>}
 
         <ChevronDown className="pik-chev" size={16} strokeWidth={2} aria-hidden="true" />
       </button>
@@ -302,6 +350,7 @@ export function Assignees({
             style={{ borderRadius: r }}
             role="listbox"
             aria-multiselectable="true"
+            aria-label={label}
             /* ── it unfolds OUT OF the pill ──────────────────
                The origin is the card's top-left, which is the
                pill's own left edge, so it opens down and out
@@ -335,10 +384,11 @@ export function Assignees({
               opacity: { duration: 0.16 },
             }}
           >
-            {CAST.map((p) => {
+            {people.map((p) => {
               const on = picked.includes(p.id);
               return (
                 <motion.button
+                  type="button"
                   key={p.id}
                   className="pik-row"
                   role="option"
@@ -355,10 +405,10 @@ export function Assignees({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
                     type: "spring", stiffness: 380, damping: 34, mass: 0.7,
-                    delay: 0.04 * CAST.indexOf(p) + 0.03,
+                    delay: Math.min(0.24, 0.04 * people.indexOf(p) + 0.03),
                   }}
                 >
-                  <Initial id={p.id} className="pik-av" />
+                  <Initial p={p} className="pik-av" />
                   <span className="pik-who">
                     <span className="pik-name">{p.name}</span>
                     <span className="pik-role">{p.role}</span>

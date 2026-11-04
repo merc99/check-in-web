@@ -136,6 +136,9 @@ export function RollingCounter({
   max = MAX,
   label = "Count",
   onChange,
+  /* Check-in: set from outside (a suggestion, a Strava pick), and how far one press goes */
+  value: outside,
+  step = 1,
 }: {
   bounce?: number;
   stagger?: number;
@@ -146,14 +149,17 @@ export function RollingCounter({
   max?: number;
   label?: string;
   onChange?: (value: number) => void;
+  value?: number;
+  step?: number;
 } = {}) {
   const still = stillness();
-  const [value, setValue] = useState(start);
-  const val = useRef(start);
+  const first = outside ?? start;
+  const [value, setValue] = useState(first);
+  const val = useRef(first);
   const strips = useRef<(HTMLDivElement | null)[]>([]);
   const cols = useRef<Col[]>(
     Array.from({ length: PLACES }, (_, p) => {
-      const n = Math.floor(start / 10 ** p);
+      const n = Math.floor(first / 10 ** p);
       return { pos: n, vel: 0, target: n, due: [], next: [] };
     }),
   );
@@ -212,12 +218,13 @@ export function RollingCounter({
   useEffect(() => () => { cancelAnimationFrame(raf.current); raf.current = 0; }, []);
 
   /* ── the one way the number changes ────────────────────── */
-  const bump = (n: number) => {
-    const v = clamp(val.current + n, min, max);
+  const bump = (n: number) => goto(val.current + n * step, true);
+  const goto = (to: number, tell: boolean) => {
+    const v = clamp(to, min, max);
     if (v === val.current) return;
     val.current = v;
     setValue(v);
-    onChange?.(v);
+    if (tell) onChange?.(v);
     const now = performance.now();
     cols.current.forEach((c, p) => {
       const to = Math.floor(v / 10 ** p);
@@ -234,6 +241,12 @@ export function RollingCounter({
     if (still) paint();
     else run();
   };
+
+  /* Check-in: a value set from outside rolls there too, without echoing back */
+  useEffect(() => {
+    if (outside !== undefined) goto(outside, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outside]);
 
   /* ── holding a button ──────────────────────────────────── */
   const hold = useRef({ t: 0, since: 0 });
