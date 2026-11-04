@@ -16,7 +16,7 @@ import { Card } from '@/components/checkin/Card'
 import { CrewHero } from '@/components/checkin/CrewHero'
 import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import { HeatmapGrid, weekDays } from '@/components/checkin/HeatmapGrid'
-import { CheckIcon, PinIcon } from '@/components/checkin/icons'
+import { CheckIcon } from '@/components/checkin/icons'
 import { useLive } from '@/components/checkin/LivePill'
 import { PostCard } from '@/components/checkin/PostCard'
 import { Reactions } from '@/components/checkin/Reactions'
@@ -283,8 +283,17 @@ export default function FeedPage() {
 
   const items = feed.data ?? []
 
+  const joinRequests = requests.data?.length ? (
+    <JoinRequests
+      requests={requests.data}
+      onPersonTap={setProfileId}
+      onAccept={(r) => act(() => acceptJoinRequest(r.id), `${r.person.name} joined the crew`)}
+      onDecline={(r) => act(() => declineJoinRequest(r.id), 'Request declined')}
+    />
+  ) : null
+
   const hero = (
-    <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} onWave={wave} waved={isWaved} recent={g.recent} />
+    <CrewHero key={g.id} color={g.color} members={g.members} arrivedId={arrivedId} onPersonTap={setProfileId} onWave={wave} waved={isWaved} recent={g.recent} requests={joinRequests} />
   )
 
   return (
@@ -298,14 +307,7 @@ export default function FeedPage() {
       <FeedHeader
         group={g}
         onSwitch={() => setSwitcherOpen(true)}
-        requests={
-          <JoinRequests
-            requests={requests.data ?? []}
-            onPersonTap={setProfileId}
-            onAccept={(r) => act(() => acceptJoinRequest(r.id), `${r.person.name} joined the crew`)}
-            onDecline={(r) => act(() => declineJoinRequest(r.id), 'Request declined')}
-          />
-        }
+        pinned={g.pinnedMessage}
         today={
           !desktop && (
             <TodayStrip
@@ -318,6 +320,7 @@ export default function FeedPage() {
               onWave={wave}
               waved={isWaved}
               recent={g.recent}
+              requests={joinRequests}
             />
           )
         }
@@ -326,13 +329,6 @@ export default function FeedPage() {
       />
 
 
-      {g.pinnedMessage && (
-        // A note pinned to the crew: a quiet row, the pin in muted ink.
-        <div className="mt-3 flex items-start gap-3 rounded-lg border bg-card px-4 py-3 text-[14px] edge-lit">
-          <PinIcon size={16} className="mt-[2px] flex-none text-muted-foreground" />
-          <p>{g.pinnedMessage}</p>
-        </div>
-      )}
 
       {items.length === 0 ? (
         <div className="px-2 py-10 text-center">

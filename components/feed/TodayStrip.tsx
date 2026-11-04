@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { burstFrom } from '@/components/fx/burst'
 import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import type { Hue } from '@/lib/colors'
@@ -21,7 +21,7 @@ const SHOWN = 6
  * Closed: a sticker per member and "n/total". Open: the brand line, the last 14 days and the bar.
  */
 export function TodayStrip({
-  groupId, color, members, arrivedId, onPersonTap, onWave, waved, recent,
+  groupId, color, members, arrivedId, onPersonTap, onWave, waved, recent, requests,
 }: {
   groupId: string
   color: Hue
@@ -31,6 +31,8 @@ export function TodayStrip({
   onWave?: (id: string) => void
   waved?: (id: string) => boolean
   recent?: number[]
+  /** Join requests (owners): a row under the stickers, always in view. */
+  requests?: ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const panel = useId()
@@ -105,6 +107,8 @@ export function TodayStrip({
           </span>
         </button>
       </div>
+
+      {requests && <div className="mt-2 empty:hidden">{requests}</div>}
 
       {/* Opens by height (grid rows 0fr → 1fr), so nothing below jumps. */}
       <div id={panel} className={cn('grid transition-[grid-template-rows,opacity] duration-200 ease-out', open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')} inert={!open}>

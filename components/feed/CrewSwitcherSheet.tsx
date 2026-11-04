@@ -1,14 +1,22 @@
 'use client'
 
+import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/checkin/Button'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
+import { CrewCover } from '@/components/checkin/CrewCover'
+import { crewTint } from '@/components/checkin/CrewTint'
 import { CheckIcon, PlusIcon } from '@/components/checkin/icons'
-import { List, listRow } from '@/components/checkin/List'
 import { afterSheetClose, ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
+import { HUE_CLASS } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import type { GroupSummary } from '@/lib/data'
 
+/**
+ * Your crews, each as a small copy of its feed header card (its hue, cover pattern and emoji tile),
+ * so you pick the crew you recognise. The one you're in has an outline in its hue and says
+ * "You're here"; the others say "Open" with an arrow.
+ */
 export function CrewSwitcherSheet({
   open, onClose, groups, activeId, onPick,
 }: {
@@ -29,30 +37,47 @@ export function CrewSwitcherSheet({
       detents={[0.6, 0.92]}
     >
       <div className="flex flex-col gap-4">
-        <List>
+        <ul className="flex flex-col gap-3">
           {groups.map((g) => {
             const active = g.id === activeId
+            const t = crewTint(g.color)
             return (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => onPick(g.id)}
-                aria-current={active ? 'true' : undefined}
-                className={cn(listRow, active && 'bg-muted')}
-              >
-                <CrewBlock name={g.name} color={g.color} emoji={g.emoji} />
-                <span className="min-w-0 flex-1">
-                  <b>{g.name}</b>
-                  <br />
-                  <span className="tnum text-[13px] text-muted-foreground">
-                    {g.inToday} of {g.memberCount} in today
+              <li key={g.id}>
+                <button
+                  type="button"
+                  onClick={() => (active ? onClose() : onPick(g.id))}
+                  aria-current={active ? 'true' : undefined}
+                  className={cn(
+                    t.className,
+                    'flex w-full items-center gap-3 rounded-xl p-3 text-left transition-[transform,border-color] duration-150 ease-out active:scale-[.98]',
+                    active
+                      ? 'outline-2 outline-offset-2 outline-(--hue)'
+                      : '[@media(hover:hover)]:hover:border-(--hue)',
+                  )}
+                  style={t.style}
+                >
+                  <CrewCover pattern={g.pattern} className="text-(--hue) opacity-25" />
+                  <CrewBlock name={g.name} color={g.color} emoji={g.emoji} className={cn('relative', HUE_CLASS[g.color].solid, 'text-on-color')} />
+                  <span className="relative min-w-0 flex-1">
+                    <span className="block truncate text-[16px] font-medium">{g.name}</span>
+                    <span className="mt-0.5 block font-mono text-[12px] text-muted-foreground">
+                      <span className="tnum text-foreground">{g.inToday}</span> of <span className="tnum">{g.memberCount}</span> in today
+                    </span>
                   </span>
-                </span>
-                {active && <CheckIcon size={18} />}
-              </button>
+                  {active ? (
+                    <span className="relative inline-flex flex-none items-center gap-1.5 rounded-full bg-foreground py-1 pl-2 pr-3 text-[12px] font-medium text-background">
+                      <CheckIcon size={13} /> You’re here
+                    </span>
+                  ) : (
+                    <span className="relative inline-flex flex-none items-center gap-0.5 text-[13px] font-medium text-muted-foreground">
+                      Open <ChevronRight size={16} aria-hidden="true" />
+                    </span>
+                  )}
+                </button>
+              </li>
             )
           })}
-        </List>
+        </ul>
         <Button
           block
           onClick={() => {

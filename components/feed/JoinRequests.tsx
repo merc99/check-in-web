@@ -8,9 +8,9 @@ import type { JoinRequestItem } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 /**
- * People asking to join, as a small pill in the crew header (only the crew's owner gets requests):
- * their faces and a count. It opens a list where each request is accepted or declined in place.
- * The pill goes away with the last request.
+ * People asking to join, as a dashed row in the "In today" card (only the crew's owner gets requests):
+ * their faces and "Jordan wants to join · Review". It opens a list where each request is accepted or
+ * declined in place. The row goes away with the last request.
  */
 export function JoinRequests({
   requests, onAccept, onDecline, onPersonTap,
@@ -28,14 +28,13 @@ export function JoinRequests({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        aria-label={`${n} ${n === 1 ? 'person wants' : 'people want'} to join`}
         className={cn(
-          'hit-44 inline-flex h-[42px] flex-none items-center gap-[6px] rounded-full border bg-card pl-[5px] pr-3 edge-lit sm:pr-2',
-          'transition-[transform,background-color,border-color] duration-150 ease-out hover:border-border-strong hover:bg-muted active:scale-[.97]',
-          open && 'border-border-strong bg-muted',
+          'flex w-full items-center gap-3 rounded-lg border border-dashed border-border-strong px-3 py-2 text-left',
+          'transition-[background-color,border-color] duration-150 ease-out hover:bg-muted',
+          open && 'bg-muted',
         )}
       >
-        <span className="flex">
+        <span className="flex flex-none">
           {faces.map((r, i) => (
             <Avatar
               key={r.id}
@@ -43,17 +42,22 @@ export function JoinRequests({
               color={r.person.color}
               photoUrl={r.person.photoUrl}
               size="sm"
-              // Phones show one face, so the crew name keeps its room.
-              className={cn('ring-2 ring-card', i > 0 && '-ml-3 hidden sm:grid')}
+              className={cn('ring-2 ring-card', i > 0 && '-ml-3')}
             />
           ))}
         </span>
-        <span className="tnum text-[13px] font-medium">{n}</span>
-        <ChevronDown
-          size={15}
-          aria-hidden="true"
-          className={cn('hidden text-muted-foreground transition-transform duration-150 ease-out sm:block', open && 'rotate-180')}
-        />
+        <span className="min-w-0 flex-1 truncate text-[13px]">
+          <span className="font-medium">{n === 1 ? requests[0].person.name : `${n} people`}</span>
+          <span className="text-muted-foreground"> {n === 1 ? 'wants' : 'want'} to join</span>
+        </span>
+        <span className="inline-flex flex-none items-center gap-1 text-[13px] font-medium">
+          Review
+          <ChevronDown
+            size={15}
+            aria-hidden="true"
+            className={cn('text-muted-foreground transition-transform duration-150 ease-out', open && 'rotate-180')}
+          />
+        </span>
       </PopoverTrigger>
 
       <PopoverContent aria-label="Join requests">
