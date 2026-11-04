@@ -301,6 +301,15 @@ export interface MyStats {
   days: LocalDate[]
 }
 
+/** Your year for the YearActivity card: check-ins per day and per crew this calendar year. */
+export interface MyYear {
+  year: number
+  /** Check-ins per local date, per crew id. */
+  byDay: Record<LocalDate, Record<UUID, number>>
+  /** Your crews, most check-ins this year first. */
+  crews: { id: UUID; name: string; color: Hue; emoji: string | null; count: number }[]
+}
+
 export interface RecentCheckIn {
   id: UUID
   group: { id: UUID; name: string; color: Hue }

@@ -24,6 +24,7 @@ export {
   getMyInsights,
   getMyRecentCheckIns,
   getMyStats,
+  getMyYear,
   getMySkills,
   getSkillsOf,
   getBinder,

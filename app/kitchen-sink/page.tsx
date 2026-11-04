@@ -13,6 +13,7 @@ import { useLive } from '@/components/checkin/LivePill'
 import { SectionTitle } from '@/components/checkin/SectionTitle'
 import { CrewBlock } from '@/components/checkin/CrewBlock'
 import { CrewCover } from '@/components/checkin/CrewCover'
+import { YearActivity, demoYearActivity } from '@/components/checkin/YearActivity'
 import { MemberSticker } from '@/components/checkin/MemberSticker'
 import { SessionDetails } from '@/components/checkin/SessionDetails'
 import { TierCard, TierMedal } from '@/components/checkin/TierCard'
@@ -54,6 +55,7 @@ export default function KitchenSink() {
   const [mode, setMode] = useState<'create' | 'join'>('create')
   const [tab, setTab] = useState<TabKey>('feed')
   const [selected, setSelected] = useState<Set<string>>(() => new Set(['leg day']))
+  const [yearDemo] = useState(() => demoYearActivity())
   const [heatRun, setHeatRun] = useState(0)
   const [note, setNote] = useState('')
 
@@ -324,6 +326,10 @@ export default function KitchenSink() {
             </Button>
           </div>
         </Card>
+      </Section>
+
+      <Section title="Year activity" note="the year · top crews · hover or arrow keys">
+        <YearActivity {...yearDemo} className="max-w-[340px]" />
       </Section>
 
       <Section title="Overlays" note="sheet · arc sheet · toast · live pill">
