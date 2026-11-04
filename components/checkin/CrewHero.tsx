@@ -104,7 +104,7 @@ export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved
       <div aria-hidden="true" className="mt-4 flex gap-1">
         {members.map((m, i) => (
           <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
-            <span className={cn('absolute inset-0 origin-left bg-primary transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />
+            <span className={cn('absolute inset-0 origin-left bg-primary shadow-[inset_0_0_0_1px_var(--primary-ink)] transition-transform duration-200 ease-out dark:shadow-none', i < n ? 'scale-x-100' : 'scale-x-0')} />
           </span>
         ))}
       </div>

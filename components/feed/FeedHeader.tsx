@@ -56,7 +56,7 @@ export function FeedHeader({
           tabIndex={collapsed ? 0 : -1}
           aria-hidden={!collapsed}
           className={cn(
-            'inline-flex min-w-0 items-center gap-2 px-1 py-2 text-[16px] font-medium transition-[opacity,transform] duration-200 ease-out',
+            'hit-44 inline-flex min-w-0 items-center gap-2 px-1 py-2 text-[16px] font-medium transition-[opacity,transform] duration-200 ease-out',
             collapsed ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
           )}
         >

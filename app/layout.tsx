@@ -13,7 +13,10 @@ const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', dis
 // Wordmark: Satoshi Black (Fontshare, free for commercial use), only for "check-in" in the logo.
 const wordmark = localFont({ src: './fonts/Satoshi-Black.woff2', weight: '900', variable: '--font-satoshi', display: 'swap' })
 
-export const metadata: Metadata = { title: 'Check-in', description: 'No shame days, just show up.' }
+export const metadata: Metadata = {
+  title: { default: 'Check-in', template: '%s · Check-in' },
+  description: 'No shame days, just show up.',
+}
 
 export const viewport: Viewport = {
   width: 'device-width',

@@ -85,7 +85,8 @@ export function TodayStrip({
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls={panel}
-          className="inline-flex items-center gap-2 rounded-full py-1 pl-2 pr-1 transition-colors duration-150 ease-out hover:bg-muted"
+          aria-label={`${n} of ${total} in today${allIn ? ', all in' : ''}. Details`}
+          className="hit-44 inline-flex items-center gap-2 rounded-full py-1 pl-2 pr-1 transition-colors duration-150 ease-out hover:bg-muted"
         >
           <span className="tnum inline-flex items-baseline whitespace-nowrap text-[22px] font-medium leading-none">
             <RollingCount n={n} tight label={`${n} of ${total} in today`} />
@@ -135,7 +136,7 @@ export function TodayStrip({
           <div aria-hidden="true" className="mt-3 flex gap-1 px-1 pb-1">
             {members.map((m, i) => (
               <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                <span className={cn('absolute inset-0 origin-left bg-primary transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />
+                <span className={cn('absolute inset-0 origin-left bg-primary shadow-[inset_0_0_0_1px_var(--primary-ink)] transition-transform duration-200 ease-out dark:shadow-none', i < n ? 'scale-x-100' : 'scale-x-0')} />
               </span>
             ))}
           </div>

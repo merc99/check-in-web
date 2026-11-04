@@ -91,7 +91,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             type="button"
             onClick={() => onPersonTap(item.user.id)}
             aria-label={`View ${item.user.name}`}
-            className="rounded-full transition-transform duration-150 ease-out active:scale-[.97]"
+            className="hit-44 rounded-full transition-transform duration-150 ease-out active:scale-[.97]"
           >
             {avatar}
           </button>
