@@ -446,6 +446,10 @@ export interface MyInsights {
   weeks: number[]
   /** All-time check-ins in each crew you're in, most first. */
   byCrew: { id: UUID; name: string; color: Hue; count: number }[]
+  /** Your check-ins per day for the last 30 days (oldest first), counted per crew in `byCrew` order. */
+  daily: { date: string; counts: number[] }[]
+  /** The same per week (Monday start) for the last 20 weeks. */
+  weekly: { start: string; counts: number[] }[]
   /** Everyone in your crews, by current streak (any crew), then all-time count. */
   leaderboard: { person: Person; isMe: boolean; streak: number; total: number }[]
   thisMonth: number

@@ -608,6 +608,17 @@ export async function getMyInsights(): Promise<MyInsights> {
   const byCrew = crews
     .map((g) => ({ id: g.id, name: g.name, color: g.color, count: mine.filter((c) => c.group_id === g.id).length }))
     .sort((a, b) => b.count - a.count)
+  const per = (from: string, to: string) =>
+    byCrew.map((g) => mine.filter((c) => c.group_id === g.id && c.local_date >= from && c.local_date < to).length)
+  const today = startOfDay(now)
+  const daily = Array.from({ length: 30 }, (_, i) => {
+    const d = addDays(today, i - 29)
+    return { date: localDate(d), counts: per(localDate(d), localDate(addDays(d, 1))) }
+  })
+  const weekly = Array.from({ length: 20 }, (_, i) => {
+    const d = addDays(monday, (i - 19) * 7)
+    return { start: localDate(d), counts: per(localDate(d), localDate(addDays(d, 7))) }
+  })
   const people = new Set(crews.flatMap((g) => membersOf(g.id).map((m) => m.user_id)))
   const leaderboard = Array.from(people)
     .map((uid) => ({ person: personOf(uid), isMe: uid === ME_ID, streak: currentStreak(daysOf(uid)), total: checkInsOf((c) => c.user_id === uid).length }))
@@ -618,6 +629,8 @@ export async function getMyInsights(): Promise<MyInsights> {
   return {
     weeks,
     byCrew,
+    daily,
+    weekly,
     leaderboard,
     thisMonth: mine.filter((c) => c.local_date.startsWith(thisMonth)).length,
     lastMonth: mine.filter((c) => c.local_date.startsWith(lastMonth)).length,

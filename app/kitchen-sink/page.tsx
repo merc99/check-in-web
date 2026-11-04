@@ -27,6 +27,7 @@ import { Sheet } from '@/components/checkin/Sheet'
 import { TabBar, type TabKey } from '@/components/checkin/TabBar'
 import { useToast } from '@/components/checkin/Toast'
 import { AVATAR_HUES } from '@/lib/colors'
+import { BenchoShelf } from './BenchoShelf'
 import { DataCheck } from './DataCheck'
 
 const VARIANTS = ['primary', 'brand', 'secondary', 'danger'] as const
@@ -303,6 +304,8 @@ export default function KitchenSink() {
           </Button>
         </div>
       </Section>
+
+      <BenchoShelf />
 
       <Section title="Mock data" note="lib/data">
         <DataCheck />

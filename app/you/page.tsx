@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
+import { CrewDays } from '@/components/you/CrewDays'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
 import { StatsGrid } from '@/components/you/StatsGrid'
@@ -213,6 +214,8 @@ export default function YouPage() {
           <>
             <SectionTitle title="Crew streaks" />
             <CrewLeaderboard rows={insights.data.leaderboard} onPersonTap={setProfileId} />
+            <SectionTitle title="Your days" note="by crew" />
+            <CrewDays insights={insights.data} />
             <SectionTitle title="Where your check-ins go" />
             <CrewDonut crews={insights.data.byCrew} />
           </>

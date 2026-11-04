@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css"; /* installed by `shadcn init`; shadcn components rely on it */
 @import "shadcn/tailwind.css"; /* project: data-open / data-closed / data-active variants the installed primitives use */
+@import "./bencho.css"; /* Bencho components, adapted to our tokens (components/bencho) */
 
 /* Dark mode is class-based (next-themes puts .dark on <html>). */
 @custom-variant dark (&:where(.dark, .dark *));

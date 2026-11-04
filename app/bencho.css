@@ -1,0 +1,1952 @@
+/* Bencho components (MIT, bencho.dev/licence), adapted to Check-in tokens: their slab is our card,
+   their ink our foreground, their UI font Geist, their signal our focus ring. Colours they hardcoded
+   are mapped to our hues; see each block. Used by components/bencho. */
+
+/* ═════ Context meter ═════ */
+
+/* ══ Context meter ════════════════════════════════════════
+   lab/ContextMeter.tsx. A slab card: a head, a rolling figure, a
+   field of dots filled column by column, chips for the kinds, and a
+   foot with the room left and Compact. Each kind is a strength of
+   the ink, strongest first; the empty room is a faint wash */
+.ctx {
+  --ctx-empty: color-mix(in srgb, var(--foreground) 8%, var(--card));
+  /* the cool half of the wheel only, rose round through blue to green:
+     no orange or yellow, so the set stays one family, but each step is
+     a clear jump in hue so no two kinds can be mistaken */
+  /* Check-in: five of our crew hues, cool half first, so it changes with light and dark */
+  --k-sys: var(--rose);
+  --k-tools: var(--grape);
+  --k-files: var(--sky);
+  --k-chat: var(--leaf);
+  --k-mem: var(--lemon);
+  /* 20 dots of 11 on a 3px gap, plus the padding */
+  width: 309px;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;}
+
+.ctx-head { display: flex; justify-content: space-between; align-items: center; }
+
+.ctx-title { font-size: 16px; line-height: 20px; font-weight: 500; letter-spacing: -0.01em; }
+
+.ctx-figure { display: flex; align-items: baseline; gap: 6px; margin: 12px 0 16px; }
+
+.ctx-num { position: relative; font-size: 30px; line-height: 32px; font-weight: 500; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+
+/* the odometer: each digit a wheel, a window one line tall */
+.ctx-roll { display: flex; line-height: 1; }
+
+.ctx-wheel { position: relative; display: inline-block; height: 1.15em; overflow: hidden; }
+
+.ctx-digit { display: block; line-height: 1.15em; }
+
+.ctx-sym { line-height: 1.15em; }
+
+/* the figure in words, for anyone not watching it roll */
+.ctx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.ctx-of { font-size: 13px; color: color-mix(in srgb, var(--foreground) 52%, var(--card)); }
+
+/* the field: filled down each column, then across */
+.ctx-grid {
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: center;}
+
+.ctx-dot {
+  display: block;
+  border-radius: 2px;
+  background: var(--ctx-empty);
+  transition: background-color 260ms ease, opacity 220ms ease, scale 260ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+/* a dot changing kind never blends two colours: one solid colour grows
+   over the other, from nothing to the full dot. Filling, the new colour
+   grows in over the old; draining, the old colour shrinks away and leaves
+   the empty dot behind it */
+.ctx-dot[data-swap] { position: relative; }
+
+.ctx-dot[data-swap]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* short, so the whole swap is done by the sound's knock */
+  animation: 340ms cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  animation-delay: inherit;}
+
+.ctx .ctx-dot[data-swap="fill"] { background: var(--was); }
+
+.ctx-dot[data-swap="fill"]::after { background: var(--now); animation-name: ctx-grow; }
+
+.ctx-dot[data-swap="drain"]::after { background: var(--was); animation-name: ctx-shrink; animation-timing-function: cubic-bezier(0.55, 0, 0.75, 0.4); animation-duration: 240ms; }
+
+/* the field gives under the press, the bar's squeeze in both axes:
+   down to its floor at 38% of 760, on the sound's knock, a touch past
+   on the way back. a/b flips per press so the keyframes restart */
+.ctx-grid[data-wave="a"] { animation: ctx-press-a 760ms cubic-bezier(0.33, 0, 0.2, 1) both; }
+
+.ctx-grid[data-wave="b"] { animation: ctx-press-b 760ms cubic-bezier(0.33, 0, 0.2, 1) both; }
+
+/* mono: the kinds as strengths of the ink, strongest first */
+.ctx[data-mono] {
+  --k-sys: var(--foreground);
+  --k-tools: color-mix(in srgb, var(--foreground) 76%, var(--card));
+  --k-files: color-mix(in srgb, var(--foreground) 54%, var(--card));
+  --k-chat: color-mix(in srgb, var(--foreground) 36%, var(--card));
+  --k-mem: color-mix(in srgb, var(--foreground) 22%, var(--card));}
+
+.ctx-dot[data-kind="sys"] { background: var(--k-sys); }
+
+.ctx-dot[data-kind="tools"] { background: var(--k-tools); }
+
+.ctx-dot[data-kind="files"] { background: var(--k-files); }
+
+.ctx-dot[data-kind="chat"] { background: var(--k-chat); }
+
+.ctx-dot[data-kind="mem"] { background: var(--k-mem); }
+
+/* the bar style: one stacked bar, a segment per kind and the room
+   left as a faint tail; widths ease, so Compact slides the chat down */
+.ctx-bar { display: flex; gap: 3px; height: 40px; }
+
+.ctx-seg {
+  display: block;
+  min-width: 3px;
+  flex-basis: 0;
+  border-radius: 6px;
+  /* the width is a real flex-grow transition, so the corners stay
+     true; slow out of the gate and long to settle, a fold not a cut */
+  transition:
+    flex-grow 820ms cubic-bezier(0.65, 0, 0.2, 1),
+    opacity 220ms ease;}
+
+/* the squeeze: the chat gives as it folds, and a softer give runs
+   down the bar after it. Two names so each press restarts it */
+.ctx-bar[data-wave="a"] .ctx-seg:not(.ctx-seg-room) { animation: ctx-give-a 760ms var(--ctx-wave, 0ms) cubic-bezier(0.33, 0, 0.2, 1) both; }
+
+.ctx-bar[data-wave="b"] .ctx-seg:not(.ctx-seg-room) { animation: ctx-give-b 760ms var(--ctx-wave, 0ms) cubic-bezier(0.33, 0, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ctx-seg { transition-duration: 1ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctx-bar[data-wave] .ctx-seg { animation: none; }
+}
+
+.ctx-seg[data-kind="sys"] { background: var(--k-sys); }
+
+.ctx-seg[data-kind="tools"] { background: var(--k-tools); }
+
+.ctx-seg[data-kind="files"] { background: var(--k-files); }
+
+.ctx-seg[data-kind="chat"] { background: var(--k-chat); }
+
+.ctx-seg[data-kind="mem"] { background: var(--k-mem); }
+
+.ctx-seg-room { background: color-mix(in srgb, var(--foreground) 8%, var(--card)); }
+
+.ctx-seg[data-dim] { opacity: 0.22; }
+
+/* pointing at a kind: it holds, the rest fall back */
+/* only the fade: growing the lit dots ate into the 3px gaps and the
+   grid stopped being an even grid */
+.ctx-dot[data-dim] { opacity: 0.22; }
+
+.ctx-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+
+.ctx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 6%, var(--card));
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: default;
+  transition: background-color 160ms ease, scale 260ms cubic-bezier(0.34, 1.56, 0.64, 1);}
+
+/* the chip gives a little under the pointer; keyed to data-on rather than
+   :hover, so hovering a kind in the field presses its chip too */
+.ctx-chip[data-on] { background: color-mix(in srgb, var(--foreground) 12%, var(--card)); scale: 0.975; }
+
+.ctx-chip:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+.ctx-swatch { display: block; width: 8px; height: 8px; border-radius: 2px; }
+
+.ctx-swatch[data-kind="sys"] { background: var(--k-sys); }
+
+.ctx-swatch[data-kind="tools"] { background: var(--k-tools); }
+
+.ctx-swatch[data-kind="files"] { background: var(--k-files); }
+
+.ctx-swatch[data-kind="chat"] { background: var(--k-chat); }
+
+.ctx-swatch[data-kind="mem"] { background: var(--k-mem); }
+
+.ctx-act {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  /* on a light card a solid black pill shouts over the meter it acts
+     on: a firm grey wash with ink words instead. A dark card keeps
+     the solid pill, where white on near-black reads calm */
+  background: color-mix(in srgb, var(--foreground) 10%, var(--card));
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: scale 240ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, color 220ms ease;}
+
+.dark .ctx-act:not([data-quiet]) { background: var(--foreground); color: var(--card); }
+
+/* Undo is the way back, not the action: quieter than Compact in either
+   fill — a fainter wash, and on a light card muted words */
+.ctx-act[data-quiet] {
+  background: color-mix(in srgb, var(--foreground) 5%, var(--card));
+  color: color-mix(in srgb, var(--foreground) 64%, var(--card));}
+
+.dark .ctx-act[data-quiet] {
+  background: color-mix(in srgb, var(--foreground) 8%, var(--card));
+  color: var(--foreground);}
+
+.ctx-act:active { scale: 0.96; }
+
+.ctx-act:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ctx-dot { transition-duration: 1ms; transition-delay: 0ms !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctx-grid[data-wave] { animation: none; }
+}
+
+@keyframes ctx-grow { from { scale: 0; } to { scale: 1; } }
+
+@keyframes ctx-press-a { 0%, 100% { scale: 1; } 38% { scale: 0.965; } 72% { scale: 1.01; } }
+
+@keyframes ctx-press-b { 0%, 100% { scale: 1; } 38% { scale: 0.965; } 72% { scale: 1.01; } }
+
+@keyframes ctx-shrink { from { scale: 1; } to { scale: 0; } }
+
+@keyframes ctx-give-a { 0%, 100% { scale: 1 1; } 38% { scale: 1 var(--ctx-give, 0.93); } 72% { scale: 1 1.03; } }
+
+@keyframes ctx-give-b { 0%, 100% { scale: 1 1; } 38% { scale: 1 var(--ctx-give, 0.93); } 72% { scale: 1 1.03; } }
+
+/* ═════ Rolling counter ═════ */
+
+/* ══ Rolling counter ═════════════════════════════════════ */
+.rct {
+  font-family: var(--font-sans);
+  /* positioned so the canvas's grab halo does not paint over
+     the buttons — see the note on .gen */
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  /* 5px round each key — above, below and at the box's end —
+     and the corner is the box's less that same 5, so the keys
+     sit concentric in it at any Corner */
+  padding: 5px;
+  border-radius: var(--rct-r);
+  background: var(--card);
+  /* Check-in: a hairline, like every card here */
+  box-shadow: 0 0 0 1px var(--border);
+  color: var(--foreground);}
+
+.rct-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: var(--rct-cell);
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rct-in);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--card));
+  color: inherit;
+  cursor: pointer;
+  transition: scale 200ms cubic-bezier(0.3, 0.9, 0.4, 1), background-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;}
+
+.rct-btn:hover { background: color-mix(in srgb, var(--foreground) 10%, var(--card)); }
+
+.rct-btn:active { scale: 0.9; transition-duration: 110ms; }
+
+.rct-btn:focus-visible, .rct-num:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ring);}
+
+/* the number hugs its digits and the buttons hug the number:
+   a column arriving or leaving animates its own width, so the
+   pill grows and shrinks with the count rather than keeping
+   room for five digits it is not showing */
+.rct-num {
+  display: flex;
+  justify-content: center;
+  padding: 0 14px;
+  height: var(--rct-cell);
+  font-size: 30px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: var(--rct-cell);
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  border-radius: 8px;
+  /* rolling digits fade at the window's top and bottom edge */
+  mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);}
+
+.rct-pair { display: flex; }
+
+.rct-col {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  height: var(--rct-cell);
+  transition: width 320ms cubic-bezier(0.3, 1.2, 0.4, 1), opacity 220ms ease;}
+
+.rct-col[data-on] { width: 0.64em; opacity: 1; }
+
+.rct-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;}
+
+.rct-strip > span { height: var(--rct-cell); }
+
+.rct-sep {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width 320ms cubic-bezier(0.3, 1.2, 0.4, 1), opacity 220ms ease;}
+
+.rct-sep[data-on] { width: 0.26em; opacity: 1; }
+
+/* ═════ Card swap ═════ */
+
+/* ══ Card swap ════════════════════════════════════════════
+   lab/CardSwap.tsx. A stack in depth; each card's slot arrives as
+   --t. Cards are the slab, a title row and a photo with a concentric
+   corner. No shadows: depth is the stack and a hairline edge */
+.csw {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;}
+
+.csw-stage {
+  position: absolute;
+  left: 30px;
+  bottom: 24px;
+  /* flat, so paint order is the z-index: a card sent back goes behind
+     at once. The origin is the block's middle, where it was on .csw */
+  perspective: 1000px;
+  perspective-origin: 150px 95px;}
+
+/* a card is a photo in a thin slab frame, its corner concentric
+   with the photo's, and a solid label pill in the corner */
+.csw-card {
+  position: absolute;
+  inset: 0;
+  padding: 3px;
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 12%, transparent);
+  transform: var(--t);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  backface-visibility: hidden;}
+
+.csw-card[data-front] { cursor: grab; touch-action: none; }
+
+.csw-card[data-front]:active { cursor: grabbing; }
+
+.csw-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 17px;
+  pointer-events: none;}
+
+.csw-tag {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;}
+
+/* ═════ Dynamic island ═════ */
+
+/* ══ Dynamic island ══════════════════════════════════════
+   See lab/Island.tsx. The frame is sized to the largest the
+   island opens to, so the wall never rescales it mid-morph;
+   the pill sits in its middle and grows out from there. */
+.dyn {
+  width: 300px;
+  height: 182px;
+  padding: 16px 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;}
+
+/* centred in the block, so it grows out from its middle */
+.dyn-top {
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;}
+
+.dyn-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;}
+
+.dyn-in {
+  position: absolute;
+  inset: 0;
+  display: flex;}
+
+.dyn-compact,
+.dyn-open {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;}
+
+/* shut: one mark at each end, the middle left dark for the
+   camera, as on the real one */
+.dyn-compact { justify-content: space-between; padding: 0 12px 0 12px; }
+
+.dyn-open { padding: 0 16px; gap: 12px; }
+
+.dyn-open[data-kind="Music"] { padding: 16px 20px; align-items: stretch; }
+
+.dyn-num {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0em;}
+
+.dyn-amber { color: var(--lemon); }
+
+/* the bright green phones use on black, as the cyan is: the system's
+   #1f9d55 is tuned for a white ground and goes dull on the island.
+   The white island keeps #1f9d55 (below). A deliberate exception to
+   the system's status green: apply-system.mjs snaps it back, so put
+   it back after any Press run */
+.dyn-green { color: var(--primary); }
+
+.dyn-amber-bg { background: color-mix(in srgb, var(--lemon) 24%, transparent); color: var(--lemon); }
+
+.dyn-red-bg { background: var(--destructive); color: #fff; }
+
+.dyn-round {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: scale 160ms ease;}
+
+.dyn-round:active { scale: 0.96; }
+
+.dyn-grow { flex: 1; }
+
+.dyn-label { font-size: 12px; color: rgba(255, 255, 255, 0.55); font-weight: 400; letter-spacing: 0em; }
+
+.dyn-big {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;}
+
+.dyn-open[data-kind="Timer"] .dyn-label { margin-right: -4px; align-self: center; }
+
+.dyn-face { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex: none; }
+
+/* Check-in: no photos in the demo, so the caller is their initial on their colour */
+.dyn-initial { display: grid; place-items: center; background: var(--coral); color: var(--on-color); font-size: 18px; font-weight: 500; }
+
+.dyn-who { display: flex; flex-direction: column; gap: 2px; text-align: left; min-width: 0; }
+
+.dyn-name { font-size: 16px; font-weight: 500; color: #fff; letter-spacing: -0.01em; }
+
+/* the call reads at a glance: a size up on both lines */
+.dyn-open[data-kind="Call"] .dyn-label { font-size: 14px; letter-spacing: -0.01em; }
+
+.dyn-open[data-kind="Call"] .dyn-name { font-size: 16px; letter-spacing: -0.01em; }
+
+/* music and flight take the same step up as the call */
+.dyn-open[data-kind="Music"] .dyn-label { font-size: 14px; letter-spacing: -0.01em; }
+
+.dyn-open[data-kind="Music"] .dyn-name { font-size: 16px; letter-spacing: -0.01em; }
+
+.dyn-open[data-kind="Music"] .dyn-t { font-size: 13px; width: 38px; letter-spacing: 0em; }
+
+.dyn-open[data-kind="Flight"] .dyn-label { font-size: 14px; letter-spacing: -0.01em; }
+
+.dyn-open[data-kind="Flight"] .dyn-code { font-size: 30px; letter-spacing: -0.03em; }
+
+.dyn-open[data-kind="Flight"] .dyn-t { font-size: 13px; width: auto; letter-spacing: 0em; }
+
+.dyn-open[data-kind="Flight"] .dyn-eta { font-size: 14px; letter-spacing: -0.01em; }
+
+.dyn-art { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; flex: none; }
+
+.dyn-art-s { width: 22px; height: 22px; border-radius: 6px; }
+
+.dyn-music { display: flex; flex-direction: column; justify-content: space-between; width: 100%; }
+
+.dyn-row { display: flex; align-items: center; gap: 12px; }
+
+.dyn-track { gap: 12px; }
+
+.dyn-t { font-size: 11px; color: rgba(255, 255, 255, 0.5); font-variant-numeric: tabular-nums; width: 34px; letter-spacing: 0em; }
+
+.dyn-t:last-child { text-align: right; }
+
+.dyn-rail { flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.22); overflow: hidden; }
+
+.dyn-rail > span { display: block; height: 100%; background: var(--card); border-radius: inherit; transition: width 1s linear; }
+
+.dyn-ctl { justify-content: center; gap: 32px; }
+
+.dyn-play { display: grid; place-items: center; }
+
+/* the bars dance while it plays and lie low when paused */
+.dyn-bars { display: inline-flex; align-items: center; gap: 2px; height: 16px; }
+
+.dyn-bars i {
+  width: 3px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--rose);
+  transition: height 220ms ease;}
+
+.dyn-bars[data-on] i { animation: dyn-bar 0.9s ease-in-out infinite alternate; }
+
+.dyn-bars[data-on] i:nth-child(2) { animation-duration: 0.7s; animation-delay: -0.3s; }
+
+.dyn-bars[data-on] i:nth-child(3) { animation-duration: 1.1s; animation-delay: -0.5s; }
+
+.dyn-bars[data-on] i:nth-child(4) { animation-duration: 0.8s; animation-delay: -0.2s; }
+
+/* the white island: ink turned over, and the colours tuned for
+   black taken a step deeper so they hold on white */
+/* the flight: cities, codes either side of the track, the times */
+.dyn-open[data-kind="Flight"] { padding: 16px 20px; align-items: stretch; }
+
+.dyn-cyan { color: var(--sky); }
+
+.dyn-plane { rotate: 45deg; }
+
+.dyn-flight { display: flex; flex-direction: column; justify-content: space-between; width: 100%; }
+
+.dyn-flight .dyn-ends { justify-content: space-between; }
+
+.dyn-flight .dyn-t { width: auto; font-size: 11px; letter-spacing: 0em; }
+
+.dyn-code { font-size: 30px; font-weight: 500; letter-spacing: -0.03em; color: #fff; line-height: 1.1; }
+
+.dyn-fly { position: relative; flex: 1; height: 22px; margin: 0 4px; }
+
+.dyn-fly::before, .dyn-fly > i {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 6px;
+  translate: 0 -50%;
+  border-radius: 3px;}
+
+.dyn-fly::before { right: 0; background: rgba(255, 255, 255, 0.18); }
+
+.dyn-fly > i { width: calc(var(--p) * (100% - 18px) + 9px); background: var(--sky); transition: width 1s linear; }
+
+.dyn-fly .dyn-plane { position: absolute; top: 50%; left: calc(var(--p) * (100% - 18px)); translate: 0 -50%; color: #fff; transition: left 1s linear; }
+
+.dyn-eta { font-size: 12px; font-weight: 400; letter-spacing: 0em; }
+
+.dyn-pill[data-tone="white"] {
+  background: var(--card);
+  color: var(--foreground);
+  /* no shadow; a faint edge so white holds on a light card */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);}
+
+.dyn-pill[data-tone="white"] .dyn-label,
+.dyn-pill[data-tone="white"] .dyn-t { color: rgba(0, 0, 0, 0.5); }
+
+.dyn-pill[data-tone="white"] .dyn-name { color: var(--foreground); }
+
+.dyn-pill[data-tone="white"] .dyn-amber { color: var(--lemon-ink); }
+
+.dyn-pill[data-tone="white"] .dyn-amber-bg { background: var(--lemon-soft); color: var(--lemon-ink); }
+
+.dyn-pill[data-tone="white"] .dyn-green { color: var(--primary-ink); }
+
+.dyn-pill[data-tone="white"] .dyn-cyan { color: var(--sky-ink); }
+
+.dyn-pill[data-tone="white"] .dyn-code { color: var(--foreground); }
+
+.dyn-pill[data-tone="white"] .dyn-fly::before { background: rgba(0, 0, 0, 0.1); }
+
+.dyn-pill[data-tone="white"] .dyn-fly > i { background: var(--sky-ink); }
+
+.dyn-pill[data-tone="white"] .dyn-fly .dyn-plane { color: var(--foreground); }
+
+.dyn-pill[data-tone="white"] .dyn-rail { background: rgba(0, 0, 0, 0.1); }
+
+.dyn-pill[data-tone="white"] .dyn-rail > span { background: var(--foreground); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dyn-bars[data-on] i { animation: none; height: 10px; }
+}
+
+@keyframes dyn-bar {
+  from { height: 4px; }
+  to { height: 16px; }}
+
+/* ═════ Time scrubber ═════ */
+
+/* ══ Time scrubber ═══════════════════════════════════════ */
+.tms {
+  width: 300px;
+  padding: 20px 20px 16px;
+  border-radius: var(--tms-r);
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--border);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;}
+
+.tms-read {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;}
+
+.tms-time {
+  display: inline-flex;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;}
+
+/* a digit rolls through a window that FADES rather than clips.
+   Each cell is 1.5em for a 1em line, the digit centred in it, so
+   at rest the neighbours sit wholly outside the window; the mask
+   takes the top and bottom quarter-em to nothing, so a digit on
+   the move leaves and arrives through a fade, never an edge. The
+   negative margin keeps the line box at 1em. */
+.tms-col {
+  display: inline-block;
+  height: 1.5em;
+  margin: -0.25em 0;
+  overflow: hidden;
+  mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent);}
+
+.tms-strip {
+  display: flex;
+  flex-direction: column;
+  transition: transform 220ms cubic-bezier(0.24, 1.34, 0.38, 1);}
+
+.tms-strip > span { height: 1.5em; line-height: 1.5em; }
+
+/* and it smears a little while it rolls */
+.tms-strip[data-flip="a"] { animation: tms-blur-a 260ms ease-out; }
+
+.tms-strip[data-flip="b"] { animation: tms-blur-b 260ms ease-out; }
+
+.tms-colon { padding: 0 0.02em; }
+
+.tms-mer {
+  font-size: 14px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--foreground) 52%, var(--card));
+  letter-spacing: -0.01em;}
+
+.tms-ruler {
+  position: relative;
+  height: 58px;
+  margin-top: 16px;
+  cursor: grab;
+  touch-action: pan-y;
+  outline: none;
+  /* the ruler fades out at both ends, like a wheel turning away */
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);}
+
+.tms-ruler:active { cursor: grabbing; }
+
+.tms-ruler:focus-visible { box-shadow: inset 0 0 0 2px var(--ring); border-radius: 10px; }
+
+.tms-track { position: absolute; left: 50%; top: 0; bottom: 0; }
+
+.tms-tick {
+  position: absolute;
+  left: -1px;
+  top: 8px;
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--foreground);
+  transform-origin: 50% 0;}
+
+.tms-tick[data-kind="quarter"] { height: 17px; }
+
+.tms-tick[data-kind="hour"] { height: 25px; }
+
+.tms-hour {
+  position: absolute;
+  left: 0;
+  top: 38px;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--foreground) 52%, var(--card));
+  letter-spacing: 0em;}
+
+/* the fixed mark the ruler runs under */
+.tms-mark {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 3px;
+  height: 32px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  /* Check-in: mint, not red. Red says something went wrong; this says "this time" */
+  background: var(--primary);}
+
+@keyframes tms-blur-a { from { filter: blur(2px); } to { filter: blur(0); } }
+
+@keyframes tms-blur-b { from { filter: blur(2px); } to { filter: blur(0); } }
+
+/* ═════ Assignees ═════ */
+
+/* Inter, not the mono class it carried. A handle is a name,
+   not a code — nothing here needs a fixed advance. */
+/* 11.5, which is .pik-role's. The names in these two lists
+   were matched at 13 already; the second lines were a pixel
+   apart, and one point of difference between two lists of
+   people reads as one of them being set slightly wrong rather
+   than as a distinction anybody meant. */
+/* and the same INK as .pik-role, by the same route: the fill's
+   own on-colour at 45%, falling back to the page's when no
+   fill is set. --ink-5 is a fixed grey off the light ramp, so
+   under a dark Fill — which this block takes — the handle
+   stayed a mid grey on a near-black row while the name above
+   it inverted properly. An alpha of the row's own ink cannot
+   come apart from it. */
+.rst-at {
+  font-size: 11px;
+  letter-spacing: 0em;
+  color: color-mix(in srgb, var(--foreground) 52%, var(--card));}
+
+/* ══ People picker ══════════════════════════════════════════
+   A pill that fills with faces, and the list it fills from.
+   See Picker.tsx — in particular why the rail's width is an
+   inline number rather than anything measured. */
+.pik {
+  position: relative;
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  color: var(--foreground);}
+
+.pik-pill {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  /* tighter on the left, because a face is a filled circle and
+     a word is not: 16 of air beside "Add people" is the same
+     amount of air as 8 beside a picture */
+  padding: 0 12px 0 8px;
+  border: 0;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--border);
+  /* ── NO SHADOW, AND NO HAIRLINE EITHER ────────────────────
+     Both are gone. The ring came back only when Stroke asks
+     for it — it carried a permanent one, which made that
+     switch a control reporting a state it was not producing,
+     the fault the tilt card and the wheel both had.
+
+     The drop shadow went with it. Nothing here needs lifting:
+     the pill and the card are the fill's own slab and they sit
+     on the block's grey ground, which separates them on its
+     own. A shadow under a shape that already reads is the
+     component insisting it is floating. */
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: -0.01em;}
+
+.pik-pill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--foreground) 45%, transparent);}
+
+/* ── the rail the faces sit in ──────────────────────────────
+   Its width is the whole animation. The faces are absolute
+   inside it, so none of them moves when another arrives — the
+   rail simply has more room, and the pill is sized by it.
+   Nothing here measures anything. */
+.pik-rail {
+  position: relative;
+  flex: none;
+  height: 28px;
+  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+.pik-face {
+  position: absolute;
+  /* both corners pinned: the face is placed by its transform,
+     in the row and in the quad alike, so `left` is an origin
+     rather than a position */
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  overflow: hidden;
+  /* the ring is the CARD's colour, not white: it is the gap
+     between two overlapping faces, so it has to be whatever is
+     behind them or the stack grows a halo in dark mode */
+  box-shadow: 0 0 0 2px var(--card);}
+
+.pik-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Check-in: a face is an initial on the person's colour */
+.pik-initial { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 999px; color: var(--on-color); font-size: 12px; font-weight: 500; }
+.pik-av.pik-initial { font-size: 14px; }
+
+/* with no faces the rail collapses to nothing but the pill's gap
+   still sits in front of the word; pull it back so the text is
+   inset 12 from the edge, matching the pill's own right padding */
+.pik-say { margin-left: -6px; color: var(--foreground); }
+
+/* ── the chevron IS the hover state ─────────────────────────
+   With the shadow gone the pill had nothing left to answer the
+   cursor with, and a fill appearing behind it would be a second
+   shape arriving on a control whose whole subject is shapes —
+   the palette's refresh button makes the same call. The glyph
+   goes to a stronger ink instead: same thing said, nothing new
+   on screen. */
+.pik-chev {
+  flex: none;
+  margin-left: -2px;
+  color: color-mix(in srgb, var(--foreground) 32%, var(--card));
+  transition: rotate 220ms cubic-bezier(0.22, 1, 0.36, 1), color 160ms ease;}
+
+.pik-pill:hover .pik-chev { color: color-mix(in srgb, var(--foreground) 72%, var(--card)); }
+
+.pik-pill[aria-expanded="true"] .pik-chev { rotate: 180deg; }
+
+/* ── the list ───────────────────────────────────────────────
+   Absolute, so opening it moves nothing. The block reserves
+   the room for it either way — see the note in Picker.tsx. */
+.pik-card {
+  position: absolute;
+  top: 54px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  padding: 8px;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--border), var(--shadow-overlay);
+  /* ── it unfolds from the PILL'S corner ────────────────────
+     Top left, not the middle: the pill starts at this same
+     left edge, so the card opens down and out from under it
+     rather than growing symmetrically out of its own centre,
+     which is what a box appearing does. */
+  transform-origin: 0 0;}
+
+.pik-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 48px;
+  padding: 0 8px;
+  border: 0;
+  /* the card's corner less its 6px padding — set in Picker.tsx
+     so it tracks the Corner knob; 16 is the value at the
+     default 22 */
+  border-radius: var(--pik-row-r, 14px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease;}
+
+.pik-row:hover { background: color-mix(in srgb, var(--foreground) 6%, transparent); }
+
+.pik-row:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);}
+
+.pik-av {
+  flex: none;
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;}
+
+.pik-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+
+/* ── the same type as the other two lists ────────────────
+   It was 13.5 at 500 with a touch of negative tracking, which
+   is a LABEL's setting — right for a word that names a control
+   and wrong for a row of people. The selection list and the
+   reorder list both set their names at the regular weight, and
+   they are the same object: a face, a name, a thing to press.
+   Three lists on one bench reading as three different type
+   systems is the fault; matching `.rst-name` is the fix. */
+.pik-name {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0em;}
+
+.pik-role {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--foreground) 52%, var(--card));
+  letter-spacing: 0em;}
+
+/* ── the mark ───────────────────────────────────────────────
+   Drawn at rest as an empty ring and filled when it is on, so
+   the row always shows that it CAN be chosen. A control that
+   only appears once used is one you have to guess at first. */
+.pik-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px; height: 18px;
+  /* ── a rounded square, not a disc ────────────────────────
+     One radius for both states, because it is one box: the
+     empty mark and the ticked one are the same square with the
+     fill switched, so the shape cannot disagree with itself
+     between rows. The radius is 0.3 of the side — round enough
+     to belong to the pill and the card above it, square enough
+     that a row of four reads as a column of checkboxes rather
+     than as a second set of avatars beside the real ones.
+
+     18, down from 20. The mark answers the row; it is not the
+     subject of it, and at 20 against a 28px face it was close
+     enough in size to read as the second circle in a pair. Two
+     pixels is enough to put it back behind the name. */
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--foreground) 22%, transparent);
+  transition: background 160ms ease, box-shadow 160ms ease;}
+
+.pik-row[data-on] .pik-mark {
+  background: var(--foreground);
+  box-shadow: inset 0 0 0 1.5px var(--foreground);}
+
+.pik-tick {
+  display: grid;
+  place-items: center;
+  color: var(--card);}
+
+@media (prefers-reduced-motion: reduce) {
+  .pik-rail, .pik-chev { transition-duration: 160ms; }
+}
+
+/* ═════ Slide to confirm ═════ */
+
+/* ══ Slide to confirm ══════════════════════════════════════
+   A handle crossing a track, and on commit the handle IS the
+   confirmation — it unfurls leftward and fills what it crossed.
+   See SlideConfirm.tsx for why the right edge stays put. */
+.sld {
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  color: var(--foreground);}
+
+.sld-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  /* ── the track is the SLAB, the handle is the INK ─────────
+     It was the other way round — a translucent wash for the
+     track on the reasoning that a groove is darker than what
+     it is cut into. True, and it has nothing to be cut into:
+     this track IS the whole block, so there is no surrounding
+     surface and a 7% wash had no opaque ground under it. On a
+     dark fill that left a near-invisible track with a dark
+     circle sitting on it. Measured: track
+     rgba(244,243,241,0.07) over a light stage.
+
+     Slab and ink is the pair the liquid toggle uses and it
+     inverts from one rule: white track with a near-black
+     handle in light, near-black track with a light handle in
+     dark. And on commit the handle fills the track, so the
+     confirmed state is a solid ink pill in both. */
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--border);
+  /* the drag is the component; the browser may not take the
+     gesture for panning */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;}
+
+/* ── the ground already covered ─────────────────────────────
+   THE SAME INK AS THE HANDLE, which turns this from a trail
+   into the handle's own body. It was an 8% tint, and a tint is
+   read as a progress bar: a track filling up behind a knob that
+   slides along it. Two objects.
+
+   The geometry was already right for one. This runs from the
+   left pad to `x + GRIP` — the handle's RIGHT edge, not its
+   left — with the handle's own corner radius, so the pair
+   describes a single capsule with a rounded cap at each end and
+   the handle's cap doing the work at the leading edge. Only the
+   colour said otherwise. Matched, there is no seam to find: the
+   dot stretches out of the corner it started in and the far end
+   is still the dot.
+
+   It cannot be the ink at 100% and also sit UNDER the words. */
+.sld-wash {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  bottom: 4px;
+  background: var(--foreground);
+  /* ── above the label, so it WIPES it ─────────────────────
+     Beneath it, the label's remaining ink sat on a surface its
+     own colour and went muddy rather than away — the fade
+     reaches zero at 55% of the travel and the capsule's edge
+     arrives at the first letter around 30%, so there is a
+     stretch where the two overlap. Painted over, the words are
+     covered by the advancing cap instead: they leave under a
+     rounded edge that is the handle's own shape, which reads as
+     the thing eating them rather than as a wipe.
+     The handle is `auto` and later in the DOM, and `auto` loses
+     to any z-index at all, so it needs one of its own. */
+  z-index: 1;
+  pointer-events: none;}
+
+.sld-say {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* ── CENTRED IN THE PILL, not in the room beside it ──────
+     It was inset by the handle's width, on the reasoning that
+     the words should be centred in the space actually left to
+     them. That is the right rule for a label sharing a row with
+     a control, and the wrong one here: the track IS the object,
+     and a label pushed 24px right of its middle reads as
+     off-centre rather than as considerate — there is nothing
+     for it to be centred against except the pill.
+
+     It costs nothing at rest — the words start well clear of
+     the handle — and the overlap it was avoiding is now the
+     point, since the capsule wipes them as it comes. */
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--foreground) 52%, var(--card));
+  pointer-events: none;
+  white-space: nowrap;}
+
+.sld-grip {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: var(--foreground);
+  color: var(--card);
+  cursor: grab;
+  /* ── it takes the pointer now, and the track still wins ───
+     It was `none`, so the track owned the gesture outright.
+     The handle has to know when a cursor is ON it to swell,
+     and a press still reaches the track by BUBBLING — the
+     handle is inside it — so nothing about the drag changed.
+     Once the track captures the pointer every later event is
+     retargeted there anyway, which is why a drag that wanders
+     off the handle keeps reporting. */
+  pointer-events: auto;
+  /* the wall it lands against, so the squash compresses
+     toward the end of the track rather than about its middle */
+  transform-origin: 0% 50%;
+  /* it is placed by a motion value, so nothing here may
+     transition `transform` or the two fight every frame */
+  transition: none;
+  /* over the wash, which had to claim a layer to cover the
+     label — see .sld-wash */
+  z-index: 2;}
+
+.sld-track[data-held] .sld-grip { cursor: grabbing; }
+
+/* ── two contents, both ABSOLUTE ────────────────────────────
+   Stacked so neither has to make room for the other and the
+   handle's width is free to be whatever the morph says it is.
+
+   They were one grid cell, and that put the arrow 21.3px right
+   of the handle's centre. "Confirmed" is 59px wide and the
+   resting handle is 42, so the shared track was wider than the
+   box holding it — and an overflowing grid item resolves
+   `center` to `start`, which shoved both to one side. The same
+   rule caught the carousel inside the Pro sheet.
+
+   Absolute with `inset: 0` has no such rule: each fills the
+   handle and centres its own content, at every width the morph
+   passes through, and neither can size the handle. */
+.sld-arrow,
+.sld-done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  pointer-events: none;}
+
+@media (prefers-reduced-motion: reduce) {
+  .sld-done { transition-duration: 160ms; }
+}
+
+/* ═════ Palette ═════ */
+
+/* ── the goo's defs hold nothing you can see ────────────────
+   `useGoo` renders an <svg> carrying a <defs> and nothing
+   else, and an <svg> with no dimensions is a replaced element:
+   the browser gives it the default 300x150 and puts it in the
+   flow. Every block that mounts one has been carrying an
+   invisible 300x150 box ever since — harmless in the fixed-size
+   relative stages that host most of them, and not harmless in
+   a flex column, where it over-subscribed the container and
+   shrank the palette's swatch row from 132 to 64.
+
+   Nothing inside a <defs> is rendered, so taking the element
+   out of flow entirely costs nothing and is what it always
+   wanted. */
+.liq-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;}
+
+/* ══ Palette ════════════════════════════════════════════════
+   A filled bar of colours and the refresh at its end.
+   Everything that moves is written from one number in
+   Palette.tsx; what is here is the shell. */
+.pal {
+  font-family: var(--font-sans);
+  /* two pills, and the gap between them is written inline
+     alongside the padding inside them — the same number in
+     both places on purpose */
+  display: flex;
+  align-items: stretch;}
+
+/* ── the slab ───────────────────────────────────────────────
+   `--fill-slab`, which is the Fill control's own token: white
+   when the block is filled light and `--slab-dark` when it is
+   filled dark. It was `--slab` — the filled-block pair — which
+   is near-black in light, and a palette wants a white card to
+   sit on far more than it wants a black one. The fallback is
+   `--card` for any mount outside a stage that sets the
+   attribute. */
+.pal-slab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--border);}
+
+/* the hairline is the Stroke control's to give, the way it is
+   for every other block — a spread shadow rather than a
+   border, so it costs the slab no layout */
+/* ── the tool pill ──────────────────────────────────────────
+   No growing; its width comes from the component. And IT is
+   what sinks under a press, not the button inside it — the
+   thing being pressed is the pill, a button that shrank inside
+   a pill that did not would read as two objects where there is
+   one. Same curve the rest of the bench presses on. */
+.pal-tool {
+  flex: none;
+  transition: scale 160ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+.pal-tool:has(.pal-go:active) {
+  scale: 0.96;}
+
+.pal-bar {
+  position: relative;
+  flex: none;
+  /* NO clip and no corner. Each swatch carries its own radius
+     now that there are gaps between them, so there is nothing
+     for the bar to shape — and a bar that clipped would cut
+     off the overshoot on the way back, which is the part of
+     the motion worth having. */}
+
+.pal-blobs {
+  position: absolute;
+  inset: 0;}
+
+.pal-seg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  /* every mode is one solid colour at every frame now, so
+     there is nothing inside to clip — and the swatch has to be
+     free to bulge past its own slot, which is what the
+     overshoot on the way back is */
+  /* transform and width are written per frame — no transition,
+     or the easing and the tween re-interpolate against each
+     other and what you see is the transition rather than the
+     move */}
+
+/* the height is written per frame too — `bounce` and `orb`
+   both lose some of it — so the rule cannot claim 100% */
+
+/* ── the refresh ────────────────────────────────────────────
+   Width, height and corner all come from the component: it
+   wears the swatch's own radius, so the Corner knob moves it
+   with everything else. NO CHROME AT ALL, at rest or on
+   hover — on whatever ink the fill asks for. */
+.pal-go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: color 160ms ease;}
+
+/* ── hover lightens the glyph, it does not fill the box ─────
+   A grey pad appearing behind the icon is a second shape
+   arriving on a block whose whole subject is shapes, and it
+   was landing inside a pill that already reads as a button —
+   chrome drawn on top of chrome. The ink easing off says the
+   same thing with nothing new on screen.
+
+   A LIGHTER COLOUR, NOT A FADED ONE. Alpha would have been
+   fewer characters and it is the wrong tool: a translucent
+   glyph lets whatever is behind it through, so the icon takes
+   the slab's tint at rest and something else the moment this
+   block sits on any other ground. `color-mix` resolves to one
+   opaque colour — the fill's own ink walked 45% toward the
+   fill's own slab — so it is a grey that was chosen rather
+   than a black that is partly missing.
+
+   And it reads in both fills for free, because both ends of
+   the mix are the Fill control's tokens: on white the black
+   goes to a lighter black, on near-black the white goes to a
+   softer white. Same gesture, no second rule. */
+.pal-go:hover {
+  color: color-mix(in srgb, var(--foreground) 55%, var(--card));}
+
+.pal-go:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px color-mix(in srgb, var(--foreground) 45%, transparent);}
+
+/* ── the glyph turns, and only one way ──────────────────────
+   A half turn per press, accumulated — so it never unwinds.
+   A refresh icon that spun back would be saying undo. */
+.pal-go svg {
+  transition: rotate 600ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+@media (prefers-reduced-motion: reduce) {
+  .pal-go, .pal-go svg, .pal-tool { transition-duration: 160ms; }
+}
+
+
+
+/* ═════ Create menu ═════ */
+
+/* the create menu has no ::before to hang it on — its shape
+   is a blob on a metaball layer — so its ring is a spread
+   shadow, which is the same mark by another means */
+/* ── 5 · create ──────────────────────────────────────────── */
+/* ── back to 244 ────────────────────────────────────────────
+   The stage, the panel and the rows are the numbers this was
+   drawn at. They had been shrunk three times chasing a
+   request that was only ever about the PILL — and shrinking
+   the panel with it was wrong twice over: the open state is
+   sized by the four rows it has to hold, so taking it down
+   crushed the rows, and the stage is sized by the panel plus
+   the room the blobs need to travel, so taking THAT down left
+   the metaball nowhere to go.
+
+   One number is smaller than it was, and it is the one that
+   was asked about. */
+.crt-stage {
+  position: relative;
+  width: 244px; height: 244px;
+  /* the two states, as two sets of numbers. One attribute
+     picks between them and everything else follows. */
+  /* The pill, and only the pill. Its WIDTH is set inline from
+     the measured label — see Liquid.tsx — so this is the
+     fallback for the frame before that measurement lands, and
+     the height is the part that lives here. 46 before. */
+  --pill-w: 120px;
+  --pill-h: 38px;
+  --panel-w: 212px;
+  --panel-h: 166px;    /* four rows and the padding; no header any more */
+  --w: var(--pill-w);
+  --h: var(--pill-h);
+  --r: var(--crt-shut-r, 999px);}
+
+.crt-stage[data-open="true"] {
+  --w: var(--panel-w);
+  --h: var(--panel-h);
+  /* 28 outside against a 10px inset leaves 18 for the rows to
+     nest in, and a 34px row rounds fully at 17 — so the two
+     curves are concentric rather than merely both round. The
+     Corner knob moves all three together; see Liquid.tsx. */
+  --r: var(--crt-r, 28px);}
+
+/* No metaball filter on this one, and that is the point. The
+   other studies have two or more shapes that have to fuse;
+   this has exactly one, so a blur can only damage it — at the
+   radius the others use, a fifth of this shape's height, the
+   corners came back bulged and uneven instead of at the
+   radius they were given. The liquid here is entirely in the
+   timing. */
+.crt-blobs {
+  position: absolute; inset: 0;
+  pointer-events: none;}
+
+/* one shape, dead centre, in both states */
+/* ── CENTRED BY AUTO MARGINS, and it has been three things ──
+   A negative margin first, which had to be animated alongside
+   the size — two axes on different clocks, and the box drifted
+   34px above centre halfway through the morph.
+
+   Then `left: 50%` with `translate(-50%, -50%)`, which fixed
+   that: a percentage translate is always half of whatever the
+   box is right now, so there is nothing to keep in step.
+
+   And now auto margins, which are self-correcting in the same
+   way and use NO TRANSFORM AT ALL. That is the whole reason
+   for the third version. This box is a motion.div whose width
+   and height Framer writes inline on every frame of the open,
+   and a CSS transform on a Framer-managed element is the trap
+   this codebase has hit before — CSS `translate` and `scale`
+   resolve BEFORE `transform`, and anything the library decides
+   to write into `transform` takes the centring with it.
+   Reported on iOS as the menu jumping to one side as it opens,
+   which is exactly what a lost -50% looks like.
+
+   `inset: 0` plus `margin: auto` centres an absolutely
+   positioned box against its containing block whatever size
+   the box currently is — no transform to lose, nothing to
+   animate, and the same answer every frame. */
+.crt-body {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--w); height: var(--h);
+  border-radius: var(--r);
+
+  background: var(--slab);
+  box-shadow: 0 0 0 1px var(--border);
+
+  /* No shadow. It had four stacked ones, added when this
+     became a white panel on the argument that a white panel on
+     a white page has no edge — which was true, and was still
+     the wrong fix: it made the menu read as a card lifted off
+     the page rather than as the page opening up. Stroke is the
+     way to give it an edge now, and it is off by default. */
+  /* One move: width, height and the corner all run the same
+     curve for the same time. Staggering the axes made the
+     open read as two animations queued up rather than one
+     thing changing size.
+
+     And no overshoot. A spring past the target takes the
+     corner radius with it — the corners dipped under 28 and
+     came back, which is a wobble, not a bounce. This curve is
+     quick off the mark and lands without ever passing the
+     number it is going to. */
+  /* width, height and the corner are Framer's now; `scale` stays
+     here because the press beat is a discrete state, not a value
+     being interpolated from JS. */
+  transition: scale 420ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+/* The first beat: pressed down. A plain uniform shrink — the
+   button gets smaller, nothing squashes and nothing spreads.
+   In fast, because a press should be felt at once and not
+   eased into. */
+.crt-stage[data-sink="true"] .crt-body,
+.crt-stage[data-sink="true"] .crt-pill {
+  scale: 0.94;
+  /* 120 against a 95ms handoff: the spread starts while this
+     is still running, so there is never a frame where nothing
+     is moving */
+  transition: scale 160ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+/* and closing is the same single move, run down */
+.crt-stage:not([data-open="true"]) .crt-body {
+  transition: scale 220ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+/* ── a panel, not a slab of ink ───────────────────────────
+   `--slab` is redefined for this component rather than
+   changed at the root, because exactly two things read it and
+   the other is the overlay's Copy button — a primary action
+   that should stay filled.
+
+   On the STAGE, not on the body. The shape and the type are
+   deliberately two layers here — opaque blobs on a filtered
+   one, text riding above on an unfiltered one — and they are
+   siblings, so tokens set on the body reach the fill and
+   none of the words. The stage is the first element that is
+   an ancestor of both.
+
+   `--board` and `--ink` both flip with the theme, so one
+   definition covers both: white with dark type in light,
+   #212429 with light type in dark — which is what dark
+   already had. Only the light theme changes. */
+.crt-stage {
+  /* the fill layer first, and what this was before it as the
+     fallback — so Auto is genuinely unchanged rather than a
+     third value that happens to look similar */
+  --slab: var(--card);
+  --on-slab: var(--foreground);
+  }
+
+.crt-ink { position: absolute; inset: 0; }
+
+/* the pill. It does not move aside, it is simply not there
+   once the shape has spread. */
+/* the same auto-margin centring as .crt-body above, and for
+   the second reason given there: three boxes stacked on one
+   stage, centred by two different mechanisms, can round a
+   sub-pixel apart. One mechanism, one answer. */
+.crt-pill {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--pill-w); height: var(--pill-h);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: 0; background: none;
+  color: var(--on-slab);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 160ms ease,
+    scale 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  letter-spacing: 0em;}
+
+.crt-stage[data-open="true"] .crt-pill {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;}
+
+/* held at full strength through the press: fading it during
+   the squash would hide the beat that the squash is for */
+.crt-stage[data-sink="true"] .crt-pill { opacity: 1; }
+
+.crt-glyph { display: grid; place-items: center; }
+
+/* the pill takes the width of whatever it is saying, so the
+   label can change without it jumping */
+.crt-say {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+/* inline-block so it has an offsetWidth to be measured by */
+.crt-say > span { display: inline-block; }
+
+/* the window, in the same place */
+.crt-panel {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--panel-w); height: var(--panel-h);
+  padding: 12px 12px;
+  color: var(--on-slab);
+  pointer-events: none;}
+
+.crt-stage[data-open="true"] .crt-panel { pointer-events: auto; }
+
+.crt-menu {
+  margin: 0; padding: 0;
+  list-style: none;
+  display: grid; align-content: start; gap: 2px;}
+
+.crt-item {
+  opacity: 0;
+  transform: translateY(6px);
+  /* the same curve as the shell, and no overshoot either: a
+     row that slides past its resting line and comes back is
+     the same wobble at a smaller size. Shortened with it —
+     320ms of travel on a box that lands in 180 left the rows
+     still moving after the shape had stopped. */
+  transition: opacity 160ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+.crt-stage[data-open="true"] .crt-item { opacity: 1; transform: none; }
+
+.crt-item button {
+  position: relative;
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  height: 34px; padding: 0 16px;
+  /* fully round, so a row nests inside the card's own corners
+     instead of squaring off against them */
+  border: 0; border-radius: var(--crt-row-r, 999px);
+  background: none;
+  /* 0.78, not the 0.72 this carried when the slab was dark.
+     The same fraction is not the same contrast once the ink
+     and the ground swap ends: light type at 0.72 on near
+     black measured comfortably, dark type at 0.72 on white
+     lands at 4.6:1 — over the line but only just, and this is
+     the menu's only body text. */
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: color 220ms ease;
+  letter-spacing: 0em;}
+
+.crt-item button:hover { color: var(--on-slab); }
+
+/* ── the hover wash, one per row ───────────────────────────
+   It was one pill that travelled between rows and stretched
+   on the way. Each row now fades its own in and out; nothing
+   moves between them. */
+.crt-item button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;}
+
+@media (hover: hover) {
+  .crt-item button:hover::before { opacity: 1; transition-duration: 160ms; }
+}
+
+.crt-item button:focus-visible::before { opacity: 1; }
+
+/* the wash sits behind the label, inside its own row */
+.crt-item button { isolation: isolate; }
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-body, .crt-pill, .crt-item, .crt-say { transition-duration: 160ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-stage[data-sink="true"] .crt-body,
+    .crt-stage[data-sink="true"] .crt-pill { scale: 1; }
+}
+
+/* ═════ Liquid toggle ═════ */
+/* ════ liquid ═══════════════════════════════════════════════
+   Three studies in one filter. Prefix liq-.
+
+   Every one of these is two layers in register: opaque shapes
+   on a layer carrying url(#liq-goo), and anything that needs
+   a crisp edge — text, a hit area — riding above on a layer
+   that carries no filter at all. The goo eats translucency
+   and mangles glyphs, so nothing else can share the layer. */
+
+/* ── 1 · liquid toggle ───────────────────────────────────── */
+.liq-well {
+  /* Check-in: sits in a settings row, so it is only as big as the switch */
+  display: inline-grid; flex: none; place-items: center;}
+
+/* ── BLACK AND WHITE, AND NO EDGE OF ITS OWN ────────────────
+   The on state was a green wash with a green ring, which made
+   this the only block on the bench asserting a colour nothing
+   else uses — and a switch does not need a hue to say it is
+   on. It inverts instead: a light track with a dark thumb
+   becomes a dark track with a light one, which is the strongest
+   thing two colours can say and the only thing this component
+   has to say.
+
+   `--fill-on` / `--fill-slab` rather than --ink / --board, so
+   the pair follows the Fill control the entry declares instead
+   of naming a colour twice.
+
+   And no inset ring. It carried one unconditionally, which is
+   an edge the Stroke switch cannot take away — the same bug
+   the sleep pill, the command bar and the Notify pill all had.
+   Stroke's own rule is a few hundred lines up. */
+.liq-sw {
+  position: relative;
+  width: 56px; height: 32px;
+  padding: 0; border: 0;
+  /* ── ALWAYS A PILL ────────────────────────────────────────
+     It took a Corner knob for a while and does not any more.
+     A switch is a pill: that is the shape the gesture is named
+     after, and squaring it turns a thing you slide into a
+     thing you click. The droplet inside followed the knob too,
+     concentrically, and the same argument applies twice over —
+     one number that could only ever make the component less
+     like itself. */
+  border-radius: 999px;
+  /* ── OFF IS THE SLAB, NOT A GREY ─────────────────────────
+     The two states are the two ends of the fill's own ramp,
+     and OFF is the light end of it: the track is the slab —
+     white on a light fill, near-black on a dark one — and the
+     dot is a grey mixed toward it. ON is the inversion, ink
+     track and slab dot, which is what it always was.
+
+     Read across the pair, the TRACK carries the state and the
+     dot is along for the ride. It was the other way round:
+     the off track was a 12% wash and the dot was full ink, so
+     the loud half of the switch was the part that only moves.
+
+     It reads because the card behind is not white — the stage
+     is the board's own grey, so a white pill on it is an
+     object. Stroke's hairline is there for anywhere it is
+     not. */
+  /* Check-in: off is the muted step with a hairline, because the
+     switch sits on a card here and a card-coloured track would vanish */
+  background: var(--muted);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  cursor: pointer;
+  /* it is a rail you can push along, not only a button */
+  touch-action: none;
+  transition: background 420ms ease;}
+
+.liq-sw[data-on="true"] { background: var(--foreground); box-shadow: none; }
+
+.liq-sw:disabled { opacity: .45; cursor: default; }
+
+.liq-sw:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+.liq-sw-blobs {
+  position: absolute; inset: 0;}
+
+/* opaque on purpose: a goo filter over a translucent fill
+   thresholds the alpha away and the shape disappears */
+/* left: 0 is not optional. These are inline elements, so with
+   left: auto the static position is wherever the line box put
+   them — and the button they sit in centres its text, which
+   pushed both blobs to the middle of the track and the thumb
+   clean off the end of it. */
+/* ── the droplet, and it is the ONLY body ───────────────────
+   There was a second, smaller blob running behind it on a
+   lagging spring; the goo between them necked into a thread,
+   which is what a trail is and what it looks like. It is one
+   body that stretches now — see the note in Liquid.tsx, and
+   the dragging ball's, which lost the same thing first.
+
+   `left: 0` is not optional. It is an inline element, so with
+   `left: auto` the static position is wherever the line box
+   put it — and the button it sits in centres its text, which
+   pushed the thumb to the middle of the track.
+
+   OPAQUE on purpose: a goo filter over a translucent fill
+   thresholds the alpha away and the shape disappears. Which
+   is why the grey is a `color-mix` and not an alpha — see the
+   note where the off colour is chosen. */
+.liq-thumb {
+  position: absolute;
+  left: 0; top: 50%;
+  /* the size comes from Liquid.tsx, which also needs it for the
+     travel — one number, so the circle and the distance it
+     crosses cannot disagree */
+  width: var(--liq-thumb, 36px); height: var(--liq-thumb, 36px);
+  margin-top: calc(var(--liq-thumb, 36px) / -2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 34%, var(--muted));
+  /* transform is Framer's — a CSS transition on the same
+     property re-interpolates every frame the spring writes,
+     and what you see is the easing, not the spring. The colour
+     is the only thing here that eases, and it is the only one
+     that can: everything else about this element is written
+     into one transform by Framer. */
+  transition: background 420ms ease;}
+
+/* ON inverts the pair: ink track, slab droplet. The two states
+   are the two ends of the fill's ramp and never two values of
+   the same one. */
+.liq-sw[data-on="true"] .liq-thumb { background: var(--card); }
+
+@media (prefers-reduced-motion: reduce) {
+  .liq-thumb, .liq-pill, .liq-bead { transition-duration: 160ms; }
+}
+
+/* ═════ Stacked bars ═════ */
+
+/* ══ Stacked bars (lab/StackedBars.tsx) ═══ */
+.stb {
+  --stb-c1: color-mix(in srgb, var(--foreground) 100%, var(--card));
+  --stb-c2: color-mix(in srgb, var(--foreground) 78%, var(--card));
+  --stb-c3: color-mix(in srgb, var(--foreground) 60%, var(--card));
+  --stb-c4: color-mix(in srgb, var(--foreground) 44%, var(--card));
+  --stb-c5: color-mix(in srgb, var(--foreground) 32%, var(--card));
+  --stb-c6: color-mix(in srgb, var(--foreground) 22%, var(--card));
+  --stb-alert: color-mix(in srgb, var(--foreground) 100%, var(--card));
+  --stb-soft: color-mix(in srgb, var(--foreground) 72%, var(--card));
+  --stb-mute: color-mix(in srgb, var(--foreground) 52%, var(--card));
+  --stb-faint: color-mix(in srgb, var(--foreground) 32%, var(--card));
+  --stb-w6: color-mix(in srgb, var(--foreground) 6%, transparent);
+  --stb-w12: color-mix(in srgb, var(--foreground) 12%, transparent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  /* Check-in: our card, so it sits in the You column like its neighbours */
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--edge-lit);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  user-select: none;
+  -webkit-user-select: none;}
+
+
+
+/* header: icon tile, title, Day / Week */
+.stb-head { display: flex; align-items: center; gap: 12px; }
+
+.stb-titles { flex: 1; min-width: 0; }
+
+.stb-title { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; line-height: 18px; }
+
+.stb-sub { font-size: 12px; color: var(--stb-mute); line-height: 16px; font-variant-numeric: tabular-nums; }
+
+.stb-seg-ctl {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--stb-w6);}
+
+.stb-thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border-radius: 8px;
+  background: var(--card);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+.stb-seg-ctl[data-mode="Week"] .stb-thumb { transform: translateX(100%); }
+
+.stb-tab {
+  position: relative;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0 10px;
+  height: 28px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--stb-mute);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 160ms ease, scale 160ms cubic-bezier(0.22, 1, 0.36, 1);}
+
+.stb-tab[data-on] { color: var(--foreground); }
+
+.stb-tab:hover:not([data-on]) { color: var(--stb-soft); }
+
+.stb-tab:active { scale: 0.96; }
+
+.stb-tab:focus-visible { outline: 2px solid var(--ring); outline-offset: 0; }
+
+/* the one figure */
+.stb-figure { display: flex; align-items: baseline; gap: 8px; margin-bottom: -4px; }
+
+.stb-num {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;}
+
+.stb-unit { font-size: 13px; color: var(--stb-mute); }
+
+/* Price flow's pop in: each character rises a touch from below, out
+   of a slight blur and from nothing, a hair past its mark — left to
+   right, 70ms apart */
+.stb-digit { display: inline-block; }
+
+.stb-digit[data-pop] {
+  animation: stb-pop 500ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);}
+
+@media (prefers-reduced-motion: reduce) {
+  .stb-digit[data-pop] { animation: none; }
+}
+
+/* the plot: absolutely placed columns, each segment its own rounded box */
+.stb-plot { position: relative; width: 100%; touch-action: none; cursor: crosshair; }
+
+.stb-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--stb-w12);}
+
+.stb-col { position: absolute; top: 0; bottom: 0; }
+
+.stb-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: var(--stb-r);
+  transition:
+    height 600ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 14ms),
+    bottom 600ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 14ms),
+    background-color 160ms ease;}
+
+.stb-bar { background-color: var(--c); }
+
+
+
+/* scrubbing: the others step back by mixing toward the slab */
+.stb[data-scrub] .stb-col:not([data-on]) .stb-bar {
+  background-color: color-mix(in srgb, var(--c) 38%, var(--card));}
+
+
+.stb-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  border: 1.5px solid var(--stb-mute);
+  border-radius: var(--stb-rr);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease;}
+
+.stb[data-scrub] .stb-ring { opacity: 1; }
+
+/* the tooltip: beside the column, gliding on a spring */
+.stb-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--card);
+  /* filled like the card, parted from the bars by a soft grey hairline */
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--card));
+  font-size: 12px;
+  line-height: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease;}
+
+.stb[data-scrub] .stb-tip { opacity: 1; }
+
+.stb-tip-head,
+.stb-tip-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+.stb-tip-head { justify-content: space-between; color: var(--stb-mute); margin-bottom: 2px; }
+
+.stb-tip b { font-weight: 500; font-variant-numeric: tabular-nums; color: var(--foreground); }
+
+.stb-tip-row span { flex: 1; color: var(--stb-soft); }
+
+.stb-tip-row b { font-weight: 400; }
+
+.stb-tip-row i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background-color: var(--c);}
+
+
+
+/* one tiny footer: first and last date */
+.stb-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -8px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--stb-faint);
+  font-variant-numeric: tabular-nums;}
+
+@keyframes stb-pop {
+  from { transform: translateY(0.18em); opacity: 0; filter: blur(2px); }
+  to { transform: none; opacity: 1; filter: blur(0); }}
+
+/* Check-in: the legend, quiet and one line */
+.stb-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: -4px;
+  font-size: 12px;
+  color: var(--stb-mute);}
+
+.stb-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.stb-legend i { width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+
+/* ═════ Task run (components/checkin/TaskRun.tsx) ═════
+   The active step's wedge turns while the step runs: a live state, so the one spinner is allowed. */
+.task-spin { transform-origin: 6px 6px; animation: task-spin 900ms linear infinite; }
+@keyframes task-spin { to { rotate: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .task-spin { animation: none; } }
