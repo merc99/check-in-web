@@ -812,7 +812,6 @@ function progressCore(userId: UUID): ProgressCore {
   const loadout: Loadout = {
     card: has('card', want.card) ? want.card : null,
     frame: has('frame', want.frame) ? want.frame : null,
-    title: has('title', want.title) ? want.title : null,
     badge: want.badge && badges.some((b) => b.key === want.badge && b.unlocked) ? want.badge : null,
   }
 
@@ -831,7 +830,7 @@ function progressCore(userId: UUID): ProgressCore {
 function flexOf(userId: UUID): Flex {
   const p = progressCore(userId)
   const badge = p.loadout.badge ? (p.badges.find((b) => b.key === p.loadout.badge) ?? null) : null
-  return { level: p.level, rank: rankFor(p.level).key, title: p.loadout.title, badge, frame: p.loadout.frame, card: p.loadout.card }
+  return { level: p.level, rank: rankFor(p.level).key, badge, frame: p.loadout.frame, card: p.loadout.card }
 }
 
 const badgeProgress = (b: BadgeInfo) => (b.progress ? b.progress.n / b.progress.of : 0)
@@ -869,7 +868,6 @@ export async function setLoadout(patch: LoadoutPatch): Promise<void> {
   const next: Loadout = { ...p.loadout }
   if (patch.card !== undefined) next.card = checked('card', patch.card, core)
   if (patch.frame !== undefined) next.frame = checked('frame', patch.frame, core)
-  if (patch.title !== undefined) next.title = checked('title', patch.title, core)
   if (patch.badge !== undefined) {
     if (patch.badge && !core.badges.some((b) => b.key === patch.badge && b.unlocked)) throw new Error('That badge isn’t earned yet.')
     next.badge = patch.badge

@@ -85,7 +85,7 @@ export function RankCard({ progress: p, className }: { progress: MyProgress; cla
       {comingUp.length > 0 && (
         <p className="mt-3 text-[13px] text-muted-foreground">
           Level {nextAt} gives you{' '}
-          <span className="text-foreground">{comingUp.map((r) => `${r.name} ${r.slot === 'title' ? 'title' : r.slot === 'card' ? 'card' : 'frame'}`).join(' and ')}</span>
+          <span className="text-foreground">{comingUp.map((r) => (r.slot === 'rank' ? `the ${r.name} rank` : `the ${r.name} ${r.slot === 'card' ? 'card' : 'frame'}`)).join(' and ')}</span>
         </p>
       )}
 

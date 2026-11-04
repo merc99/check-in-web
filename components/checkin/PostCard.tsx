@@ -12,11 +12,10 @@ import { HEART_PATH } from './icons'
 import { SessionDetails } from './SessionDetails'
 import { TIER_HUE, TierMedal } from './TierCard'
 import { crewTint } from './CrewTint'
-import { BadgeDisc, cardFinish, RankEmblem } from './Progression'
+import { cardFinish } from './Progression'
 import { Share2 } from 'lucide-react'
 import { Button as UiButton } from '@/components/ui/button'
 import { tierOf } from '@/lib/mastery'
-import { rankOf } from '@/lib/progression'
 import type { Hue } from '@/lib/colors'
 
 const DOUBLE_TAP_MS = 300
@@ -112,45 +111,31 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         ) : (
           avatar
         )}
-        <div className="min-w-0 flex-1">
-          <p className="min-w-0 leading-snug">
+        <p className="min-w-0 flex-1">
+          {onPersonTap && !item.isMine ? (
+            // The name opens their profile too (level, rank and showcase badge live there).
+            <button type="button" onClick={() => onPersonTap(item.user.id)} className="font-medium underline-offset-4 hover:underline">
+              {item.user.name}
+            </button>
+          ) : (
             <span className="font-medium">{item.isMine ? 'You' : item.user.name}</span>
-            {item.with.length > 0 && (
-              <span className="text-muted-foreground">
-                {' '}with <span className="font-medium text-foreground">{listNames(item.with.map((p) => p.name))}</span>
-              </span>
-            )}
-            <span className="ml-2 whitespace-nowrap text-[13px] text-muted-foreground">
-              {timeAgo(item.createdAt, now)}
-              {justIn && (
-                <span className="ml-2 inline-flex items-center gap-1 text-[12px] text-primary-ink">
-                  <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
-                  Just in
-                </span>
-              )}
-            </span>
-          </p>
-          <p className="truncate text-[13px] leading-snug text-muted-foreground">{flex.title ?? rankOf(flex.rank).name}</p>
-        </div>
-        {/* The flex (progression): their showcase badge and level, on their own at the right. */}
-        <div className="flex flex-none items-center gap-2 self-start pt-0.5">
-          {flex.badge && (
-            <span title={flex.badge.name} className="flex">
-              <BadgeDisc badgeKey={flex.badge.key} size="sm" />
+          )}
+          {item.with.length > 0 && (
+            <span className="text-muted-foreground">
+              {' '}with <span className="font-medium text-foreground">{listNames(item.with.map((p) => p.name))}</span>
             </span>
           )}
-          <span title={`Level ${flex.level}, ${rankOf(flex.rank).name}`} className="flex items-center gap-1.5">
-            <span className="hidden font-mono text-[12px] text-muted-foreground sm:inline">Lv {flex.level}</span>
-            <RankEmblem level={flex.level} rank={flex.rank} size="sm" />
+          <span className="ml-2 text-[13px] text-muted-foreground">{timeAgo(item.createdAt, now)}</span>
+        </p>
+        {justIn && (
+          <span className="ml-auto inline-flex items-center gap-1.5 text-[12px] text-primary-ink">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+            Just in
           </span>
-          <span className="sr-only">
-            Level {flex.level}
-            {flex.badge ? `, ${flex.badge.name} badge` : ''}
-          </span>
-        </div>
+        )}
       </div>
 
-      <div className="mt-1.5 pl-[52px]">
+      <div className="-mt-1 pl-[52px]">
         {item.milestone && (
           <div className="mb-3 mt-2 flex items-center gap-3">
             <TierMedal tier={item.milestone.tier} />

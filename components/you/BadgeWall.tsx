@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { BadgeDisc } from '@/components/checkin/Progression'
 import { useToast } from '@/components/checkin/Toast'
 import { setLoadout, type MyProgress } from '@/lib/data'
-import { REWARDS, XP } from '@/lib/progression'
+import { XP } from '@/lib/progression'
 import { cn } from '@/lib/utils'
 
 const FILTERS = [
@@ -19,8 +19,7 @@ const COLLAPSED = 9
 
 /**
  * Every badge you can earn (progression), account-wide and per skill. Earned ones are coins in their
- * color; tap one to show it on your check-in card. The rest show how far along you are and what they
- * unlock (a title, sometimes). Each one is +25 XP.
+ * color; tap one to show it on your profile. The rest show how far along you are. Each one is +25 XP.
  */
 export function BadgeWall({ progress: p }: { progress: MyProgress }) {
   const toast = useToast()
@@ -32,7 +31,7 @@ export function BadgeWall({ progress: p }: { progress: MyProgress }) {
   const show = (key: string, name: string) => {
     const on = p.loadout.badge !== key
     setLoadout({ badge: on ? key : null }).then(
-      () => toast(on ? `${name} is on your check-in card` : 'Badge off your card'),
+      () => toast(on ? `${name} is on your profile` : 'Badge off your profile'),
       (e: unknown) => toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.'),
     )
   }
@@ -59,7 +58,6 @@ export function BadgeWall({ progress: p }: { progress: MyProgress }) {
       <ul className="mt-4 grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 lg:grid-cols-3">
         {shown.map((b) => {
           const worn = p.loadout.badge === b.key
-          const unlocks = REWARDS.find((r) => r.unlock.kind === 'achievement' && r.unlock.key === (b.key.startsWith('all.') ? b.key.slice(4) : b.key.split(':')[1]))
           const body = (
             <>
               <span className="relative">
@@ -78,9 +76,8 @@ export function BadgeWall({ progress: p }: { progress: MyProgress }) {
                 </span>
               )}
               <span className="mt-1.5 block font-mono text-[11px] leading-tight text-subtle-foreground">
-                {b.unlocked ? (worn ? 'On your card' : `+${XP.achievement} XP`) : b.progress ? `${b.progress.n.toLocaleString()} / ${b.progress.of.toLocaleString()}` : b.subtitle}
+                {b.unlocked ? (worn ? 'On your profile' : `+${XP.achievement} XP`) : b.progress ? `${b.progress.n.toLocaleString()} / ${b.progress.of.toLocaleString()}` : b.subtitle}
               </span>
-              {unlocks && <span className="mt-0.5 block text-[11px] leading-tight text-muted-foreground">Title: {unlocks.name}</span>}
             </>
           )
           return (
@@ -89,7 +86,7 @@ export function BadgeWall({ progress: p }: { progress: MyProgress }) {
                 <button
                   type="button"
                   aria-pressed={worn}
-                  aria-label={`${b.name}${b.crewName ? `, ${b.crewName}` : ''}. ${worn ? 'On your card' : 'Show on your card'}`}
+                  aria-label={`${b.name}${b.crewName ? `, ${b.crewName}` : ''}. ${worn ? 'On your profile' : 'Show on your profile'}`}
                   onClick={() => show(b.key, b.name)}
                   className="flex flex-col items-center rounded-lg p-1 transition-transform duration-150 ease-out active:scale-[.97]"
                 >

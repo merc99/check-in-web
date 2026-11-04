@@ -58,12 +58,12 @@ const PEOPLE: PersonSeed[] = [
  * Only rewards each person can plausibly have; the API drops anything they haven't unlocked.
  */
 const LOADOUTS: Record<string, Partial<Loadout>> = {
-  [ME_ID]: { card: 'edge', frame: 'foil', title: 'Seven straight', badge: 'g1:week' },
-  u1: { card: 'holo', frame: 'foil', title: 'Seasoned', badge: 'g1:hundred' },
-  u2: { card: 'edge', frame: 'ring', title: 'Regular', badge: 'g1:ten' },
-  u3: { card: 'tint', frame: 'foil', title: 'Mainstay', badge: 'g1:quarter' },
-  u4: { frame: 'ring', title: 'Weekend regular' },
-  u5: { card: 'edge', title: 'Regular', badge: 'g2:ten' },
+  [ME_ID]: { card: 'edge', frame: 'foil', badge: 'g1:week' },
+  u1: { card: 'holo', frame: 'foil', badge: 'g1:hundred' },
+  u2: { card: 'edge', frame: 'ring', badge: 'g1:ten' },
+  u3: { card: 'tint', frame: 'foil', badge: 'g1:quarter' },
+  u4: { frame: 'ring' },
+  u5: { card: 'edge', badge: 'g2:ten' },
   u6: { frame: 'ring', badge: 'g2:first' },
 }
 

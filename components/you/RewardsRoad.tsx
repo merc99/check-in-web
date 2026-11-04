@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ChevronLeft, ChevronRight, CreditCard, Circle, Type } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, CreditCard, Circle, Shield } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { prefersReducedMotion } from '@/lib/motion'
 import { RankEmblem } from '@/components/checkin/Progression'
@@ -9,7 +9,7 @@ import { useDragScroll } from '@/lib/useDragScroll'
 import { xpForLevel } from '@/lib/progression'
 import { cn } from '@/lib/utils'
 
-const SLOT_ICON = { card: CreditCard, frame: Circle, title: Type } as const
+const SLOT_ICON = { card: CreditCard, frame: Circle, rank: Shield } as const
 
 /**
  * The rewards road (progression): every level that gives you something, in order, as one track.
@@ -102,7 +102,7 @@ export function RewardsRoad({ progress: p }: { progress: MyProgress }) {
                     <Icon size={13} aria-hidden="true" className="flex-none text-muted-foreground" />
                     <span className="min-w-0">
                       <span className="block truncate font-medium">{r.name}</span>
-                      <span className="block truncate text-muted-foreground">{r.slot === 'title' ? 'Title' : r.slot === 'card' ? 'Card finish' : 'Frame'}</span>
+                      <span className="block truncate text-muted-foreground">{r.slot === 'rank' ? 'New rank' : r.slot === 'card' ? 'Card finish' : 'Frame'}</span>
                     </span>
                   </li>
                 )

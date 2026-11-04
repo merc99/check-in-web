@@ -1,6 +1,6 @@
 // Progression: the MMO layer on top of mastery (Ben, Nov 2026: rank up by showing up, flex what you
 // earn). One account-wide level from XP, rank names along the way, and cosmetic rewards for your
-// check-in card: a card finish, an avatar frame, a title and one showcase badge. XP never goes down,
+// check-in card: a card finish and an avatar frame; your level and one showcase badge show on your profile. XP never goes down,
 // nothing expires and nothing is bought: every reward is earned by sessions, tiers or achievements.
 import type { Hue } from './colors'
 import { tierOf, type TierKey } from './mastery'
@@ -69,8 +69,11 @@ export function rankFor(level: number): Rank {
 
 // ─── Rewards ───
 
-export type Slot = 'card' | 'frame' | 'title' | 'badge'
-export const SLOT_LABEL: Record<Slot, string> = { card: 'Card', frame: 'Frame', title: 'Title', badge: 'Badge' }
+/** What you wear: a card finish, a frame and one showcase badge. */
+export type Slot = 'card' | 'frame' | 'badge'
+export const SLOT_LABEL: Record<Slot, string> = { card: 'Card', frame: 'Frame', badge: 'Badge' }
+/** A reward's kind: something to wear, or a new rank (a stop on the road, nothing to put on). */
+export type RewardSlot = 'card' | 'frame' | 'rank'
 
 /** Post finishes (components/checkin/Finish.module.css). Static: nothing moves on a post. */
 export type CardFinish = 'edge' | 'tint' | 'holo' | 'gilded' | 'aurora'
@@ -85,17 +88,16 @@ export type Unlock =
 
 export interface Reward {
   id: string
-  slot: Exclude<Slot, 'badge'>
+  slot: RewardSlot
   name: string
   /** One line on what it is. */
   blurb: string
   unlock: Unlock
-  /** The value it sets on the loadout (a finish, a frame, a title's text). */
+  /** The value it sets on the loadout (a finish, a frame), or the rank's key. */
   value: string
 }
 
 const lvl = (level: number): Unlock => ({ kind: 'level', level })
-const ach = (key: string, name: string): Unlock => ({ kind: 'achievement', key, name })
 const tier = (t: TierKey): Unlock => ({ kind: 'tier', tier: t })
 
 export const REWARDS: Reward[] = [
@@ -112,17 +114,8 @@ export const REWARDS: Reward[] = [
   { id: 'frame.gilded', slot: 'frame', name: 'Gilded', blurb: 'A gold ring', unlock: lvl(15), value: 'gilded' },
   { id: 'frame.prism', slot: 'frame', name: 'Prism', blurb: 'A thick prism ring', unlock: tier('expert'), value: 'prism' },
 
-  // Titles: one line under your name on every post.
-  ...RANKS.map((r): Reward => ({ id: `title.${r.key}`, slot: 'title', name: r.name, blurb: `Rank, level ${r.from}`, unlock: r.from === 1 ? { kind: 'start' } : lvl(r.from), value: r.name })),
-  { id: 'title.early', slot: 'title', name: 'Early bird', blurb: 'Five sessions before 7am', unlock: ach('early', 'Early bird'), value: 'Early bird' },
-  { id: 'title.weekends', slot: 'title', name: 'Weekend regular', blurb: 'Four weekends', unlock: ach('weekends', 'Weekend regular'), value: 'Weekend regular' },
-  { id: 'title.week', slot: 'title', name: 'Seven straight', blurb: 'Seven days running', unlock: ach('week', 'Full week'), value: 'Seven straight' },
-  { id: 'title.month', slot: 'title', name: 'Big month', blurb: '15 sessions in a month', unlock: ach('month', 'Big month'), value: 'Big month' },
-  { id: 'title.photo', slot: 'title', name: 'Receipts', blurb: 'A session with a photo', unlock: ach('photo', 'Pics or it didn’t happen'), value: 'Receipts' },
-  { id: 'title.hundred', slot: 'title', name: 'Hundred club', blurb: '100 sessions in one skill', unlock: ach('hundred', 'Hundred club'), value: 'Hundred club' },
-  { id: 'title.perfect', slot: 'title', name: 'All in', blurb: 'Your whole crew in, same day', unlock: ach('perfect', 'Perfect day'), value: 'All in' },
-  { id: 'title.committed', slot: 'title', name: 'Committed', blurb: 'Reach Committed in a skill', unlock: tier('committed'), value: 'Committed' },
-  { id: 'title.seasoned', slot: 'title', name: 'Seasoned', blurb: 'Reach Seasoned in a skill', unlock: tier('seasoned'), value: 'Seasoned' },
+  // Ranks: a new name at these levels, shown on your profile.
+  ...RANKS.filter((r) => r.from > 1).map((r): Reward => ({ id: `rank.${r.key}`, slot: 'rank', name: r.name, blurb: 'A new rank', unlock: lvl(r.from), value: r.key })),
 ]
 
 export const rewardOf = (id: string) => REWARDS.find((r) => r.id === id) ?? null
@@ -139,12 +132,11 @@ export function unlockLabel(u: Unlock): string {
 export interface Loadout {
   card: CardFinish | null
   frame: FrameKey | null
-  title: string | null
   /** A badge key (see BADGES / skill achievements). */
   badge: string | null
 }
 
-export const EMPTY_LOADOUT: Loadout = { card: null, frame: null, title: null, badge: null }
+export const EMPTY_LOADOUT: Loadout = { card: null, frame: null, badge: null }
 
 // ─── Badges ───
 

@@ -3,7 +3,7 @@ import type { CrewPattern } from '@/lib/crewStyle'
 import type { CheckInDetails, CheckInSource, SkillKind, TierKey } from '@/lib/mastery'
 export type { SkillAchievement } from '@/lib/mastery-achievements'
 import type { LocalDate } from '@/lib/dates'
-import type { CardFinish, FrameKey, Loadout, RankKey, Slot } from '@/lib/progression'
+import type { CardFinish, FrameKey, Loadout, RankKey, RewardSlot } from '@/lib/progression'
 
 // ─── Rows: shaped exactly like the Supabase tables (snake_case, nullable where the column is) ───
 
@@ -240,7 +240,6 @@ export interface FeedItem {
 export interface Flex {
   level: number
   rank: RankKey
-  title: string | null
   badge: BadgeInfo | null
   frame: FrameKey | null
   card: CardFinish | null
@@ -261,12 +260,12 @@ export interface BadgeInfo {
 /** One reward and where you are with it. */
 export interface RewardState {
   id: string
-  slot: Exclude<Slot, 'badge'>
+  slot: RewardSlot
   name: string
   blurb: string
   value: string
   unlocked: boolean
-  /** "Level 8", "Reach Seasoned", "Badge: Early bird". */
+  /** "Level 8", "Reach Seasoned". */
   how: string
   /** Level rewards: the level. */
   level: number | null

@@ -9,7 +9,7 @@ import { ResponsiveSheet } from '@/components/checkin/ResponsiveSheet'
 import { Segmented } from '@/components/checkin/Segmented'
 import { useToast } from '@/components/checkin/Toast'
 import { Button } from '@/components/ui/button'
-import { setLoadout, type FeedItem, type MyProgress, type Person, type RewardState } from '@/lib/data'
+import { setLoadout, type FeedItem, type MyProgress, type Person } from '@/lib/data'
 import { localDate } from '@/lib/dates'
 import { SLOT_LABEL, type CardFinish, type FrameKey, type Loadout, type Slot } from '@/lib/progression'
 import { HUE_CLASS } from '@/lib/colors'
@@ -24,15 +24,14 @@ function previewItem(person: Person, p: MyProgress, loadout: Loadout): FeedItem 
     localDate: localDate(now), hearts: { count: 0, byMe: false, people: [] }, reactions: [], details: null, source: 'manual',
     skill: 'other', milestone: null, photoUrl: null, with: [],
     flex: {
-      level: p.level, rank: p.rank, title: loadout.title, frame: loadout.frame, card: loadout.card,
+      level: p.level, rank: p.rank, frame: loadout.frame, card: loadout.card,
       badge: loadout.badge ? (p.badges.find((b) => b.key === loadout.badge) ?? null) : null,
     },
   }
 }
 
 /**
- * Your check-in card (progression): the post your crew sees, with your finish, frame, title and
- * badge on it, and "Change your look" to pick from what you've earned.
+ * Your check-in card (progression): the post your crew sees, with your finish and frame on it, and "Change your look" to pick from what you've earned.
  */
 export function YourCard({ person, progress, className }: { person: Person; progress: MyProgress; className?: string }) {
   const [open, setOpen] = useState(false)
@@ -56,7 +55,7 @@ export function YourCard({ person, progress, className }: { person: Person; prog
   )
 }
 
-const SLOTS: { value: Slot; label: string }[] = (['card', 'frame', 'title', 'badge'] as const).map((v) => ({ value: v, label: SLOT_LABEL[v] }))
+const SLOTS: { value: Slot; label: string }[] = (['card', 'frame', 'badge'] as const).map((v) => ({ value: v, label: SLOT_LABEL[v] }))
 
 export function LoadoutSheet({
   open, onOpenChange, person, progress: p,
@@ -116,15 +115,6 @@ export function LoadoutSheet({
             </ul>
           )}
 
-          {slot === 'title' && (
-            <ul className="flex flex-col divide-y rounded-lg border">
-              <TitleRow selected={!loadout.title} onClick={() => pick({ title: null })} reward={null} />
-              {rewards.map((r) => (
-                <TitleRow key={r.id} selected={loadout.title === r.value} onClick={() => pick({ title: r.value })} reward={r} />
-              ))}
-            </ul>
-          )}
-
           {slot === 'badge' && (
             <>
               <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -137,6 +127,7 @@ export function LoadoutSheet({
                   </Option>
                 ))}
               </ul>
+              <p className="mt-3 text-[13px] text-muted-foreground">Your badge shows on your profile, next to your level, when someone taps your name.</p>
               {lockedBadges > 0 && (
                 <p className="mt-3 text-[13px] text-muted-foreground">
                   <span className="tnum">{lockedBadges}</span> more to earn. They’re on your badge wall.
@@ -196,34 +187,5 @@ function Swatch({ finish, person }: { finish: CardFinish; person: Person }) {
         <span className="h-1.5 w-10 rounded-full bg-muted" />
       </span>
     </span>
-  )
-}
-
-function TitleRow({ selected, onClick, reward: r }: { selected: boolean; onClick: () => void; reward: RewardState | null }) {
-  const locked = r ? !r.unlocked : false
-  return (
-    <li>
-      <button
-        type="button"
-        aria-pressed={selected}
-        disabled={locked}
-        onClick={onClick}
-        className={cn('flex min-h-12 w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 ease-out', locked ? 'cursor-not-allowed' : 'hover:bg-muted')}
-      >
-        <span className="min-w-0 flex-1">
-          <span className={cn('block text-[14px] font-medium', locked && 'text-muted-foreground')}>{r ? r.name : 'No title'}</span>
-          {r && <span className="block text-[12px] text-muted-foreground">{r.unlocked ? r.blurb : r.how}</span>}
-        </span>
-        {locked ? (
-          <Lock size={14} aria-hidden="true" className="flex-none text-subtle-foreground" />
-        ) : (
-          selected && (
-            <span aria-hidden="true" className="grid size-5 flex-none place-items-center rounded-full bg-foreground text-background">
-              <Check size={12} strokeWidth={2.5} />
-            </span>
-          )
-        )}
-      </button>
-    </li>
   )
 }

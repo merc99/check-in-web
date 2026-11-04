@@ -327,21 +327,21 @@ The MMO layer over mastery. Your check-in card is the thing you flex; what goes 
   crewmate, +25 a badge, a tier 10 / 50 / 150 / 300 / 600 / 1,500. **Level** 1–50 from XP (`xpForLevel` =
   20·L·(L−1)). **Ranks** by level: Newcomer 1, Regular 5, Mainstay 10, Pillar 20, Keystone 30, Legend 40, each
   with a hue. No seasons, no countdowns, no prestige reset (brand voice).
-- **Rewards** (`REWARDS`), unlocked by a level, a tier or a badge: card finishes (Signature edge 3, Tinted 8, Holo
-  at Seasoned, Gilded 20, Aurora 35), frames (Ring 2, Foil at Committed, Gilded 15, Prism at Expert), titles (the
-  rank names, and badge titles like Early bird, Seven straight, Hundred club). **Badges** are every achievement
-  (account-wide `all.<key>` and per skill `<groupId>:<key>`); you show one.
-- **Loadout** (`Profile.loadout`: card, frame, title, badge). `setLoadout` only takes what's unlocked; anything
-  else reads as plain. `FeedItem.flex` carries the author's level, rank and loadout.
-- **On posts** (`PostCard`): the name and time, the title (or rank) under it; the showcase badge and the level
-  emblem ("Lv n" from `sm`) on their own at the top right; the frame on the
-  avatar, the finish on the card (milestone posts keep the tier's `CrewTint`). Your avatar wears your frame
-  everywhere (`useMyFrame`).
+- **Rewards** (`REWARDS`), unlocked by a level or a tier: card finishes (Signature edge 3, Tinted 8, Holo at
+  Seasoned, Gilded 20, Aurora 35), frames (Ring 2, Foil at Committed, Gilded 15, Prism at Expert), and each new
+  rank as a stop on the road (nothing to wear). No titles (Ben, Nov 2026: they added little). **Badges** are every
+  achievement (account-wide `all.<key>` and per skill `<groupId>:<key>`); you show one.
+- **Loadout** (`Profile.loadout`: card, frame, badge). `setLoadout` only takes what's unlocked; anything else reads
+  as plain. `FeedItem.flex` carries the author's level, rank and loadout.
+- **On posts** (`PostCard`): only the frame on the avatar and the finish on the card (milestone posts keep the
+  tier's `CrewTint`); the post stays name, time and the session (Ben, Nov 2026: no level or badge on the card).
+  Tapping a crewmate's name or avatar opens `ProfileSheet`, which shows their level, rank and showcase badge.
+  Your avatar wears your frame everywhere (`useMyFrame`).
 - **On You**: `RankCard` (emblem, level, XP to the next in mint, XP this week, what the next level gives, "How
   XP works") beside `YourCard` (your post as the crew sees it, "Change your look" opens `LoadoutSheet`: Card,
-  Frame, Title, Badge; locked ones show dimmed with how to get them), then the **Rewards road** (every level that
-  gives something, earned in mint, the next with XP to go) and the **Badge wall** (`BadgeWall`: filters, tap an
-  earned badge to wear it, progress on the rest, the title it unlocks).
+  Frame, Badge; locked ones show dimmed with how to get them), then the **Rewards road** (every level that gives
+  something, earned in mint, the next with XP to go; arrows for a mouse, a drag glides and settles on a stop) and
+  the **Badge wall** (`BadgeWall`: filters, tap an earned badge to show it on your profile, progress on the rest).
 - **Check-in**: the toast says the XP ("You showed up. +15 XP, yours for good."); a new level adds a toast with
   the rank and what it opened up.
 - **Art** (`components/checkin/Progression.tsx` + `.module.css`): placeholder hex emblems, badge coins, frames and
