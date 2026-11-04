@@ -17,6 +17,7 @@
   --radius: 16px;
 
   --background: #F6F6F7;          /* graphite: content carries the color, surfaces stay neutral */
+  --sidebar: #EEEEF0;             /* deepest surface: the desktop crew rail */
   --foreground: #171717;
   --card: #FFFFFF;
   --card-foreground: #171717;
@@ -107,6 +108,7 @@
 .dark {
   color-scheme: dark;
   --background: #141415;
+  --sidebar: #0F0F10;
   --foreground: #EDEDED;
   --card: #1A1A1C;
   --card-foreground: #EDEDED;
@@ -158,6 +160,7 @@
   --color-black: #000000;
 
   --color-background: var(--background);
+  --color-sidebar: var(--sidebar);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);

@@ -1,8 +1,6 @@
 'use client'
 
-import { Flame } from 'lucide-react'
-import { Gloss, GlassInset, GlossPill, Sparkline } from '@/components/fx/Gloss'
-import { AuroraFrame } from '@/components/fx/loops'
+import { Sparkline } from '@/components/fx/Gloss'
 import { RollingCount } from '@/components/fx/RollingCount'
 import { addDays } from '@/lib/dates'
 import { cn } from '@/lib/utils'
@@ -39,9 +37,9 @@ export function heroLine(n: number, total: number, meIn: boolean) {
 }
 
 /**
- * The signature card, as a glossy panel in the crew's hue (fx/Gloss): "n/total in today", the crew
- * streak, the last two weeks as a sparkline, a sticker per member and a segmented bar. The aurora
- * frame turns on only while the whole crew is in (fx/AuroraFrame).
+ * Who's in today, for the desktop rail: a plain card (references: Chord "Team usage", Data API).
+ * "n/total in today" with a small muted unit, the brand line, the last two weeks as a thin line,
+ * a sticker per member and the tally (one pill per member, mint when they're in).
  */
 export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved, streak, recent }: CrewHeroProps) {
   const n = members.filter((m) => m.inToday).length
@@ -49,73 +47,67 @@ export function CrewHero({ color, members, arrivedId, onPersonTap, onWave, waved
   const everyone = total > 1 && n === total
 
   return (
-    <AuroraFrame on={everyone} className="rounded-xl">
-      <Gloss hue={color} role="region" aria-label="Who’s in today" className="rounded-xl p-5">
-        <div className="flex items-center justify-between gap-3">
-          <GlossPill>In today</GlossPill>
-          {!!streak && streak > 1 && (
-            <GlossPill solid>
-              <Flame size={13} strokeWidth={2.25} aria-hidden="true" />
-              <span>
-                <span className="tnum">{streak}</span>-day crew streak
-              </span>
-            </GlossPill>
-          )}
-        </div>
-
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div className="tnum font-display text-[72px] leading-[.85] tracking-tightest max-[380px]:text-[60px]">
-            <RollingCount n={n} tight label={`${n} of ${total} in today`} />
-            <span aria-hidden="true" className="text-[32px] opacity-60">/{total}</span>
-          </div>
-          <p className="max-w-[17ch] pt-[6px] text-right text-sm font-semibold">{heroLine(n, total, members.some((m) => m.isMe && m.inToday))}</p>
-        </div>
-
-        {recent && recent.length > 1 && (
-          <GlassInset className="mt-4 px-3 pb-2 pt-[10px]">
-            <div className="flex items-baseline justify-between text-[12px] font-bold">
-              <span>Last 14 days</span>
-              <span className="opacity-70">today</span>
-            </div>
-            <Sparkline
-              values={recent}
-              height={44}
-              className="mt-1"
-              label="Members in each day, last 14 days"
-              pointLabel={(i) => {
-                const day = addDays(new Date(), i - (recent.length - 1))
-                const when = i === recent.length - 1 ? 'Today' : day.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
-                return `${when} · ${recent[i]} in`
-              }}
-            />
-          </GlassInset>
+    <section role="region" aria-label="Who’s in today" data-hue={color} className="rounded-xl border bg-card p-5 edge-lit">
+      <div className="flex items-center justify-between gap-3 text-[13px] text-muted-foreground">
+        <span>In today</span>
+        {!!streak && streak > 1 && (
+          <span className="font-mono text-[12px]">
+            <span className="tnum text-foreground">{streak}</span>-day streak
+          </span>
         )}
+      </div>
 
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {members.map(({ person, inToday, isMe }) => (
-            <MemberSticker
-              key={person.id}
-              person={person}
-              inToday={inToday}
-              isMe={isMe}
-              arrived={arrivedId === person.id}
-              waved={waved?.(person.id)}
-              onTap={onPersonTap}
-              onWave={onWave}
-            />
-          ))}
-        </ul>
+      <p className="mt-3 flex items-baseline gap-1">
+        <span className="tnum text-[56px] font-medium leading-none tracking-tightest">
+          <RollingCount n={n} tight label={`${n} of ${total} in today`} />
+        </span>
+        <span aria-hidden="true" className="tnum text-[20px] text-muted-foreground">/{total}</span>
+        {everyone && <span className="ml-2 text-[13px] font-medium text-primary-ink">all in</span>}
+      </p>
+      <p className="mt-2 text-[13px] text-muted-foreground">{heroLine(n, total, members.some((m) => m.isMe && m.inToday))}</p>
 
-        <div aria-hidden="true" className="mt-5 flex gap-[6px]">
-          {members.map((m, i) => (
-            <span key={m.person.id} className="relative h-[10px] flex-1 overflow-hidden rounded-full bg-white/35 shadow-[inset_0_0_0_1px_rgb(255_255_255/.4)]">
-              <span
-                className={cn('absolute inset-0 origin-left bg-on-color transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')}
-              />
-            </span>
-          ))}
+      {recent && recent.length > 1 && (
+        <div className="mt-4">
+          <Sparkline
+            values={recent}
+            height={44}
+            className="text-primary"
+            label="Members in each day, last 14 days"
+            pointLabel={(i) => {
+              const day = addDays(new Date(), i - (recent.length - 1))
+              const when = i === recent.length - 1 ? 'Today' : day.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+              return `${when} · ${recent[i]} in`
+            }}
+          />
+          <div aria-hidden="true" className="mt-1 flex justify-between font-mono text-[12px] text-subtle-foreground">
+            <span>14 days ago</span>
+            <span>today</span>
+          </div>
         </div>
-      </Gloss>
-    </AuroraFrame>
+      )}
+
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {members.map(({ person, inToday, isMe }) => (
+          <MemberSticker
+            key={person.id}
+            person={person}
+            inToday={inToday}
+            isMe={isMe}
+            arrived={arrivedId === person.id}
+            waved={waved?.(person.id)}
+            onTap={onPersonTap}
+            onWave={onWave}
+          />
+        ))}
+      </ul>
+
+      <div aria-hidden="true" className="mt-4 flex gap-1">
+        {members.map((m, i) => (
+          <span key={m.person.id} className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+            <span className={cn('absolute inset-0 origin-left bg-primary transition-transform duration-200 ease-out', i < n ? 'scale-x-100' : 'scale-x-0')} />
+          </span>
+        ))}
+      </div>
+    </section>
   )
 }

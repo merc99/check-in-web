@@ -384,13 +384,13 @@ export default function FeedPage() {
           </Card>
           <Card>
             <div className="mb-[14px] flex items-baseline justify-between gap-3">
-              <h2 className="font-display text-[17px] leading-none">Your week</h2>
-              {stats.data && <small className="tnum text-[13px] text-muted-foreground">{stats.data.total} all time</small>}
+              <h2 className="text-[15px] font-medium leading-none">Your week</h2>
+              {stats.data && <small className="tnum font-mono text-[12px] text-muted-foreground">{stats.data.total} all time</small>}
             </div>
             <HeatmapGrid days={week} />
             {stats.data && (
               <p className="mt-3 text-[13px] text-muted-foreground">
-                <span data-fx-streak="" className="inline-block font-bold text-foreground">
+                <span data-fx-streak="" className="inline-block font-medium text-foreground">
                   <RollingCount n={stats.data.streak} label={`${stats.data.streak}`} />
                 </span>
                 -day streak, best <span className="tnum">{stats.data.best}</span>
