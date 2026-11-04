@@ -89,7 +89,7 @@ function Pick({ selected, onClick, label, children }: { selected: boolean; onCli
       aria-label={label}
       onClick={onClick}
       className={cn(
-        'grid size-11 place-items-center rounded-md border transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[.94]',
+        'grid size-11 place-items-center rounded-md border transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[.97]',
         selected ? 'border-foreground bg-muted' : 'border-border bg-card hover:-translate-y-0.5 hover:border-border-strong',
       )}
     >

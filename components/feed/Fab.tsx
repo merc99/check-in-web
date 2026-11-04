@@ -16,7 +16,7 @@ export const Fab = forwardRef<HTMLButtonElement, { done: boolean; onClick: () =>
         aria-label={done ? 'You’re checked in today' : 'Check in'}
         className={cn(
           'pointer-events-auto grid size-16 place-items-center rounded-full border shadow-raised',
-          'transition-[transform,background-color] duration-150 ease-out active:scale-[.96]',
+          'transition-[transform,background-color] duration-150 ease-out active:scale-[.97]',
           done ? 'border-border bg-card edge-lit' : 'border-transparent bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.3),var(--elev-raised)]',
         )}
       >

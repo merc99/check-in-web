@@ -318,7 +318,7 @@ export function CheckInSheet({
         {photo && (
           <div className="relative -mt-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo} alt="Your proof photo" className="max-h-[180px] w-full rounded-md border object-cover" />
+            <img src={photo} alt="Your proof photo" className="max-h-[180px] w-full rounded-md object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10" />
             <UiButton size="sm" variant="secondary" className="absolute right-2 top-2" onClick={() => setPhoto(null)}>
               Remove photo
             </UiButton>

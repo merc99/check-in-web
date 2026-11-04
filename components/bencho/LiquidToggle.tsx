@@ -3,7 +3,7 @@
 // Pattern: Bencho / Liquid toggle (adapted to Check-in tokens). MIT, bencho.dev/licence
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
+import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform, useVelocity } from "motion/react";
 
 /* ── what this block expects the page to provide ───────
 
@@ -149,6 +149,8 @@ export function LiquidToggle({
      you are moving. Drag slowly and the pair stays one shape;
      flick and the goo necks out behind it. */
   const x = useMotionValue<number>(SHUT_X);
+  /* Check-in: reduced motion jumps the thumb and keeps the droplet round */
+  const still = useReducedMotion();
 
   /* ── ONE BODY. STRETCH, NOT A TRAIL. ─────────────────────
      There was a second, smaller blob running behind this one
@@ -204,8 +206,8 @@ export function LiquidToggle({
     damping: 34,
     mass: 0.6,
   });
-  const wide = useTransform([eased, swell], ([v, s]: number[]) => lengthen(v) * s);
-  const tall = useTransform([eased, swell], ([v, s]: number[]) => s / lengthen(v));
+  const wide = useTransform([eased, swell], ([v, s]: number[]) => (still ? 1 : lengthen(v) * s));
+  const tall = useTransform([eased, swell], ([v, s]: number[]) => (still ? 1 : s / lengthen(v)));
 
   /* ── how the thumb lands when it is let go ───────────────
      Bounce is the damping and Speed is the stiffness, so both
@@ -244,9 +246,13 @@ export function LiquidToggle({
      value exactly where the spring had got to. */
   useEffect(() => {
     if (held) return;
+    if (still) {
+      x.set(on ? OPEN_X : SHUT_X);
+      return;
+    }
     const run = animate(x, on ? OPEN_X : SHUT_X, settle);
     return () => run.stop();
-  }, [on, held, x, settle]);
+  }, [on, held, x, settle, still]);
 
   /* the component is drawn at whatever fraction the card
      allows, so a client delta has to be divided back out

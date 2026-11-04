@@ -39,7 +39,7 @@ export function CheerButton({
           aria-pressed={byMe}
           onClick={press}
           className={cn(
-            'inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[14px] font-medium transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[.95]',
+            'inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[14px] font-medium transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[.97]',
             byMe ? 'border-primary bg-primary text-primary-foreground' : 'border-border-strong bg-card hover:bg-muted',
           )}
         >

@@ -125,7 +125,7 @@ export function HoldButton({ label, hint, onConfirm, variant = 'danger', childre
           styles.pill,
           variant === 'danger' ? styles.danger : styles.secondary,
           'inline-flex w-full items-center justify-center rounded-full border px-6 py-4 text-[15px] font-medium leading-none shadow-card',
-          'transition-transform duration-150 ease-out active:scale-[.98] disabled:opacity-60',
+          'transition-transform duration-150 ease-out active:scale-[.97] disabled:opacity-60',
           variant === 'danger' ? 'border-border bg-destructive-soft text-destructive-ink' : 'border-border-strong bg-card text-foreground',
         )}
       >

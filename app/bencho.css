@@ -282,7 +282,7 @@
   transition: scale 200ms cubic-bezier(0.3, 0.9, 0.4, 1), background-color 160ms ease;
   -webkit-tap-highlight-color: transparent;}
 
-.rct-btn:hover { background: color-mix(in srgb, var(--foreground) 10%, var(--card)); }
+@media (hover: hover) { .rct-btn:hover { background: color-mix(in srgb, var(--foreground) 10%, var(--card)); } } /* Check-in: no stuck hover after a tap */
 
 .rct-btn:active { scale: 0.9; transition-duration: 110ms; }
 
@@ -878,7 +878,7 @@
   color: color-mix(in srgb, var(--foreground) 32%, var(--card));
   transition: rotate 220ms cubic-bezier(0.22, 1, 0.36, 1), color 160ms ease;}
 
-.pik-pill:hover .pik-chev { color: color-mix(in srgb, var(--foreground) 72%, var(--card)); }
+@media (hover: hover) { .pik-pill:hover .pik-chev { color: color-mix(in srgb, var(--foreground) 72%, var(--card)); } } /* Check-in: no stuck hover after a tap */
 
 .pik-pill[aria-expanded="true"] .pik-chev { rotate: 180deg; }
 
@@ -921,7 +921,7 @@
   cursor: pointer;
   transition: background 160ms ease;}
 
-.pik-row:hover { background: color-mix(in srgb, var(--foreground) 6%, transparent); }
+@media (hover: hover) { .pik-row:hover { background: color-mix(in srgb, var(--foreground) 6%, transparent); } } /* Check-in: no stuck hover after a tap */
 
 .pik-row:focus-visible {
   outline: none;
@@ -1557,7 +1557,7 @@
   transition: color 220ms ease;
   letter-spacing: 0em;}
 
-.crt-item button:hover { color: var(--on-slab); }
+@media (hover: hover) { .crt-item button:hover { color: var(--on-slab); } } /* Check-in: no stuck hover after a tap */
 
 /* ── the hover wash, one per row ───────────────────────────
    It was one pill that travelled between rows and stretched
@@ -1802,7 +1802,7 @@
 
 .stb-tab[data-on] { color: var(--foreground); }
 
-.stb-tab:hover:not([data-on]) { color: var(--stb-soft); }
+@media (hover: hover) { .stb-tab:hover:not([data-on]) { color: var(--stb-soft); } } /* Check-in: no stuck hover after a tap */
 
 .stb-tab:active { scale: 0.96; }
 
@@ -1969,7 +1969,7 @@
   margin: 0;
 }
 .crt-stage[data-rail] .crt-pill { gap: 0; color: var(--muted-foreground); transition: color 150ms ease-out, opacity 160ms ease; }
-.crt-stage[data-rail] .crt-pill:hover { color: var(--foreground); }
+@media (hover: hover) { .crt-stage[data-rail] .crt-pill:hover { color: var(--foreground); } } /* Check-in: no stuck hover after a tap */
 .crt-stage[data-rail] .crt-pill:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 14px; }
 .crt-stage[data-rail]:not([data-open]) .crt-body { box-shadow: 0 0 0 1px var(--border-strong); }
 .crt-stage[data-rail][data-open] .crt-body { box-shadow: 0 0 0 1px var(--border), var(--elev-overlay); }
@@ -1978,7 +1978,7 @@
 /* In the app it reserves no box: the list floats over what follows,
    as wide as the shelf's, and scrolls past six people. */
 .pik[data-inline] { display: inline-block; z-index: 20; }
-.pik[data-inline] .pik-card { right: auto; width: 264px; max-height: 300px; overflow-y: auto; }
+.pik[data-inline] .pik-card { right: auto; width: 264px; max-height: 300px; overflow-y: auto; overscroll-behavior: contain; }
 
 
 
