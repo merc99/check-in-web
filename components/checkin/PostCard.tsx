@@ -91,7 +91,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
             type="button"
             onClick={() => onPersonTap(item.user.id)}
             aria-label={`View ${item.user.name}`}
-            className="rounded-full transition-transform duration-150 ease-out active:scale-[.96]"
+            className="rounded-full transition-transform duration-150 ease-out active:scale-[.97]"
           >
             {avatar}
           </button>
@@ -120,7 +120,7 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
         <SessionDetails details={item.details} skill={item.skill} source={item.source} className={item.note ? 'mt-2' : undefined} />
         {item.photoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.photoUrl} alt={`${item.isMine ? 'Your' : `${item.user.name}’s`} proof photo`} className="mt-3 max-h-[320px] w-full rounded-md border object-cover" />
+          <img src={item.photoUrl} alt={`${item.isMine ? 'Your' : `${item.user.name}’s`} proof photo`} className="mt-3 max-h-[320px] w-full rounded-md object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10" />
         )}
         {item.tags.length > 0 && (
           <div className="mt-[10px] flex flex-wrap gap-2">

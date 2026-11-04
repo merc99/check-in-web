@@ -54,7 +54,7 @@ export function AppSidebar() {
                     window.scrollTo({ top: 0 })
                   }}
                   className={cn(
-                    'block rounded-[14px] transition-[transform,opacity] duration-150 ease-out active:scale-[.95]',
+                    'block rounded-[14px] transition-[transform,opacity] duration-150 ease-out active:scale-[.97]',
                     current ? 'opacity-100' : 'opacity-70 hover:opacity-100',
                   )}
                 >

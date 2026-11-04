@@ -10,6 +10,7 @@ import { heroLine, type HeroMember } from '@/components/checkin/CrewHero'
 import { Sparkline } from '@/components/fx/Gloss'
 import { RollingCount } from '@/components/fx/RollingCount'
 import { addDays } from '@/lib/dates'
+import { prefersReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 /** How many stickers fit before the rest fold into "+n". */
@@ -50,7 +51,7 @@ export function TodayStrip({
     if (before !== false || !allIn) return
     const t = window.setTimeout(() => {
       if (strip.current) burstFrom(strip.current, [`--${color}`, '--primary', '--lemon', 'white'], 34)
-      label.current?.animate(
+      if (!prefersReducedMotion()) label.current?.animate(
         [{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }],
         { duration: 450, easing: 'cubic-bezier(0.34, 1.45, 0.64, 1)' },
       )

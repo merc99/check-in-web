@@ -30,7 +30,7 @@ export function AddChip({ name, onAdd, size = 'm' }: { name: string; onAdd: () =
       onClick={onAdd}
       className={cn(
         base, SIZE[size], 'border-dashed border-border-strong bg-transparent text-muted-foreground',
-        'transition-[transform,box-shadow] duration-150 ease-out active:scale-[.96]',
+        'transition-[transform,box-shadow] duration-150 ease-out active:scale-[.97]',
       )}
     >
       <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
@@ -53,7 +53,7 @@ export function ToggleChip({
       onClick={onToggle}
       className={cn(
         base, SIZE[size], 'hit-44',
-        'transition-[transform,background-color,border-color,color] duration-200 ease-spring active:scale-[.96]',
+        'transition-[transform,background-color,border-color,color] duration-200 ease-spring active:scale-[.97]',
         selected ? 'animate-bump border-border-strong bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground',
       )}
     >

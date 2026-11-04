@@ -4,7 +4,7 @@
 // Pattern: Bencho / Stacked bars (adapted to Check-in tokens). MIT, bencho.dev/licence
 
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { animate, motion, useMotionValue } from "motion/react";
+import { animate, motion, useMotionValue, useReducedMotion } from "motion/react";
 
 /* ══ Stacked bars ═════════════════════════════════════════
    Check-in: your check-ins for every day (or week), stacked by
@@ -122,6 +122,8 @@ export function StackedBars({
   }, [total]);
 
   /* ring and tooltip: placed at once when they appear, glide after */
+  /* Check-in: reduced motion moves the scrub ring straight to its column */
+  const still = useReducedMotion();
   const ringX = useMotionValue(0);
   const ringY = useMotionValue(0);
   const ringH = useMotionValue(0);
@@ -141,7 +143,7 @@ export function StackedBars({
       ? Math.min(cw - TIP_W, right)
       : left - 8 - TIP_W;
     const go = (mv: typeof ringX, v: number) => {
-      if (was.current === null) mv.set(v);
+      if (was.current === null || still) mv.set(v);
       else animate(mv, v, SPRING);
     };
     go(ringX, x); go(ringY, y); go(ringH, h); go(tipX, tx);

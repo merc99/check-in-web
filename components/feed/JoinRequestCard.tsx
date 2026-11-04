@@ -20,7 +20,7 @@ export function JoinRequestCard({
           type="button"
           onClick={() => onPersonTap(person.id)}
           aria-label={`View ${person.name}`}
-          className="relative flex-none rounded-full transition-transform duration-150 ease-out active:scale-[.96]"
+          className="relative flex-none rounded-full transition-transform duration-150 ease-out active:scale-[.97]"
         >
           <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} />
           <span aria-hidden="true" className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border-2 border-card bg-primary text-primary-foreground">

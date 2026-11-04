@@ -204,7 +204,7 @@ export default function GroupSettingsPage(props: { params: Promise<{ groupId: st
                 type="button"
                 onClick={() => setProfileId(m.person.id)}
                 aria-label={`View ${m.person.name}`}
-                className="rounded-full transition-transform duration-150 ease-out active:scale-[.96]"
+                className="rounded-full transition-transform duration-150 ease-out active:scale-[.97]"
               >
                 <Avatar name={m.person.name} color={m.person.color} photoUrl={m.person.photoUrl} size="sm" />
               </button>

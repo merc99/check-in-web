@@ -41,7 +41,7 @@ export function MemberSticker({ person, inToday, isMe, arrived, waved, size = 'm
           type="button"
           onClick={action}
           aria-label={label}
-          className="hit-44 block rounded-full transition-transform duration-150 ease-out hover:-translate-y-0.5 active:scale-[.94]"
+          className="hit-44 block rounded-full transition-transform duration-150 ease-out hover:-translate-y-0.5 active:scale-[.97]"
         >
           {avatar}
         </button>
