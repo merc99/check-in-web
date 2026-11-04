@@ -75,7 +75,12 @@ export function StatsGrid({ stats, insights }: { stats: MyStats; insights?: MyIn
       </section>
 
       <Tile label="Day streak" value={<RollingCount n={n(stats.streak)} tight label={`${stats.streak}-day streak`} />} unit="days">
-        {stats.streak > 0 && stats.streak >= stats.best ? 'Your best run' : `best ${stats.best}`}
+        {/* When it started, not the best (that's the next tile). */}
+        {stats.streak > 0 && stats.streak >= stats.best
+          ? 'Your best run'
+          : stats.streak > 0
+            ? `since ${addDays(today, -(stats.streak - (stats.checkedInToday ? 1 : 0))).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+            : 'starts with your next check-in'}
       </Tile>
       <Tile label="Best streak" value={<RollingCount n={n(stats.best)} tight label={`Best streak ${stats.best} days`} />} unit="days">
         longest so far

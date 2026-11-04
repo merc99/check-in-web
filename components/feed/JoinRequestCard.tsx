@@ -35,7 +35,7 @@ export function JoinRequestCard({
         </p>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button size="sm" variant="primary" className="hit-44" onClick={onAccept}>
+        <Button size="sm" className="hit-44" onClick={onAccept}>
           Accept
         </Button>
         <Button size="sm" className="hit-44" onClick={onDecline}>

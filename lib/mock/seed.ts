@@ -34,7 +34,7 @@ interface PersonSeed {
 }
 
 const PEOPLE: PersonSeed[] = [
-  { id: ME_ID, name: 'Ben', color: 'leaf', joined: 120, streak: 6, total: 70, bestRun: 14, handle: 'benwoods', bio: 'Showing up, mostly.', sessions: { g1: 61, g2: 9 } },
+  { id: ME_ID, name: 'Ben', color: 'rose', joined: 120, streak: 6, total: 70, bestRun: 14, handle: 'benwoods', bio: 'Showing up, mostly.', sessions: { g1: 61, g2: 9 } },
   { id: 'u1', name: 'Maya', color: 'coral', joined: 200, streak: 12, total: 152, sessions: { g1: 152 } },
   { id: 'u2', name: 'Dre', color: 'sky', joined: 100, streak: 4, total: 49, sessions: { g1: 49 } },
   { id: 'u3', name: 'Priya', color: 'grape', joined: 190, streak: 21, total: 112 },
