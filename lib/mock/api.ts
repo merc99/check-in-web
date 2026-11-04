@@ -69,7 +69,7 @@ const personOf = (id: UUID) => toPerson(profile(id))
 
 function group(id: UUID): Group {
   const g = db().groups.find((x) => x.id === id && !x.deleted_at)
-  if (!g) throw new Error('Group not found')
+  if (!g) throw new Error('That crew isn’t around any more. Check the code or link and try again.')
   return g
 }
 
@@ -228,7 +228,7 @@ function progressOf(userId: UUID, g: Group): SkillProgress {
 
 function addMembership(userId: UUID, groupId: UUID) {
   const g = group(groupId)
-  if (membersOf(groupId).length >= g.max_members) throw new Error('Group is full')
+  if (membersOf(groupId).length >= g.max_members) throw new Error('That crew is full right now. Browse public crews for another one.')
   const existing = db().group_members.find((m) => m.user_id === userId && m.group_id === groupId)
   if (existing) {
     existing.deleted_at = null
@@ -559,7 +559,7 @@ export async function updateProfile(patch: ProfilePatch): Promise<Me> {
   if (patch.handle !== undefined) {
     const handle = patch.handle?.trim().replace(/^@/, '').slice(0, 24) || null
     if (handle && db().profiles.some((x) => x.id !== ME_ID && x.handle?.toLowerCase() === handle.toLowerCase())) {
-      throw new Error('That handle is taken')
+      throw new Error('That handle is taken. Try another one.')
     }
     p.handle = handle
   }
@@ -783,7 +783,7 @@ export async function joinGroupBySlug(slug: string): Promise<UUID> {
   const match = alive(db().groups).find((g) => g.invite_slug === code)
   const target =
     match ?? alive(db().groups).find((g) => !isMember(ME_ID, g.id) && membersOf(g.id).length < g.max_members)
-  if (!target) throw new Error('Group not found')
+  if (!target) throw new Error('That crew isn’t around any more. Check the code or link and try again.')
   if (!isMember(ME_ID, target.id)) addMembership(ME_ID, target.id)
   return target.id
 }
@@ -850,7 +850,7 @@ export async function addTag(groupId: UUID, name: string): Promise<Tag> {
   await settle()
   requireMember(groupId)
   const clean = name.trim().toLowerCase()
-  if (alive(db().tags).some((t) => t.group_id === groupId && t.name === clean)) throw new Error('That tag already exists')
+  if (alive(db().tags).some((t) => t.group_id === groupId && t.name === clean)) throw new Error('That tag is already here. Pick it from the list.')
   const tag = findOrCreateTag(groupId, clean)
   if (!tag) throw new Error('Tag name is required')
   return tag
@@ -989,10 +989,10 @@ export async function declineJoinRequest(requestId: UUID): Promise<void> {
 
 export async function requestToJoin(groupId: UUID): Promise<void> {
   await settle()
-  if (!group(groupId).is_public) throw new Error('Group not found')
+  if (!group(groupId).is_public) throw new Error('That crew isn’t around any more. Check the code or link and try again.')
   const s = status(groupId)
   if (s === 'member' || s === 'pending') return
-  if (s === 'full') throw new Error('Group is full')
+  if (s === 'full') throw new Error('That crew is full right now. Browse public crews for another one.')
   const existing = db().join_requests.find((r) => r.group_id === groupId && r.user_id === ME_ID)
   if (existing) {
     existing.status = 'pending'
@@ -1040,7 +1040,7 @@ export async function getExploreGroups(query = ''): Promise<ExploreGroup[]> {
 export async function getExploreDetails(groupId: UUID): Promise<ExploreDetail> {
   await settle()
   const g = group(groupId)
-  if (!g.is_public && !isMember(ME_ID, groupId)) throw new Error('Group not found')
+  if (!g.is_public && !isMember(ME_ID, groupId)) throw new Error('That crew isn’t around any more. Check the code or link and try again.')
   return {
     ...exploreGroup(g),
     members: membersOf(groupId)

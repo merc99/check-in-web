@@ -34,8 +34,10 @@ export default function NewGroupPage() {
   const [max, setMax] = useState<number>(8)
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
-  // Set by a submit with something missing; cleared by typing (forms skill: the button always works).
-  const [tried, setTried] = useState<'create' | 'join' | null>(null)
+  // A field's error shows after a submit, or after you leave a field you typed in, and clears on your next
+  // keystroke (forms skill: blur first, the button always works).
+  const [flagged, setFlagged] = useState<'name' | 'code' | null>(null)
+  const [dirty, setDirty] = useState<'name' | 'code' | null>(null)
 
   const fail = (e: unknown) => {
     toast(e instanceof Error ? e.message : 'That didn’t go through. Try again.')
@@ -44,7 +46,7 @@ export default function NewGroupPage() {
 
   const create = async () => {
     if (busy) return
-    if (!name.trim()) return setTried('create')
+    if (!name.trim()) return setFlagged('name')
     setBusy(true)
     try {
       const id = await createGroup({ name, color, maxMembers: max })
@@ -58,7 +60,7 @@ export default function NewGroupPage() {
 
   const join = async () => {
     if (busy) return
-    if (code.length !== 6) return setTried('join')
+    if (code.length !== 6) return setFlagged('code')
     setBusy(true)
     try {
       const id = await joinGroupBySlug(code)
@@ -107,11 +109,16 @@ export default function NewGroupPage() {
               </div>
             </div>
 
-            <FormField label="Crew name" error={tried === 'create' && !shownName ? 'Give your crew a name to create it.' : undefined}>
+            <FormField label="Crew name" error={flagged === 'name' && !shownName ? 'Give your crew a name to create it.' : undefined}>
               <Input
                 value={name}
-                aria-invalid={tried === 'create' && !shownName}
-                onChange={(e) => setName(e.target.value)}
+                aria-invalid={flagged === 'name' && !shownName}
+                onChange={(e) => {
+                  setName(e.target.value)
+                  setDirty('name')
+                  setFlagged(null)
+                }}
+                onBlur={() => dirty === 'name' && !shownName && setFlagged('name')}
                 maxLength={32}
                 placeholder="DIALED, Morning Pages…"
                 onKeyDown={(e) => e.key === 'Enter' && create()}
@@ -138,12 +145,17 @@ export default function NewGroupPage() {
             <FormField
               label="Invite code"
               hint="Six characters, from whoever invited you. Any code works in this prototype."
-              error={tried === 'join' && code.length !== 6 ? 'Invite codes are six characters. Check the code and try again.' : undefined}
+              error={flagged === 'code' && code.length !== 6 ? 'Invite codes are six characters. Check the code and try again.' : undefined}
             >
               <Input
-                aria-invalid={tried === 'join' && code.length !== 6}
+                aria-invalid={flagged === 'code' && code.length !== 6}
                 value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                onChange={(e) => {
+                  setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))
+                  setDirty('code')
+                  setFlagged(null)
+                }}
+                onBlur={() => dirty === 'code' && code.length > 0 && code.length !== 6 && setFlagged('code')}
                 onKeyDown={(e) => e.key === 'Enter' && join()}
                 maxLength={6}
                 autoComplete="off"

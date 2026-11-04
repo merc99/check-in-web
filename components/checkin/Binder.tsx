@@ -108,18 +108,18 @@ function FlipCard({
               <BadgeCheck size={13} aria-hidden="true" /> Verified
             </p>
           )}
-          <div className="mt-auto flex items-center gap-1">
+          <div className="mt-auto flex items-center gap-2">
             {isMe && onPin && (
-              <Button size="icon" variant="ghost" className="size-9" aria-label={pinned ? 'Unpin' : 'Pin to front'} title={pinned ? 'Unpin' : 'Pin to front'} onClick={() => onPin(pinned ? null : c.groupId)}>
+              <Button size="icon" variant="ghost" className="hit-44 size-9" aria-label={pinned ? 'Unpin' : 'Pin to front'} title={pinned ? 'Unpin' : 'Pin to front'} onClick={() => onPin(pinned ? null : c.groupId)}>
                 {pinned ? <PinOff size={15} /> : <Pin size={15} />}
               </Button>
             )}
             {isMe && onShare && (
-              <Button size="icon" variant="ghost" className="size-9" aria-label="Share card" title="Share card" onClick={() => onShare(c)}>
+              <Button size="icon" variant="ghost" className="hit-44 size-9" aria-label="Share card" title="Share card" onClick={() => onShare(c)}>
                 <Share2 size={15} />
               </Button>
             )}
-            <Button size="sm" variant="ghost" className="ml-auto h-9 px-3" onClick={onFlip}>
+            <Button size="sm" variant="ghost" className="hit-44 ml-auto h-9 px-3" onClick={onFlip}>
               Flip
             </Button>
           </div>
