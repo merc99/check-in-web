@@ -155,7 +155,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | `TierCeremony` (rise, flip, a finish by tier, burst) | moment | Your own tier-up only (and the kitchen sink) |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
-| `CrewTint` card (clean hue tint, one still sheen, lit edge, soft glow, engraved name; holo hairline from Seasoned) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
+| `CrewTint` card (solid hue, white text, one still sheen, lit edge, soft glow; holo hairline from Seasoned) | calm (static) | Feed header, crew switcher, milestone posts, your card on You |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
 | `RollingCounter` (digits roll, drag or step) | calm | New crew, max size |
 | `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
@@ -214,13 +214,15 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   list to accept or decline in place. Gone with the last request.
 - **Crew switcher** (`CrewSwitcherSheet`): each crew is a small copy of its header card (`CrewTint`, cover, emoji
   tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
-- **CrewTint** (`components/checkin/CrewTint.tsx`, Ben, Nov 2026: bright and obvious, sleek, a little metallic,
-  not overdone): a clear, even tint of a brighter tone of the hue (on a lifted base in dark mode, so warm hues stay
-  colorful), one soft diagonal sheen like light across brushed metal, a lit metallic top edge, a hue hairline, a
-  soft glow of the hue underneath and a fine grain. `glow` is a touch brighter with a wider halo (milestone posts,
-  `YouHero`); `holo` adds a still holo hairline (Seasoned and up). Helpers: `engraved` (recessed silver lettering:
-  the crew name on the header, your name on You) and `tintWell` (a recessed well: the pinned note, your numbers).
-  Only on the feed header, the crew switcher, milestone posts and `YouHero`; no `CrewCover` patterns on them.
+- **CrewTint** (`components/checkin/CrewTint.tsx`, Ben, Nov 2026: bright, obvious, high contrast, a little
+  metallic, clean): the hue as a solid, saturated card, the same in light and dark: a mid tone top left deepening
+  toward the bottom right (clamped in oklch so white text holds on every hue), one soft still sheen, a lit top
+  edge, a hairline, a soft glow of the hue underneath and a fine grain. Inside it the theme tokens are remapped:
+  text is white (muted = white 80%), and `card` / `muted` / `border` become dark ink, so chips and buttons on it are
+  ink. `glow` widens the halo (milestone posts, `YouHero`); `holo` adds a still holo hairline (Seasoned and up).
+  Helpers: `engraved` (bright silver lettering: the crew name on the header, your name on You) and `tintWell` (a
+  recessed ink well: the pinned note, your numbers). Only on the feed header, the crew switcher, milestone posts
+  and `YouHero`.
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
 - **You** (revamp, Nov 2026): `YouHero` (`components/you/YouHero.tsx`), your own card as a `CrewTint` glow in your
