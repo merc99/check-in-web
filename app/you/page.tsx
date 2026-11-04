@@ -105,7 +105,6 @@ export default function YouPage() {
             <RankCard progress={progress.data} className="mt-3" />
             <YourCard person={person} progress={progress.data} className="mt-3" />
           </div>
-          <SectionTitle title="Rewards road" note={`level ${progress.data.level} of 50`} />
           <RewardsRoad progress={progress.data} />
         </>
       )}
