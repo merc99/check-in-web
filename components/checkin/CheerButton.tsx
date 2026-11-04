@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils'
  * button, sends a small burst in the crew's color and rolls the count (delight moment).
  */
 export function CheerButton({
-  count, byMe, people, color, onCheer, isMine,
-}: { count: number; byMe: boolean; people: Person[]; color: Hue; onCheer: (on: boolean) => void; isMine: boolean }) {
+  count, byMe, people, color, onCheer, isMine, className,
+}: { count: number; byMe: boolean; people: Person[]; color: Hue; onCheer: (on: boolean) => void; isMine: boolean; className?: string }) {
   const btn = useRef<HTMLButtonElement>(null)
   const [pop, setPop] = useState(0)
   const press = () => {
@@ -31,7 +31,7 @@ export function CheerButton({
   const others = count - names.length - (byMe ? 1 : 0)
   const who = [...(byMe ? ['you'] : []), ...names]
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-3">
+    <div className={cn('mt-3 flex flex-wrap items-center gap-3', className)}>
       {!isMine ? (
         <button
           ref={btn}

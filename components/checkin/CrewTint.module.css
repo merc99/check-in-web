@@ -1,0 +1,45 @@
+/* A crew's hue washed into a card: deep enough to tell crews apart at a glance, calm enough that
+   the text stays light (dark mode) or dark (light mode). A brighter tone of the hue sits top right,
+   the edge is the hue, and `glow` adds a soft halo for the big moments (milestone posts).
+   Set --hue on the element (HUE_CLASS[color].cssVar). */
+.tint {
+  --edge: color-mix(in oklab, var(--hue) 42%, transparent);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--edge);
+  background:
+    radial-gradient(110% 120% at 100% 0%, color-mix(in oklab, var(--hue) 26%, transparent) 0%, transparent 62%),
+    color-mix(in oklab, var(--hue) 9%, var(--card));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--hue) 34%, transparent);
+}
+:global(.dark) .tint {
+  background:
+    radial-gradient(110% 120% at 100% 0%, color-mix(in oklab, var(--hue) 30%, transparent) 0%, transparent 62%),
+    color-mix(in oklab, var(--hue) 12%, var(--card));
+}
+
+/* The big moments: the edge gets brighter and a soft halo of the hue sits under the card. */
+.glow {
+  --edge: color-mix(in oklab, var(--hue) 62%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--hue) 45%, transparent),
+    0 0 0 4px color-mix(in oklab, var(--hue) 10%, transparent),
+    0 14px 44px -14px color-mix(in oklab, var(--hue) 55%, transparent);
+}
+
+/* Seasoned and up: a still holo edge on top of the glow (nothing moves). */
+.holo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(from 210deg, var(--hue), var(--grape), var(--rose), var(--lemon), var(--leaf), var(--hue));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: .85;
+}

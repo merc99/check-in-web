@@ -75,7 +75,8 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Destructive:** `bg-destructive-soft text-destructive-ink` (soft) or `bg-destructive text-white` (solid, rare).
 - **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
   avatars, dots, chart marks and small badges; `bg-{hue}-soft text-{hue}-ink` for the crew medal (`CrewBlock`) and
-  a cover without a photo. Never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
+  a cover without a photo. Two places wear the crew's hue as a tinted card (`CrewTint`, Ben, Nov 2026): the feed
+  header and milestone posts. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
   Mint is not a crew or avatar hue (it's `primary`); demo data that used mint now uses leaf.
 - **Shadows:** resting cards have none in dark (`edge-lit` only) and a 1px soft one in light. `shadow-raised` for
   floating things (FAB, dock), `shadow-overlay` (sheets, menus), `shadow-you` (the signed-in user's avatar ring).
@@ -155,6 +156,7 @@ Retired in the clean UI pass (kept in `components/fx` and `/fx-preview` for refe
 | Cheer press (pop, small burst, rolling count) | delight | The Cheer button on milestone posts |
 | Binder flip (500ms, ease-out) | calm | Binder cards, on a tap |
 | Hover edge / press | calm | Post cards, Explore crew cards, leaderboard rows, crew share rows (no lift) |
+| `CrewTint` glow (soft hue halo, brighter edge; still holo edge from Seasoned) | calm (static) | Milestone posts only |
 | `LiquidToggle` (droplet stretches as it crosses) | calm | Every `Switch` |
 | `RollingCounter` (digits roll, drag or step) | calm | New crew, max size; session time and pages in the check-in sheet |
 | `CreateMenu` (pill unfolds into a menu, no overshoot) | calm | The desktop crew rail's + (start, join with a code, browse) |
@@ -199,9 +201,13 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   (`bg-black/10`), never white. `CrewMedal` is the crew's emoji as a dark enamel badge. Retired from everyday
   screens in the clean UI pass (the feed header, Explore covers and crew-look preview are neutral now); kept for
   the kitchen sink and as a reference.
-- **FeedHeader:** a quiet header, no surface (Ben, Nov 2026: flat, the crew's color as a dot): the dot + name (medium,
-  24/28px, tap to switch), one muted line of members and crew streak, the round gear, the TodayStrip on phones. No
-  pattern, emoji or holo. Scrolled, it collapses into a neutral frosted sticky bar.
+- **FeedHeader:** the crew you're in as its own card (Ben, Nov 2026: make the crew obvious, crews look different):
+  a `CrewTint` in the crew's hue, its cover pattern faint on the right (`CrewCover`), its emoji on a solid hue tile,
+  the name (medium, 22/28px, wraps to two lines, tap to switch), one muted line of members and crew streak, the round
+  gear, then the TodayStrip on phones. Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
+- **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue washed into a card, a hue edge and a brighter tone
+  top right; text stays light (dark) or dark (light). `glow` adds a soft hue halo, `holo` a still holo edge. Only on
+  the feed header (plain) and milestone posts (glow; holo from Seasoned up).
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
 - **You:** a bento (Data API, Crextio): an all-time hero card (the number, "+n vs last month" pill, the 12-week chart),
@@ -249,8 +255,9 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   "Tidy with AI" (demo) spots details in a rough note.
 - **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
   edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
-- **Milestone posts:** a crewmate's (or your) tier-up shows its TierCard in the post, and the live line says "Dre
-  reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
+- **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card with a glow (a still
+  holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
+  DIALED"; vouches under the note, then Cheer and the reactions in one row. The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
   week", with sessions to the next tier and a Perks list; a crewmate's cards on their profile sheet.
 - **Strava (mocked):** `CheckIn.source` (`manual` | `strava`). You → Settings → Strava, or "Connect Strava" in the
   sheet, turns on the demo (sample activities, `getStravaActivities`). Fitness crews get "Add from Strava"; posts say
