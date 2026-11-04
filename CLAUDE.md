@@ -93,7 +93,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
   1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
-  crews in two columns) and You (your card and the mosaic side by side, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`).
+  crews in two columns) and You (your card and your year side by side, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
@@ -197,7 +197,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   card never changes size: the views crossfade in 280ms, the entering one rises 8px, rows stagger 35ms. Hover or
   focus a day for a pale tooltip (120ms). The grid is an ARIA grid with one tab stop (arrows move by week and day).
   Props: `counts` per day and `crews`, from `getMyYear()`; `demoYearActivity()` is seeded sample data for the
-  kitchen sink. On You as "Your year", under "Your week".
+  kitchen sink. On You under your card (it replaced `ShowingUp`); `month` adds "+n vs last month" or
+  "n this month · m last" to the header.
 - **LivePill**, **Ticket** (`Ticket.module.css`, Ben, Nov 2026): the crew's hue with depth, two notches cut clean
   through at the perforation (a mask; the shadow is a drop-shadow filter so it follows the cut), the code as letters
   pressed into the ticket (dark wells, inner shadow, a lit lip, bright letters), `animate-wave` on copy, and the
@@ -234,9 +235,8 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
 - **You** (revamp, Nov 2026): `YouHero` (`components/you/YouHero.tsx`), your own card as a `CrewTint` glow in your
   color with faint dots: avatar, name, handle, your top tier as a small `TierMedal`, bio, an edit pencil, and an ink
-  strip of all time (biggest) | streak | best in `RollingCount`. Then `ShowingUp`: the last 20 weeks as a mosaic (mint
-  in, muted open, hatched still to come, today ringed), "n of m days in", this month | last month. Side by side on
-  desktop. Then the week tally, "Your year" (`YearActivity`), skills (`TrophyCase`: compact rows, a tier disc, a bar in the next tier's hue), binder,
+  strip of all time (biggest) | streak | best in `RollingCount`. Then "Your year" (`YearActivity`, with this month
+  against the last in its header), side by side with your card on desktop. Then the week tally, skills (`TrophyCase`: compact rows, a tier disc, a bar in the next tier's hue), binder,
   recap, achievements, recent | the leaderboard and the crew share.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.

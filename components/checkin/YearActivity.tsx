@@ -31,11 +31,13 @@ const DAY = ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Satur
  * tooltip. The grid is one tab stop: arrow keys move by day (up/down) and week (left/right).
  */
 export function YearActivity({
-  counts, crews, today = new Date(), className,
+  counts, crews, month, today = new Date(), className,
 }: {
   /** Check-ins per day, keyed YYYY-MM-DD. */
   counts: Record<string, number>
   crews: ActivityCrew[]
+  /** This month against the last, shown in the header ("+3 vs last month", else "4 this month"). */
+  month?: { thisMonth: number; lastMonth: number }
   today?: Date
   className?: string
 }) {
@@ -77,9 +79,22 @@ export function YearActivity({
       <AnimatePresence initial={false}>
         {view === 'year' ? (
           <motion.div key="year" {...swap} className="absolute inset-0 flex flex-col p-[14px]">
-            <h3 className="text-[14px] font-medium leading-none">
-              <span className="tnum">{total.toLocaleString()}</span> check-ins in {year}
-            </h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-[14px] font-medium leading-none">
+                <span className="tnum">{total.toLocaleString()}</span> check-ins in {year}
+              </h3>
+              {month &&
+                (month.thisMonth > month.lastMonth ? (
+                  <span className="flex-none rounded-full bg-primary-soft px-2 py-0.5 font-mono text-[11px] text-primary-ink">
+                    +{month.thisMonth - month.lastMonth} vs last month
+                  </span>
+                ) : (
+                  <span className="flex-none font-mono text-[11px] text-muted-foreground">
+                    <span className="tnum text-foreground">{month.thisMonth}</span> this month ·{' '}
+                    <span className="tnum">{month.lastMonth}</span> last
+                  </span>
+                ))}
+            </div>
             <YearGrid counts={counts} today={today} />
             <div className="mt-auto flex h-10 items-center justify-between gap-2 rounded-[12px] bg-muted pl-3 pr-1.5">
               <span className="truncate text-[12px] text-muted-foreground">Most check-ins in</span>

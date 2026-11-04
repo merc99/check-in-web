@@ -5,7 +5,6 @@ import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { CrewDays } from '@/components/you/CrewDays'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
-import { ShowingUp } from '@/components/you/ShowingUp'
 import { YouHero } from '@/components/you/YouHero'
 import { YearActivity } from '@/components/checkin/YearActivity'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
@@ -91,7 +90,7 @@ export default function YouPage() {
   return (
     // Desktop: the wide layout, a bento of stat cards and two columns under them.
     <main data-layout="wide" className="px-5 pb-[150px] lg:mx-auto lg:w-full lg:max-w-[1040px] lg:px-8 lg:pb-16">
-      {/* Phones: stacked. Desktop: your card and the mosaic side by side. */}
+      {/* Phones: stacked. Desktop: your card and your year side by side. */}
       <div className="lg:mt-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-stretch lg:gap-4 lg:[&>*]:mt-0">
       <YouHero
         person={person}
@@ -100,7 +99,14 @@ export default function YouPage() {
         stats={stats.data}
         topTier={topSkill?.tier ? { tier: topSkill.tier, crewName: topSkill.crewName } : null}
       />
-      <ShowingUp stats={stats.data} insights={insights.data} />
+      {year.data && (
+        <YearActivity
+          counts={year.data.counts}
+          crews={year.data.crews}
+          month={insights.data}
+          className="mt-3 lg:aspect-auto lg:h-full"
+        />
+      )}
       </div>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
@@ -113,14 +119,6 @@ export default function YouPage() {
           {stats.data.checkedInToday ? 'You’re in for today.' : 'Today’s still open. No rush.'}
         </p>
       </Card>
-
-      {/* The year in one card: the last 31 weeks, and your top crews behind the toggle. */}
-      {year.data && (
-        <>
-          <SectionTitle title="Your year" />
-          <YearActivity counts={year.data.counts} crews={year.data.crews} />
-        </>
-      )}
 
       {/* Mastery: each crew's skill, the tier you've reached and the next one. */}
       {skills.data && skills.data.length > 0 && (
