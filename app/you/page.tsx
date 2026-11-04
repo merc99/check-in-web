@@ -1,14 +1,13 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileSheet } from '@/components/feed/ProfileSheet'
 import { CrewDays } from '@/components/you/CrewDays'
 import { CrewDonut } from '@/components/you/CrewDonut'
 import { CrewLeaderboard } from '@/components/you/CrewLeaderboard'
-import { StatsGrid } from '@/components/you/StatsGrid'
+import { ShowingUp } from '@/components/you/ShowingUp'
+import { YouHero } from '@/components/you/YouHero'
 import { AchievementCard } from '@/components/checkin/AchievementCard'
-import { Avatar } from '@/components/checkin/Avatar'
 import { Button } from '@/components/checkin/Button'
 import { Card } from '@/components/checkin/Card'
 import { TagChip } from '@/components/checkin/Chip'
@@ -37,7 +36,6 @@ import { PREF, usePref } from '@/lib/prefs'
 import { tierOf } from '@/lib/mastery'
 
 export default function YouPage() {
-  const router = useRouter()
   const auth = useAuth()
   const { groups, activeId } = useActiveCrew()
   const toast = useToast()
@@ -91,26 +89,17 @@ export default function YouPage() {
   return (
     // Desktop: the wide layout, a bento of stat cards and two columns under them.
     <main data-layout="wide" className="px-5 pb-[150px] lg:mx-auto lg:w-full lg:max-w-[1040px] lg:px-8 lg:pb-16">
-      <section className="flex items-center gap-5 pb-2 pt-8">
-        <Avatar name={person.name} color={person.color} photoUrl={person.photoUrl} size="xl" you />
-        <div className="min-w-0 flex-1">
-          <h1 className="wrap-break-word text-[28px] font-medium leading-tight">{person.name}</h1>
-          {profile.handle && <p className="mt-1 text-[14px] text-muted-foreground">@{profile.handle}</p>}
-          {/* Your top tier, like a level under the name (reference: the Steam profile). */}
-          {topSkill?.tier && (
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1 text-[12px] edge-lit">
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
-              {tierOf(topSkill.tier).name} <span className="text-muted-foreground">· {topSkill.crewName}</span>
-            </p>
-          )}
-          {profile.bio && <p className="mt-2 text-[14px]">{profile.bio}</p>}
-          <Button size="sm" className="mt-3" onClick={() => router.push('/profile/edit')}>
-            Edit profile
-          </Button>
-        </div>
-      </section>
-
-      <StatsGrid stats={stats.data} insights={insights.data} />
+      {/* Phones: stacked. Desktop: your card and the mosaic side by side. */}
+      <div className="lg:mt-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-stretch lg:gap-4 lg:[&>*]:mt-0">
+      <YouHero
+        person={person}
+        handle={profile.handle}
+        bio={profile.bio}
+        stats={stats.data}
+        topTier={topSkill?.tier ? { tier: topSkill.tier, crewName: topSkill.crewName } : null}
+      />
+      <ShowingUp stats={stats.data} insights={insights.data} />
+      </div>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
       <div className="min-w-0">

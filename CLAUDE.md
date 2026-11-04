@@ -76,7 +76,7 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
   avatars, dots, chart marks and small badges; `bg-{hue}-soft text-{hue}-ink` for the crew medal (`CrewBlock`) and
   a cover without a photo. Tinted cards (`CrewTint`, Ben, Nov 2026): the feed header and its copies in the crew switcher
-  wear the crew's hue; milestone posts wear the tier's hue. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
+  wear the crew's hue; milestone posts wear the tier's hue; your card on You wears your own color. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
   Mint is not a crew or avatar hue (it's `primary`); demo data that used mint now uses leaf.
 - **Shadows:** resting cards have none in dark (`edge-lit` only) and a 1px soft one in light. `shadow-raised` for
   floating things (FAB, dock), `shadow-overlay` (sheets, menus), `shadow-you` (the signed-in user's avatar ring).
@@ -93,7 +93,7 @@ plus a few Check-in extras, so registry components inherit the theme.
   Desktop (`lg`, 1024px+) gets `AppSidebar` (tabs + your crews) instead of the tab bar and FAB, in a shell up to
   1600px. Pages stay one centered column unless their `<main>` sets `data-layout="wide"`: the feed (one column of posts,
   up to 760px, + a sticky right rail with check-in, `CrewHero` and your week), Explore (the ring at full size,
-  crews in two columns) and You (the stat bento, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`).
+  crews in two columns) and You (your card and the mosaic side by side, then two columns: week, your skills, crew recap, achievements, recent | leaderboard, crews). Sheets open as centered dialogs on desktop (`ResponsiveSheet`).
   Use `lg:` classes where CSS can do it, `useDesktop()` (`lib/viewport.ts`) only where JS must choose.
 - **Modes:** both first-class; **dark by default** (`defaultTheme="dark"`); You → Settings switches to light or system. Check every screen in both.
 
@@ -216,12 +216,15 @@ Build these with the primitives and the sources in `ui-references/check-in-map.m
   tile, "n of total in today"); the one you're in has an outline in its hue and a "You're here" pill, the rest say "Open". Scrolled, it collapses into a neutral frosted sticky bar with the crew's dot.
 - **CrewTint** (`components/checkin/CrewTint.tsx`): a crew's hue washed into a card, a hue edge and a brighter tone
   top right; text stays light (dark) or dark (light). `glow` adds a soft hue halo, `holo` a still holo edge. Only on
-  the feed header and the crew switcher (plain) and milestone posts (glow; holo from Seasoned up).
+  the feed header and the crew switcher (plain), milestone posts (glow; holo from Seasoned up) and `YouHero` (glow).
 - **AppSidebar** (desktop): a 72px crew rail (medals, a bar on the active one, + to start or join) on `bg-sidebar`,
   then a quiet panel: the logo, the three tabs as pills, the current crew's card at the bottom.
-- **You:** a bento (Data API, Crextio): an all-time hero card (the number, "+n vs last month" pill, the 12-week chart),
-  four number tiles (streak, best, this week, this month), then the week tally, skills, binder, recap, achievements,
-  recent (a hairline list) | the leaderboard (a hairline list, your bar mint) and the crew share (one stacked bar).
+- **You** (revamp, Nov 2026): `YouHero` (`components/you/YouHero.tsx`), your own card as a `CrewTint` glow in your
+  color with faint dots: avatar, name, handle, your top tier as a small `TierMedal`, bio, an edit pencil, and an ink
+  strip of all time (biggest) | streak | best in `RollingCount`. Then `ShowingUp`: the last 20 weeks as a mosaic (mint
+  in, muted open, hatched still to come, today ringed), "n of m days in", this month | last month. Side by side on
+  desktop. Then the week tally, skills (`TrophyCase`: compact rows, a tier disc, a bar in the next tier's hue), binder,
+  recap, achievements, recent | the leaderboard and the crew share.
 - **Check-in** (feed): stamp in the sheet → burst from the button + `success` → your post drops in → on the day's
   first check-in, +1 flies to the streak → a `RevealCard` if it unlocked an achievement, otherwise one toast.
 - Feed background: plain `bg-background` (the old `crew-glow` wash is retired; the class is a no-op).
@@ -268,7 +271,7 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
 - **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card in the **tier's**
   color (`TIER_HUE`: Started leaf, Habit sky, Committed clay, Seasoned indigo, Expert grape, Master lemon) with a
   lighter glow wash (a still holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
-  DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px rounded tile
+  DIALED"; then the reactions (and Share card on yours). `TierMedal` is a flat 44px disc
   (`TierBadge.module.css`) in the tier's own palette with a white icon: green sprout, sky calendar, fire flame (lemon →
   clay → coral), dusk mountain, prism gem, gold crown; a smooth gradient, a hairline lit edge and a soft glow, a still
   holo ring from Seasoned. No numbers, no orb or gloss (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This

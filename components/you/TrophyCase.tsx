@@ -1,14 +1,15 @@
-import { TierCard } from '@/components/checkin/TierCard'
+import { TIER_HUE, TierMedal } from '@/components/checkin/TierCard'
 import { ChallengeBar } from '@/components/checkin/ChallengeBar'
 import { SkillAchievements } from '@/components/you/SkillAchievements'
-import { HUE_CLASS, type Hue } from '@/lib/colors'
+import { HUE_CLASS } from '@/lib/colors'
 import type { SkillProgress } from '@/lib/data'
 import { tierOf } from '@/lib/mastery'
 import { cn } from '@/lib/utils'
 
 /**
- * Your skills (mastery): one row per crew's skill with the tier card you've reached and how far the
- * next one is. Encouraging, never a countdown: "12 more sessions to Committed".
+ * Your skills (mastery): one compact row per crew's skill, the tier's tile, the tier and the crew, and
+ * how far the next tier is on a bar in the next tier's color. The full tier cards live in the binder
+ * below. Encouraging, never a countdown: "12 more sessions to Committed".
  */
 export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
   if (!skills.length) return null
@@ -17,11 +18,19 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
     <>
     <ul className="flex flex-col gap-3">
       {skills.map((s) => (
-        <li key={s.groupId} className="rounded-lg border bg-card p-3 shadow-card">
+        <li key={s.groupId} className="rounded-xl border bg-card p-4 edge-lit">
           {s.tier ? (
-            <>
-              <TierCard tier={s.tier} skill={s.skill} crewName={s.crewName} color={s.color} sessions={s.sessions} />
-            </>
+            <div className="flex items-center gap-3 px-1 pt-1">
+              <TierMedal tier={s.tier} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] text-muted-foreground">{s.crewName}</p>
+                <p className="text-[18px] font-medium leading-tight tracking-tight">{tierOf(s.tier).name}</p>
+              </div>
+              <p className="flex-none text-right">
+                <span className="tnum block text-[18px] font-medium leading-tight">{s.sessions.toLocaleString()}</span>
+                <span className="block font-mono text-[11px] text-subtle-foreground">sessions</span>
+              </p>
+            </div>
           ) : (
             <p className="px-1 py-2 text-[14px] text-muted-foreground">No sessions in {s.crewName} yet. The first one gets you Started.</p>
           )}
@@ -32,7 +41,7 @@ export function TrophyCase({ skills }: { skills: SkillProgress[] }) {
       ))}
     </ul>
     {/* Perks: what showing up unlocks. Cosmetic and social, a thank-you, never the reason to show up. */}
-    <div className="mt-3 rounded-lg border bg-card p-4 shadow-card">
+    <div className="mt-3 rounded-xl border bg-card p-4 edge-lit">
       <p className="text-[13px] font-medium">Perks</p>
       <ul className="mt-2 flex flex-col gap-2 text-[14px]">
         <li className="flex items-center gap-3">
@@ -72,8 +81,8 @@ function NextTier({ skill: s }: { skill: SkillProgress }) {
           {s.sessions} / {t.at}
         </span>
       </div>
-      <div aria-hidden="true" className="mt-2 h-[6px] overflow-hidden rounded-full bg-muted">
-        <div className={cn('h-full origin-left rounded-full transition-transform duration-300 ease-out', HUE_CLASS[s.color as Hue].solid)} style={{ transform: `scaleX(${done})` }} />
+      <div aria-hidden="true" className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+        <div className={cn('h-full origin-left rounded-full transition-transform duration-300 ease-out', HUE_CLASS[TIER_HUE[next.tier]].solid)} style={{ transform: `scaleX(${done})` }} />
       </div>
     </div>
   )
