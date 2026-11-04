@@ -10,7 +10,7 @@ import { Avatar } from './Avatar'
 import { TagChip } from './Chip'
 import { HEART_PATH } from './icons'
 import { SessionDetails } from './SessionDetails'
-import { TierMedal } from './TierCard'
+import { TIER_HUE, TierMedal } from './TierCard'
 import { crewTint } from './CrewTint'
 import { BadgeCheck, Share2 } from 'lucide-react'
 import { Button as UiButton } from '@/components/ui/button'
@@ -28,7 +28,7 @@ export interface PostCardProps {
   onPersonTap?: (id: string) => void
   /** Emoji reactions. They include the heart, so they replace the heart pill. */
   reactions?: ReactNode
-  /** The crew this post is in, for a milestone post's tier card. */
+  /** The crew this post is in, for a milestone post's line (crewColor is kept for callers; the card wears the tier's color). */
   crewName?: string
   crewColor?: Hue
   /** Milestone posts: vouch for the tier, share your own card. */
@@ -37,7 +37,7 @@ export interface PostCardProps {
 }
 
 /** One check-in. Heart pill, who hearted, and double-tap anywhere on the card to heart it. */
-export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, crewColor, onVouch, onShare }: PostCardProps) {
+export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crewName, onVouch, onShare }: PostCardProps) {
   const [burst, setBurst] = useState(0)
   const [pop, setPop] = useState(false)
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
@@ -70,10 +70,11 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
     lastTap.current = { t: now, x: e.clientX, y: e.clientY }
   }
 
-  // A milestone post is the crew's big moment: the whole card wears the crew's hue with a soft glow,
-  // and a still holo edge from Seasoned up. The tier shows as one compact line, not a second card.
+  // A milestone post is the crew's big moment: the whole card wears the tier's own color (green for
+  // Started, fire for Committed...) with a soft glow, and a still holo edge from Seasoned up. The tier
+  // shows as one compact line with its coin, not a second card.
   const moment = item.milestone
-    ? crewTint(crewColor ?? item.user.color, ['holo', 'aurora', 'master'].includes(tierOf(item.milestone.tier).material) ? 'holo' : 'glow')
+    ? crewTint(TIER_HUE[item.milestone.tier], ['holo', 'aurora', 'master'].includes(tierOf(item.milestone.tier).material) ? 'holo' : 'glow')
     : null
 
   const avatar = (
@@ -126,13 +127,13 @@ export function PostCard({ item, entering, onHeart, onPersonTap, reactions, crew
       <div className="-mt-1 pl-[52px]">
         {item.milestone && (
           <div className="mb-3 mt-2 flex items-center gap-3">
-            <TierMedal tier={item.milestone.tier} color={crewColor ?? item.user.color} />
+            <TierMedal tier={item.milestone.tier} />
             <div className="min-w-0">
               <p className="text-[17px] font-medium leading-tight tracking-tight">
                 {item.isMine ? 'You' : item.user.name} reached {tierOf(item.milestone.tier).name}
               </p>
               <p className="mt-0.5 font-mono text-[12px] text-muted-foreground">
-                <span className="tnum">{item.milestone.sessions.toLocaleString()}</span> sessions{crewName ? ` in ${crewName}` : ''}
+                <span className="tnum">{item.milestone.sessions.toLocaleString()}</span> session{item.milestone.sessions === 1 ? '' : 's'}{crewName ? ` in ${crewName}` : ''}
               </p>
             </div>
           </div>

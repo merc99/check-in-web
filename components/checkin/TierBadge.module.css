@@ -1,54 +1,56 @@
-/* The tier badge on a milestone post: a small coin. The face is the crew's hue, soft and lit from the
-   top; the tier's icon sits on it in the hue's ink. The rim says the tier: a hairline (Started), the
-   hue (Habit), brushed silver (Committed), a still holo ring (Seasoned, Expert, Master).
-   Nothing moves. Set --hue on the element. */
+/* The tier badge on a milestone post: a glossy coin in the tier's own colors (Ben, Nov 2026: make it
+   stand out). Started is green, Habit sky, Committed hot fire, Seasoned dusk, Expert a prism, Master gold.
+   A lit top, a darker foot, a bright rim and a soft glow in the tier's color; a white icon. Static. */
 .badge {
-  --rim: var(--border-strong);
+  --a: var(--leaf);
+  --b: var(--leaf);
+  --c: var(--leaf-ink);
   position: relative;
   flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 9999px;
-  padding: 1.5px;
-  background: var(--rim);
-  box-shadow: 0 6px 16px -10px color-mix(in oklab, var(--hue) 70%, transparent);
-}
-
-.face {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  color: color-mix(in oklab, var(--hue) 62%, var(--foreground));
+  color: white;
   background:
-    radial-gradient(110% 80% at 30% 0%, color-mix(in oklab, var(--hue) 30%, transparent) 0%, transparent 65%),
-    color-mix(in oklab, var(--hue) 16%, var(--card));
-  box-shadow: inset 0 1px 0 color-mix(in oklab, white 22%, transparent);
-}
-:global(.dark) .face {
-  color: color-mix(in oklab, var(--hue) 70%, white);
-  background:
-    radial-gradient(110% 80% at 30% 0%, color-mix(in oklab, var(--hue) 34%, transparent) 0%, transparent 65%),
-    color-mix(in oklab, var(--hue) 20%, var(--card));
-}
-
-.paper { --rim: var(--border-strong); box-shadow: none; }
-.enamel { --rim: color-mix(in oklab, var(--hue) 75%, transparent); }
-.foil {
-  --rim: linear-gradient(
-    140deg,
-    color-mix(in oklab, white 92%, var(--hue)) 0%,
-    color-mix(in oklab, var(--hue) 35%, var(--muted-foreground)) 38%,
-    color-mix(in oklab, white 85%, var(--hue)) 62%,
-    color-mix(in oklab, var(--hue) 30%, var(--muted-foreground)) 100%
-  );
-}
-.holo {
-  --rim: conic-gradient(from 210deg, var(--hue), var(--grape), var(--rose), var(--lemon), var(--leaf), var(--hue));
+    radial-gradient(70% 55% at 32% 18%, color-mix(in oklab, white 55%, transparent) 0%, transparent 70%),
+    linear-gradient(155deg, var(--a) 0%, var(--b) 52%, var(--c) 100%);
   box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--hue) 12%, transparent),
-    0 6px 18px -8px color-mix(in oklab, var(--hue) 75%, transparent);
+    inset 0 1px 0 color-mix(in oklab, white 60%, transparent),
+    inset 0 -3px 6px color-mix(in oklab, var(--c) 55%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--b) 70%, white),
+    0 0 0 4px color-mix(in oklab, var(--b) 18%, transparent),
+    0 8px 24px -6px color-mix(in oklab, var(--b) 75%, transparent);
+}
+.badge svg {
+  filter: drop-shadow(0 1px 1px color-mix(in oklab, var(--c) 70%, black));
+}
+
+.started { --a: color-mix(in oklab, var(--leaf) 55%, white); --b: var(--leaf); --c: var(--leaf-ink); }
+.habit { --a: color-mix(in oklab, var(--sky) 55%, white); --b: var(--sky); --c: var(--indigo-ink); }
+.committed { --a: var(--lemon); --b: var(--clay); --c: color-mix(in oklab, var(--coral-ink) 85%, var(--rose)); }
+.seasoned { --a: color-mix(in oklab, var(--sky) 60%, white); --b: var(--indigo); --c: var(--grape-ink); }
+.expert { --a: var(--sky); --b: var(--grape); --c: var(--rose-ink); }
+.master { --a: color-mix(in oklab, var(--lemon) 55%, white); --b: var(--lemon); --c: var(--clay-ink); }
+
+/* Seasoned and up: a still holo ring just outside the rim. */
+.prism {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 60%, transparent),
+    inset 0 -3px 6px color-mix(in oklab, var(--c) 55%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--b) 70%, white),
+    0 8px 26px -6px color-mix(in oklab, var(--b) 85%, transparent);
+}
+.prism::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from 210deg, var(--sky), var(--grape), var(--rose), var(--lemon), var(--leaf), var(--sky));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: .9;
 }

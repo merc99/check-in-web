@@ -75,8 +75,8 @@ plus a few Check-in extras, so registry components inherit the theme.
 - **Destructive:** `bg-destructive-soft text-destructive-ink` (soft) or `bg-destructive text-white` (solid, rare).
 - **Crew hues** (coral, sky, rose, grape, lemon, leaf, clay, indigo): content color only. Solid `bg-{hue}` for
   avatars, dots, chart marks and small badges; `bg-{hue}-soft text-{hue}-ink` for the crew medal (`CrewBlock`) and
-  a cover without a photo. Three places wear the crew's hue as a tinted card (`CrewTint`, Ben, Nov 2026): the feed
-  header, its copies in the crew switcher, and milestone posts. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
+  a cover without a photo. Tinted cards (`CrewTint`, Ben, Nov 2026): the feed header and its copies in the crew switcher
+  wear the crew's hue; milestone posts wear the tier's hue. Otherwise never a banner, panel, post edge or page wash. Tags are neutral chips with a hue dot.
   Mint is not a crew or avatar hue (it's `primary`); demo data that used mint now uses leaf.
 - **Shadows:** resting cards have none in dark (`edge-lit` only) and a 1px soft one in light. `shadow-raised` for
   floating things (FAB, dock), `shadow-overlay` (sheets, menus), `shadow-you` (the signed-in user's avatar ring).
@@ -260,11 +260,13 @@ The skilling layer (ideas and the first-slice plan in `docs/ideas/`). **The crew
   (`SessionDetails`); seeded posts still carry some.
 - **TierCard** (`components/checkin/TierCard.tsx`): a material per tier (paper, enamel, foil, holo, holo + an aurora
   edge; Master shows locked). No hover tilt or shine (Ben, Nov 2026); a tap still sweeps the sheen on touch.
-- **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card with a glow (a still
-  holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
-  DIALED"; vouches under the note, then the reactions (and Share card on yours). `TierMedal` is a small coin
-  (`TierBadge.module.css`): the tier's icon (sprout, calendar check, flame, mountain, gem, crown) on the crew's hue,
-  the rim by tier (hairline, hue, brushed silver, still holo from Seasoned). No numbers, no dark orb (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
+- **Milestone posts:** a crewmate's (or your) tier-up turns the whole post into a `CrewTint` card in the **tier's**
+  color (`TIER_HUE`: Started leaf, Habit sky, Committed clay, Seasoned indigo, Expert grape, Master lemon) with a
+  lighter glow wash (a still holo edge from Seasoned up), with one compact line: the `TierMedal`, "Maya reached Seasoned" and "150 sessions in
+  DIALED"; vouches under the note, then the reactions (and Share card on yours). `TierMedal` is a glossy 48px coin
+  (`TierBadge.module.css`) in the tier's own palette with a white icon: green sprout, sky calendar, fire flame (lemon →
+  clay → coral), dusk mountain, prism gem, gold crown; a lit top, bright rim and glow, a still holo ring from
+  Seasoned. No numbers, no dark orb (Ben, Nov 2026). The live line says "Dre reached Committed". Your own tier-up opens the `RevealCard`. **Trophy case** ("Your skills") on You under "This
   week", with sessions to the next tier and a Perks list; a crewmate's cards on their profile sheet.
 - **Strava (mocked):** `CheckIn.source` (`manual` | `strava`). You → Settings → Strava, or "Connect Strava" in the
   sheet, turns on the demo (sample activities, `getStravaActivities`). Fitness crews get "Add from Strava"; posts say

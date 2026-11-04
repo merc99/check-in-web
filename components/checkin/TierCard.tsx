@@ -43,27 +43,27 @@ const BADGE_ICON: Record<TierKey, LucideIcon> = {
   expert: Gem,
   master: Crown,
 }
-const BADGE_RIM: Record<ReturnType<typeof tierOf>['material'], string> = {
-  paper: badge.paper,
-  enamel: badge.enamel,
-  foil: badge.foil,
-  holo: badge.holo,
-  aurora: badge.holo,
-  master: badge.holo,
+/** Each tier's own color, for the milestone post's card (the badge carries the full palette). */
+export const TIER_HUE: Record<TierKey, Hue> = {
+  started: 'leaf',
+  habit: 'sky',
+  committed: 'clay',
+  seasoned: 'indigo',
+  expert: 'grape',
+  master: 'lemon',
 }
 
 /**
- * The tier as a small coin, for a milestone post's line (see TierBadge.module.css): the tier's icon on
- * the crew's hue, the rim by tier. The post's text says the tier and the count, so it's decorative.
+ * The tier as a glossy coin in its own colors, for a milestone post's line (TierBadge.module.css):
+ * green sprout, sky calendar, fire flame, dusk mountain, prism gem, gold crown. The post's text says
+ * the tier and the count, so it's decorative.
  */
-export function TierMedal({ tier, color, className }: { tier: TierKey; color: Hue; className?: string }) {
-  const t = tierOf(tier)
+export function TierMedal({ tier, className }: { tier: TierKey; color?: Hue; className?: string }) {
   const Icon = BADGE_ICON[tier]
+  const prism = tier === 'seasoned' || tier === 'expert' || tier === 'master'
   return (
-    <span aria-hidden="true" className={cn(badge.badge, BADGE_RIM[t.material], className)} style={{ '--hue': HUE_CLASS[color].cssVar } as CSSProperties}>
-      <span className={badge.face}>
-        <Icon size={19} strokeWidth={1.75} />
-      </span>
+    <span aria-hidden="true" className={cn(badge.badge, badge[tier], prism && badge.prism, className)}>
+      <Icon size={21} strokeWidth={2} />
     </span>
   )
 }
